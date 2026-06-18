@@ -26,6 +26,9 @@ export type Timeframe = '30 Sec' | '1 Min' | '5 Min' | '15 Min' | '30 Min' | 'Ho
 
 type Props = {
   gated: boolean;
+  /** When true, the live line freezes (stops ticking) but stays visible —
+      used when the floor is closed (inventory depleted). */
+  frozen?: boolean;
   msrp?: number;
   street?: number;
   timeframe?: Timeframe;
@@ -122,6 +125,7 @@ function RefPill({ viewBox, value }: { viewBox?: { x: number; y: number; width: 
 
 export default function PriceChart({
   gated,
+  frozen = false,
   msrp = 85,
   street = 60,
   timeframe = '30 Sec',
@@ -140,7 +144,7 @@ export default function PriceChart({
   const tickRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (gated) {
+    if (gated || frozen) {
       if (tickRef.current !== null) {
         window.clearInterval(tickRef.current);
         tickRef.current = null;
@@ -157,7 +161,7 @@ export default function PriceChart({
         tickRef.current = null;
       }
     };
-  }, [gated, timeframe]);
+  }, [gated, frozen, timeframe]);
 
   const data = useMemo(() => {
     const base = baseSeriesByTf[timeframe];

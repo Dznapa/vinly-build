@@ -7,7 +7,7 @@
    tuned so panels puzzle together at matching heights. */
 
 import { useRouter } from 'next/navigation';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { PageChrome } from '@/components/PageChrome';
 import PriceChart, { type Timeframe } from '@/components/PriceChart';
 import InventoryBar from '@/components/InventoryBar';
@@ -60,6 +60,17 @@ function CurrentOfferInner({ id }: { id: string }) {
   const savings = Math.max(0, offer.msrp - livePrice);
   const totalBottles = 12;
   const initialBottles = Math.max(1, Math.round(offer.inventoryPct * totalBottles));
+  // Page-owned inventory drift so we know when the floor closes (and can freeze
+  // the chart). Drives the InventoryBar via percentRemaining.
+  const [bottlesLeft, setBottlesLeft] = useState(initialBottles);
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setBottlesLeft((n) => (n > 0 && Math.random() < 0.18 ? n - 1 : n));
+    }, 6000);
+    return () => window.clearInterval(id);
+  }, []);
+  const invPct = totalBottles > 0 ? Math.max(0, Math.min(100, (bottlesLeft / totalBottles) * 100)) : 0;
+  const floorClosed = bottlesLeft <= 0;
 
   const { openGate: openBillingGate } = useBillingGate();
 
@@ -87,7 +98,7 @@ function CurrentOfferInner({ id }: { id: string }) {
   const shared: SharedProps = {
     offer, isGated, timeframe, setTimeframe, readMore, setReadMore,
     livePrice, offMsrpPct, offStreetPct, savings,
-    initialBottles, totalBottles,
+    initialBottles, totalBottles, invPct, floorClosed,
     handlePriceTick, openBuy, openBillingGate,
     handleGetQualified, handleLoginExplore, handleSkipSesh,
   };
@@ -120,6 +131,8 @@ type SharedProps = {
   savings: number;
   initialBottles: number;
   totalBottles: number;
+  invPct: number;
+  floorClosed: boolean;
   handlePriceTick: (p: number) => void;
   openBuy: () => void;
   openBillingGate: () => void;
@@ -484,11 +497,11 @@ function LayoutTerminal(p: SharedProps) {
 
         <div className="panel sesh-term-chart">
           <div className="chart-wrap">
-            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={false} frozen={p.floorClosed} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
-          <InventoryBar initial={initialBottles} total={totalBottles} variant="dark" />
+          <InventoryBar percentRemaining={p.invPct} variant="dark" />
         </div>
 
         <aside className="panel sesh-term-right">
