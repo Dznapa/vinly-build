@@ -185,5 +185,6 @@
   .actions :global(.btn-skip),
   .actions :global(.btn-billing) {
     width: 100%;
+    min-width: 0;
   }
 }

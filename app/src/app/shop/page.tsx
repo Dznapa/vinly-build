@@ -46,7 +46,9 @@ function WineCard({ wine }: { wine: ShopWine }) {
   const variant = wine.isPack ? 'pack' : pickVariant(wine.name, wine.maker);
 
   const handleAdd = () => {
-    addItem(wine.id, qty);
+    // Blocked (not billing-verified) → the billing gate popup is shown; bail
+    // out so we don't fake an "added" state or toast.
+    if (!addItem(wine.id, qty)) return;
     setAdded(true);
     const label = qty === 1 ? '1 bottle' : `${qty} bottles`;
     toast({

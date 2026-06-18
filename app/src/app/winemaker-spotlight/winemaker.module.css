@@ -360,3 +360,26 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 600px) {
+  .spotlightTile {
+    flex: 0 0 80vw;
+    min-height: 0;
+    padding: 18px 16px;
+  }
+  .tileBottle {
+    min-height: 200px;
+  }
+  .tileBottle img,
+  .tileBottle svg,
+  .tileBottleImg {
+    max-height: 200px;
+  }
+  .spotlightPanel {
+    padding: 18px 12px;
+  }
+  .tileControls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

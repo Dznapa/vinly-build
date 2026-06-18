@@ -176,6 +176,16 @@
   font-weight: 600;
 }
 
+@media (max-width: 480px) {
+  .orderRow {
+    grid-template-columns: 1fr auto;
+    row-gap: 2px;
+  }
+  .orderDate {
+    grid-column: 1 / -1;
+  }
+}
+
 .orderTotal {
   color: var(--green);
   font-weight: 700;

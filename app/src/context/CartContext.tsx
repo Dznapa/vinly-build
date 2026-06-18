@@ -14,17 +14,19 @@ import {
   type ReactNode,
 } from 'react';
 import { SHOP } from '@/data/mock';
+import { useUserState } from '@/context/UserStateContext';
+import { useBillingGate } from '@/context/BillingGateContext';
 
 export type CartItem = { wineId: string; qty: number };
 
-// NEEDS REVIEW: spec only says "flat shipping under 6"; the exact dollar
-// amount is not specified. Using a placeholder of $14.95 until owner confirms.
-export const SHIPPING_RATE = 14.95;
+// Flat shipping under the free-shipping threshold (owner-confirmed $35).
+export const SHIPPING_RATE = 35.0;
 export const FREE_SHIP_THRESHOLD = 6;
 
 type Ctx = {
   items: CartItem[];
-  addItem: (wineId: string, qty: number) => void;
+  /** Returns true if added, false if blocked by the billing gate. */
+  addItem: (wineId: string, qty: number) => boolean;
   removeItem: (wineId: string) => void;
   setQty: (wineId: string, qty: number) => void;
   clear: () => void;
@@ -49,6 +51,8 @@ function clampQty(n: number) {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const { userState } = useUserState();
+  const { openGate } = useBillingGate();
 
   // Hydrate from localStorage on mount (mirror UserStateContext pattern).
   useEffect(() => {
@@ -88,9 +92,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, hydrated]);
 
-  const addItem = useCallback((wineId: string, qty: number) => {
+  const addItem = useCallback((wineId: string, qty: number): boolean => {
+    // Billing gate: only SESH-qualified (billing-verified) users can add to
+    // cart anywhere in the app. Everyone else gets the billing wizard popup
+    // instead — and nothing is added. (This never fires during account
+    // creation / billing entry, since those flows don't call addItem.)
+    if (userState !== 'sesh_qualified') {
+      openGate();
+      return false;
+    }
     const add = clampQty(qty);
-    if (add <= 0) return;
+    if (add <= 0) return false;
     setItems((prev) => {
       const existing = prev.find((i) => i.wineId === wineId);
       if (existing) {
@@ -100,7 +112,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { wineId, qty: add }];
     });
-  }, []);
+    return true;
+  }, [userState, openGate]);
 
   const removeItem = useCallback((wineId: string) => {
     setItems((prev) => prev.filter((i) => i.wineId !== wineId));

@@ -2,24 +2,17 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useUserState } from '@/context/UserStateContext';
 import { SESH_OFFERS } from '@/data/mock';
 
-/* Landing logic from BUILD_PROMPT.md:
-   anonymous + signed-in non-qualified -> /shop
-   sesh_qualified -> SESH page (first offer) */
+/* The SESH is the front door: every visitor — anonymous, signed-in, or
+   SESH-qualified — lands on the SESH page for the first live offer. Non-qualified
+   users browse it as viewers (prices visible; buying prompts to add billing). */
 export default function RootPage() {
   const router = useRouter();
-  const { userState, hydrated } = useUserState();
 
   useEffect(() => {
-    if (!hydrated) return;
-    if (userState === 'sesh_qualified') {
-      router.replace(`/current-offer/${SESH_OFFERS[0].id}`);
-    } else {
-      router.replace('/shop');
-    }
-  }, [hydrated, userState, router]);
+    router.replace(`/current-offer/${SESH_OFFERS[0].id}`);
+  }, [router]);
 
   return null;
 }

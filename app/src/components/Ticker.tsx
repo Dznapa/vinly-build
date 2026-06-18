@@ -9,6 +9,8 @@
 import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { TICKER } from '@/data/mock';
+import { useUserState } from '@/context/UserStateContext';
+import { useBillingGate } from '@/context/BillingGateContext';
 import { useQuickBuy } from './useQuickBuy';
 import BottlePlaceholder, { pickVariant } from './BottlePlaceholder';
 
@@ -16,6 +18,8 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const [paused, setPaused] = useState(false);
+  const { userState } = useUserState();
+  const { openGate } = useBillingGate();
   const { open: openQuickBuy, popover } = useQuickBuy('ticker');
 
   // Chevrons nudge a CSS variable that offsets the animated track.
@@ -26,7 +30,10 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
     }
   };
 
-  const cards = [...TICKER, ...TICKER]; // duplicated for seamless loop
+  // Duplicate the list enough that the rendered strip always overflows the
+  // viewport (even on wide screens). Kept an even number of copies so the
+  // -50% keyframe recycles seamlessly back to the first card — never runs out.
+  const cards = [...TICKER, ...TICKER, ...TICKER, ...TICKER];
 
   return (
     <div
@@ -50,8 +57,8 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
               <Image
                 src={w.image}
                 alt=""
-                width={46}
-                height={64}
+                width={54}
+                height={76}
                 unoptimized
                 loading="lazy"
               />
@@ -59,8 +66,8 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
               <BottlePlaceholder
                 name={w.name}
                 variant={pickVariant(w.name, w.sub)}
-                width={46}
-                height={64}
+                width={54}
+                height={76}
               />
             )}
             <div className="tc-body">
@@ -80,6 +87,11 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
                   aria-label={`Quick add ${w.name}`}
                   onClick={(e) => {
                     e.stopPropagation();
+                    // Not billing-verified → billing gate popup, not the buy flow.
+                    if (userState !== 'sesh_qualified') {
+                      openGate();
+                      return;
+                    }
                     openQuickBuy({
                       id: w.id,
                       name: w.name,

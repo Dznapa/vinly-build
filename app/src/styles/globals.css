@@ -369,12 +369,12 @@ button {
   will-change: transform;
 }
 .ticker-card {
-  flex: 0 0 300px;
+  flex: 0 0 320px;
   display: flex;
   align-items: center;
   gap: 12px;
   background: var(--navy-panel);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(99, 162, 222, 0.55);
   border-radius: 10px;
   padding: 10px 14px;
   position: relative;
@@ -387,8 +387,8 @@ button {
   pointer-events: none;
 }
 .ticker-card img {
-  width: 46px;
-  height: 64px;
+  width: 54px;
+  height: 76px;
   object-fit: contain;
   flex: 0 0 auto;
 }
@@ -1200,7 +1200,8 @@ button {
 
 .sesh-buy {
   width: 100%;
-  background: var(--orange);
+  /* Deeper orange than the global --orange (#F26A35) for the SESH BUY NOW CTA */
+  background: #D4541C;
   color: #fff;
   border: 0;
   border-radius: 12px;
@@ -1211,7 +1212,7 @@ button {
   letter-spacing: 1px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  box-shadow: 0 12px 28px rgba(242, 106, 53, 0.28);
+  box-shadow: 0 12px 28px rgba(212, 84, 28, 0.28);
   transition: filter 120ms ease, transform 80ms ease;
 }
 .sesh-buy:hover { filter: brightness(1.06); }
@@ -1221,9 +1222,12 @@ button {
   background: #0e2647; color: #fff; justify-content: center;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
 }
-.sesh-buy--full { width: 100%; }
+/* Full-width up to a sane CTA size, then centered — keeps the button from
+   stretching into an oversized banner inside wide buy panels. */
+.sesh-buy--full { width: 100%; max-width: 380px; margin-inline: auto; }
 .sesh-buyfoot {
   display: inline-flex; align-items: center; gap: 8px;
+  align-self: center;
   color: #8aa2bb; font-size: 12px;
 }
 .sesh-buyfoot i { color: var(--orange); }
@@ -3874,9 +3878,123 @@ button {
 }
 .qbp-modal-foot-warn i { color: #e23b3b; }
 
+/* Billing-gate popover (non-qualified viewer taps BUY NOW) */
+.qbp-modal--gate { max-width: 420px; }
+.qbp-gate-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 8px 6px 4px;
+}
+.qbp-gate-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: var(--orange);
+  background: rgba(242, 106, 53, 0.12);
+  box-shadow: 0 0 0 1px rgba(242, 106, 53, 0.28) inset;
+}
+.qbp-gate-title {
+  margin: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: #fff;
+}
+.qbp-gate-copy {
+  margin: 0;
+  color: #b7c6d8;
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 36ch;
+}
+
 @media (max-width: 520px) {
   .qbp-modal-qtyrow { grid-template-columns: 1fr; }
   .qbp-modal-total-block { text-align: left; }
   .qbp-modal-total-block .qbp-modal-meta { text-align: left; }
   .qbp-modal-product { grid-template-columns: 80px minmax(0, 1fr); }
+}
+
+/* =================================================================
+   MOBILE PASS — phone tier. Adds the small-screen breakpoints the app
+   was missing across global chrome, the SESH terminal, shop, and the
+   shared signup-form grammar (previously only a ~700–1000px tier).
+   ================================================================= */
+
+/* Reserve room so the fixed prototype DevToolbar never hides page content. */
+body { padding-bottom: 56px; }
+
+@media (max-width: 600px) {
+  /* Container: tighter side gutters on phones */
+  .wrap { padding-left: 16px; padding-right: 16px; }
+
+  /* Header: tighten the icon row so it fits ~320px */
+  .header-icons { gap: 12px; }
+
+  /* Footer: stack the three link columns */
+  .foot-links { flex-direction: column; gap: 8px; }
+  .foot-links > div { margin-bottom: 8px; }
+
+  /* DevToolbar (prototype only): wrap instead of overflowing off-screen */
+  .proto-bar { flex-wrap: wrap; gap: 8px 10px; font-size: 11px; padding: 8px 14px; }
+  .proto-bar .spacer { display: none; }
+
+  /* SESH terminal header: stack symbol / title / price */
+  .sesh-term-headerbar { grid-template-columns: 1fr; gap: 6px; padding: 14px 16px; }
+  .sesh-term-headerprice { justify-content: flex-start; flex-wrap: wrap; }
+  .sesh-term-headerprice > span:first-child { font-size: 24px; }
+
+  /* On mobile, lead with the chart + bottle/BUY NOW; push KEY STATS to the
+     bottom so the graph and the action are what users see first. */
+  .sesh-term-chart { order: 1; }
+  .sesh-term-right { order: 2; }
+  .sesh-term-left { order: 3; }
+
+  /* SESH timeframe buttons + chart legend: wrap instead of overflow */
+  .sesh-tfs { flex-wrap: wrap; width: 100%; }
+  .chart-legend { flex-wrap: wrap; gap: 10px 14px; }
+
+  /* Shared signup-form grammar (register / login / profile-edit) */
+  .signup-card { padding: 24px 18px; }
+  .signup-actions { flex-direction: column; }
+  .bdate { gap: 10px; }
+
+  /* IPO / collection head: stack title + action button */
+  .ipo-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+  /* Shop controls row: wrap; full-width search field */
+  .search-row { flex-wrap: wrap; gap: 12px; }
+  .search-row .search-box { order: 3; flex: 1 1 100%; max-width: none; }
+  .search-row .btn-search { order: 4; }
+  .search-row .wines-count { order: 2; margin-left: auto; }
+
+  /* Panels: trim padding on phones */
+  .shop-panel { padding: 16px; }
+
+  /* Admin tabs: bigger tap target */
+  .tf { padding: 11px 16px; }
+
+  /* Tap targets ≥ ~40px */
+  .stepper button { width: 40px; height: 40px; }
+}
+
+@media (max-width: 480px) {
+  /* Ticker cards: smaller on tiny screens */
+  .ticker-card { flex-basis: 240px; }
+  .slide-track { padding: 0 20px; }
+
+  /* Shop wine card: go vertical so the stepper + ADD TO CART aren't crushed */
+  .wine-card { flex-direction: column; align-items: flex-start; }
+  .wine-card .bottle { flex: 0 0 auto; align-self: center; }
+  .wine-card .controls { flex-wrap: wrap; width: 100%; }
+  .wine-card .controls .btn-cart { flex: 1 1 auto; }
+
+  /* Birth-date: stack the three selects so long month names don't clip */
+  .bdate { flex-direction: column; gap: 8px; }
 }

@@ -132,3 +132,9 @@
     position: static;
   }
 }
+
+@media (max-width: 480px) {
+  .fieldRow {
+    flex-direction: column;
+  }
+}

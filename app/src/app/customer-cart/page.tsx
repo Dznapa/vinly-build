@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
-import { useCart, FREE_SHIP_THRESHOLD } from '@/context/CartContext';
+import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE } from '@/context/CartContext';
 import { useToast } from '@/components/ToastProvider';
 import { SHOP } from '@/data/mock';
 import BottlePlaceholder, { pickVariant } from '@/components/BottlePlaceholder';
@@ -181,8 +181,8 @@ export default function CustomerCartPage() {
               </button>
               <div className={styles.freeShipNote}>
                 {freeShip
-                  ? 'Free ground shipping included.'
-                  : `Add ${FREE_SHIP_THRESHOLD - count} more bottle${FREE_SHIP_THRESHOLD - count === 1 ? '' : 's'} for free shipping.`}
+                  ? '🎉 You unlocked FREE ground shipping!'
+                  : `Just ${FREE_SHIP_THRESHOLD - count} more bottle${FREE_SHIP_THRESHOLD - count === 1 ? '' : 's'} unlocks FREE shipping — otherwise it's a $${SHIPPING_RATE.toFixed(2)} flat rate.`}
               </div>
             </aside>
           )}

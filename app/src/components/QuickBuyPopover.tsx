@@ -7,6 +7,7 @@
    CONFIRM + CANCEL controls. Expired state: red banner + BUY NOW recovery. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 
 export type QuickBuyWine = {
@@ -34,6 +35,7 @@ function formatMMSS(total: number): string {
 
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
+  const router = useRouter();
   const [qty, setQty] = useState<number>(1);
   const [lockedAt, setLockedAt] = useState<number | null>(null);
   const [secondsLeft, setSecondsLeft] = useState<number>(LOCK_SECONDS);
@@ -75,9 +77,11 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   }, [open, isLocked, onClose]);
 
   const addToCart = useCallback((wineId: string, quantity: number) => {
-    addItem(wineId, quantity);
+    const added = addItem(wineId, quantity);
     onClose();
-  }, [addItem, onClose]);
+    // Buying from the SESH → take them straight to the cart to review/checkout.
+    if (added && source === 'sesh') router.push('/customer-cart');
+  }, [addItem, onClose, source, router]);
 
   const handleLockIn = useCallback(() => {
     if (!wine) return;

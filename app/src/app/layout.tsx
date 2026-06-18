@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { UserStateProvider } from '@/context/UserStateContext';
+import { BillingGateProvider } from '@/context/BillingGateContext';
 import { CartProvider } from '@/context/CartContext';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { ToastProvider } from '@/components/ToastProvider';
@@ -36,13 +37,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <UserStateProvider>
           <ProfileProvider>
-            <CartProvider>
-              <ToastProvider>
-                {children}
-                <ScrollToTop />
-                <DevToolbar />
-              </ToastProvider>
-            </CartProvider>
+            <BillingGateProvider>
+              <CartProvider>
+                <ToastProvider>
+                  {children}
+                  <ScrollToTop />
+                  <DevToolbar />
+                </ToastProvider>
+              </CartProvider>
+            </BillingGateProvider>
           </ProfileProvider>
         </UserStateProvider>
       </body>

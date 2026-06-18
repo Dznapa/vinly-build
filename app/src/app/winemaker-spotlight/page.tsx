@@ -28,7 +28,8 @@ function SpotlightTile({ wine }: { wine: ShopWine }) {
   const countryLines = wine.country ? wine.country.split('\n') : [];
 
   const handleAdd = () => {
-    addItem(wine.id, qty);
+    // Blocked (not billing-verified) → billing gate popup shown; bail out.
+    if (!addItem(wine.id, qty)) return;
     setAdded(true);
     setQty(1);
     window.setTimeout(() => setAdded(false), 1100);

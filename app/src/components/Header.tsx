@@ -75,13 +75,13 @@ export function Header() {
 
         <nav className="header-icons" aria-label="Primary">
           <Link className="icon" href="/current-offer/justin-isosceles" title="SESH" aria-label="SESH">
-            <i className="fa-solid fa-chart-line" aria-hidden />
+            <i className="fa-solid fa-arrow-trend-up" aria-hidden />
           </Link>
           <Link className="icon" href="/shop" title="Shop" aria-label="Shop">
-            <i className="fa-solid fa-wine-bottle" aria-hidden />
+            <i className="fa-solid fa-store" aria-hidden />
           </Link>
           <Link className="icon" href="/winemaker-spotlight" title="Winemaker" aria-label="Winemaker">
-            <i className="fa-solid fa-star" aria-hidden />
+            <i className="fa-solid fa-award" aria-hidden />
           </Link>
           <Link className="icon" href="/customer-cart" title="Cart" aria-label="Cart">
             <i className="fa-solid fa-cart-shopping" aria-hidden />

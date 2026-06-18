@@ -6,13 +6,14 @@
    heroes differently, with the BUY NOW button always obvious. Columns are
    tuned so panels puzzle together at matching heights. */
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import { PageChrome } from '@/components/PageChrome';
 import PriceChart, { type Timeframe } from '@/components/PriceChart';
 import InventoryBar from '@/components/InventoryBar';
 import BottlePlaceholder from '@/components/BottlePlaceholder';
 import { useQuickBuy } from '@/components/useQuickBuy';
+import { useBillingGate } from '@/context/BillingGateContext';
 import { getSeshOffer, type SeshOffer } from '@/data/mock';
 import { useUserState } from '@/context/UserStateContext';
 
@@ -38,12 +39,16 @@ export default function CurrentOfferPage({ params }: { params: { id: string } })
 
 function CurrentOfferInner({ id }: { id: string }) {
   const router = useRouter();
-  const search = useSearchParams();
-  const variant = (search.get('v') ?? 'v1') as VariantId;
+  // Terminal (v4) is the permanent, shipped SESH layout. The other variants and
+  // the LAYOUT switcher were prototype-only A/B options.
+  const variant = 'v4' as VariantId;
   const offer = getSeshOffer(id);
   const { userState } = useUserState();
-  const isGated = userState === 'anonymous' || userState === 'signed_in';
-  const stateClass = isGated ? 'gated' : 'qualified';
+  // Not SESH-qualified → can view everything but must add billing to buy.
+  const isGated = userState !== 'sesh_qualified';
+  // Everyone now sees live prices + chart on the SESH (viewer mode); only the
+  // buy action is gated, via the billing popup below.
+  const stateClass = 'qualified';
 
   const [timeframe, setTimeframe] = useState<Timeframe>('30 Sec');
   const [readMore, setReadMore] = useState(false);
@@ -55,6 +60,8 @@ function CurrentOfferInner({ id }: { id: string }) {
   const savings = Math.max(0, offer.msrp - livePrice);
   const totalBottles = 12;
   const initialBottles = Math.max(1, Math.round(offer.inventoryPct * totalBottles));
+
+  const { openGate: openBillingGate } = useBillingGate();
 
   const { open: openQuickBuy, popover } = useQuickBuy('sesh');
   const openBuy = () =>
@@ -81,15 +88,13 @@ function CurrentOfferInner({ id }: { id: string }) {
     offer, isGated, timeframe, setTimeframe, readMore, setReadMore,
     livePrice, offMsrpPct, offStreetPct, savings,
     initialBottles, totalBottles,
-    handlePriceTick, openBuy,
+    handlePriceTick, openBuy, openBillingGate,
     handleGetQualified, handleLoginExplore, handleSkipSesh,
   };
 
   return (
     <PageChrome>
       <main className={`wrap sesh-page sesh-${variant} ${stateClass}`}>
-        <VariantPicker active={variant} onPick={(v) => router.replace(`/current-offer/${id}?v=${v}`)} />
-
         {variant === 'v1' && <LayoutSplit {...shared} />}
         {variant === 'v2' && <LayoutHero {...shared} />}
         {variant === 'v3' && <LayoutTicket {...shared} />}
@@ -117,6 +122,7 @@ type SharedProps = {
   totalBottles: number;
   handlePriceTick: (p: number) => void;
   openBuy: () => void;
+  openBillingGate: () => void;
   handleGetQualified: () => void;
   handleLoginExplore: () => void;
   handleSkipSesh: () => void;
@@ -196,23 +202,14 @@ function Desc({ offer, readMore, setReadMore }: Pick<SharedProps, 'offer' | 'rea
 }
 
 function BuyButton(p: SharedProps & { full?: boolean }) {
-  const { isGated, livePrice, openBuy, handleLoginExplore, full } = p;
-  if (isGated) {
-    return (
-      <button
-        type="button"
-        className={`sesh-buy ${full ? 'sesh-buy--full' : ''} sesh-buy--gated`}
-        onClick={handleLoginExplore}
-      >
-        <i className="fa-solid fa-lock" aria-hidden /> LOGIN / SIGNUP TO BUY
-      </button>
-    );
-  }
+  const { isGated, livePrice, openBuy, openBillingGate, full } = p;
+  // Viewers (non-qualified) see the same BUY NOW + live price, but tapping it
+  // opens the "add billing to participate" gate instead of the purchase flow.
   return (
     <button
       type="button"
       className={`sesh-buy${full ? ' sesh-buy--full' : ''}`}
-      onClick={openBuy}
+      onClick={isGated ? openBillingGate : openBuy}
     >
       <span>BUY NOW</span>
       <span className="sesh-buy-price">${livePrice.toFixed(2)}</span>
@@ -266,7 +263,7 @@ function LayoutSplit(p: SharedProps) {
         <div className="sesh-split-chart panel">
           <PriceBadge livePrice={livePrice} offMsrpPct={offMsrpPct} />
           <div className="sesh-split-chartbox">
-            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -332,7 +329,7 @@ function LayoutHero(p: SharedProps) {
 
       <div className="panel sesh-hero-chart">
         <div className="chart-wrap">
-          <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+          <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                       timeframe={timeframe} onPriceChange={handlePriceTick} />
         </div>
         <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -383,7 +380,7 @@ function LayoutTicket(p: SharedProps) {
             </div>
           </div>
           <div className="chart-wrap">
-            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -476,7 +473,7 @@ function LayoutTerminal(p: SharedProps) {
 
         <div className="panel sesh-term-chart">
           <div className="chart-wrap">
-            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -526,7 +523,7 @@ function LayoutStack(p: SharedProps) {
 
       <div className="panel sesh-stack-chart">
         <div className="chart-wrap">
-          <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+          <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                       timeframe={timeframe} onPriceChange={handlePriceTick} />
         </div>
         <TFs timeframe={timeframe} setTimeframe={setTimeframe} />

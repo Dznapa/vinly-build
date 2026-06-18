@@ -37,7 +37,12 @@
 .tableWrap {
   background: #fff;
   border-radius: var(--card-radius);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Keep columns readable on phones — swipe horizontally instead of squishing. */
+.table {
+  min-width: 680px;
 }
 
 .table {
@@ -109,6 +114,16 @@
 }
 .searchPill::placeholder {
   color: #9aa3ad;
+}
+
+@media (max-width: 600px) {
+  .tableTools {
+    display: block;
+  }
+  .searchPill {
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 .sortable {
