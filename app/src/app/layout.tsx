@@ -9,6 +9,8 @@ import { ScrollToTop } from '@/components/ScrollToTop';
 import { DevToolbar } from '@/components/DevToolbar';
 import { PriceLock } from '@/components/PriceLock';
 import { WelcomeModal } from '@/components/WelcomeModal';
+import { ShippingWindowProvider } from '@/context/ShippingWindowContext';
+import { ShippingWindowModal } from '@/components/ShippingWindowModal';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -41,13 +43,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <ProfileProvider>
             <BillingGateProvider>
               <CartProvider>
-                <ToastProvider>
-                  {children}
-                  <ScrollToTop />
-                  <DevToolbar />
-                  <PriceLock />
-                  <WelcomeModal />
-                </ToastProvider>
+                <ShippingWindowProvider>
+                  <ToastProvider>
+                    {children}
+                    <ScrollToTop />
+                    <DevToolbar />
+                    <PriceLock />
+                    <WelcomeModal />
+                    <ShippingWindowModal />
+                  </ToastProvider>
+                </ShippingWindowProvider>
               </CartProvider>
             </BillingGateProvider>
           </ProfileProvider>

@@ -7,8 +7,8 @@
    CONFIRM + CANCEL controls. Expired state: red banner + BUY NOW recovery. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { useShippingWindow } from '@/context/ShippingWindowContext';
 
 export type QuickBuyWine = {
   id: string;
@@ -35,7 +35,7 @@ function formatMMSS(total: number): string {
 
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
-  const router = useRouter();
+  const shipWindow = useShippingWindow();
   const [qty, setQty] = useState<number>(1);
   const [lockedAt, setLockedAt] = useState<number | null>(null);
   const [secondsLeft, setSecondsLeft] = useState<number>(LOCK_SECONDS);
@@ -79,9 +79,9 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   const addToCart = useCallback((wineId: string, quantity: number) => {
     const added = addItem(wineId, quantity);
     onClose();
-    // Buying from the SESH → take them straight to the cart to review/checkout.
-    if (added && source === 'sesh') router.push('/customer-cart');
-  }, [addItem, onClose, source, router]);
+    // A SESH or Ticker commit opens (or extends) the free-shipping window.
+    if (added && (source === 'sesh' || source === 'ticker')) shipWindow.open();
+  }, [addItem, onClose, source, shipWindow]);
 
   const handleLockIn = useCallback(() => {
     if (!wine) return;

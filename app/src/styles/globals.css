@@ -3910,8 +3910,8 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #8aa2bb;
-  font-size: 12px;
+  color: #c7d5e6;
+  font-size: 14px;
   line-height: 1.4;
   letter-spacing: 0.3px;
 }
@@ -4217,3 +4217,179 @@ body.prices-locked .chart-tip {
 .chart-tip-row b { color: #fff; font-variant-numeric: tabular-nums; font-weight: 700; }
 .chart-tip-row.is-live span { color: #fff; }
 .chart-tip-row.is-live b { color: var(--green); }
+
+/* =================================================================
+   FREE-SHIPPING WINDOW MODAL (SESH / Ticker post-purchase)
+   ================================================================= */
+.ship-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(6, 14, 26, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.ship-card {
+  width: 100%;
+  max-width: 460px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--navy-deep);
+  border: 1px solid rgba(99, 162, 222, 0.28);
+  border-radius: 20px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+  outline: none;
+}
+.ship-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+.ship-logo { height: 26px; width: auto; }
+.ship-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(14, 173, 37, 0.12);
+  border: 1px solid rgba(14, 173, 37, 0.35);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  color: var(--green);
+}
+.ship-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: ship-pulse 1.6s ease-in-out infinite;
+}
+@keyframes ship-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.ship-timer { text-align: center; padding: 18px 24px 4px; }
+.ship-eyebrow {
+  font-family: 'League Spartan', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.6px;
+  color: #8aa2bb;
+  margin-bottom: 8px;
+}
+.ship-clock {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+  color: var(--orange);
+  text-shadow: 0 0 30px rgba(242, 106, 53, 0.45);
+  transition: color 400ms ease, text-shadow 400ms ease;
+}
+.ship-clock.is-danger { color: #e23b3b; text-shadow: 0 0 30px rgba(226, 61, 61, 0.5); }
+.ship-subclock { font-size: 12px; color: #8aa2bb; margin-top: 10px; }
+
+.ship-body { padding: 12px 28px 0; text-align: center; }
+.ship-hl {
+  font-family: 'League Spartan', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin: 0 0 12px;
+  color: #fff;
+}
+.ship-mech { font-size: 14.5px; line-height: 1.6; color: #c7d5e6; margin: 0; }
+.ship-mech b { color: #fff; }
+.ship-free { color: var(--green); }
+
+.ship-prog { padding: 22px 28px 6px; }
+.ship-prog-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 9px; }
+.ship-prog-label { font-family: 'League Spartan', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.6px; color: #8aa2bb; }
+.ship-prog-count { font-size: 13px; font-weight: 700; color: #c7d5e6; }
+.ship-prog-count .n { color: var(--orange); }
+.ship-prog-count .of { color: #8aa2bb; }
+.ship-bars { display: flex; gap: 6px; }
+.ship-seg {
+  flex: 1;
+  height: 10px;
+  border-radius: 3px;
+  background: #14243a;
+  border: 1px solid rgba(99, 162, 222, 0.18);
+  transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+.ship-seg.on { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 10px rgba(242, 106, 53, 0.45); }
+.ship-seg.on.free { background: var(--green); border-color: var(--green); box-shadow: 0 0 10px rgba(14, 173, 37, 0.45); }
+.ship-mixnote { font-size: 12px; color: #8aa2bb; margin-top: 12px; text-align: center; }
+
+.ship-ctas { padding: 20px 28px 12px; }
+.ship-btn { width: 100%; border: none; cursor: pointer; font-family: 'League Spartan', sans-serif; border-radius: 12px; }
+.ship-btn-primary {
+  background: var(--orange);
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+  padding: 16px;
+  box-shadow: 0 0 28px rgba(242, 106, 53, 0.4);
+  transition: transform 120ms ease, filter 200ms ease;
+}
+.ship-btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.ship-btn-primary:active { transform: translateY(0); }
+.ship-btn-ghost {
+  margin-top: 11px;
+  background: transparent;
+  color: #8aa2bb;
+  border: 1px solid rgba(99, 162, 222, 0.22);
+  font-family: 'Mulish', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 13px;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.ship-btn-ghost:hover { color: #c7d5e6; border-color: #8aa2bb; }
+
+.ship-foot { border-top: 1px solid rgba(99, 162, 222, 0.18); padding: 14px; text-align: center; }
+.ship-foot i { font-size: 13px; color: #8aa2bb; font-family: 'League Spartan', sans-serif; }
+
+.ship-card--done { text-align: center; padding: 30px 28px 0; }
+.ship-done-ic { font-size: 44px; color: var(--green); margin-bottom: 12px; }
+.ship-card--done .ship-ctas { padding: 18px 0 12px; }
+
+/* Minimized floating timer badge — keeps running while they shop. */
+.ship-badge {
+  position: fixed;
+  right: 18px;
+  bottom: 70px;
+  z-index: 1100;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--navy-deep);
+  border: 1px solid rgba(242, 106, 53, 0.5);
+  border-radius: 999px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-family: 'League Spartan', sans-serif;
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+.ship-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 8px var(--orange); animation: ship-pulse 1.6s ease-in-out infinite; }
+.ship-badge.is-danger { border-color: rgba(226, 61, 61, 0.6); }
+.ship-badge.is-danger .ship-badge-dot { background: #e23b3b; box-shadow: 0 0 8px #e23b3b; }
+.ship-badge-time { font-weight: 800; font-variant-numeric: tabular-nums; font-size: 15px; letter-spacing: 0.5px; }
+.ship-badge-meta { font-size: 12px; color: #8aa2bb; font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ship-pill-dot, .ship-badge-dot { animation: none; }
+  .ship-btn-primary:hover { transform: none; }
+}
+@media (max-width: 420px) {
+  .ship-clock { font-size: 58px; }
+  .ship-hl { font-size: 21px; }
+  .ship-badge { bottom: 64px; }
+}
