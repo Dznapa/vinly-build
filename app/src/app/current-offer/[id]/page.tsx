@@ -274,7 +274,7 @@ function LayoutSplit(p: SharedProps) {
         <div className="sesh-split-chart panel">
           <PriceBadge livePrice={livePrice} offMsrpPct={offMsrpPct} />
           <div className="sesh-split-chartbox">
-            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -340,7 +340,7 @@ function LayoutHero(p: SharedProps) {
 
       <div className="panel sesh-hero-chart">
         <div className="chart-wrap">
-          <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+          <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                       timeframe={timeframe} onPriceChange={handlePriceTick} />
         </div>
         <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -391,7 +391,7 @@ function LayoutTicket(p: SharedProps) {
             </div>
           </div>
           <div className="chart-wrap">
-            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -484,7 +484,7 @@ function LayoutTerminal(p: SharedProps) {
 
         <div className="panel sesh-term-chart">
           <div className="chart-wrap">
-            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -534,7 +534,7 @@ function LayoutStack(p: SharedProps) {
 
       <div className="panel sesh-stack-chart">
         <div className="chart-wrap">
-          <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
+          <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
                       timeframe={timeframe} onPriceChange={handlePriceTick} />
         </div>
         <TFs timeframe={timeframe} setTimeframe={setTimeframe} />

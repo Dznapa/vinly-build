@@ -4021,9 +4021,16 @@ body.prices-locked .sesh-buy-price {
   user-select: none;
   pointer-events: none;
 }
-body.prices-locked .chart-wrap {
-  filter: blur(8px);
-  pointer-events: none;
+/* The graph itself stays clear — non-qualified users watch the live line move.
+   Only the price-revealing bits are blurred: y-axis values, the hover tooltip,
+   the in-chart MSRP/Street labels, and the legend. */
+body.prices-locked .recharts-yAxis .recharts-cartesian-axis-tick-value,
+body.prices-locked .recharts-reference-line text,
+body.prices-locked .chart-legend-item,
+body.prices-locked .chart-tip {
+  filter: blur(5px);
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* SESH buy button in locked (view-pricing) state — centered, no price shown. */
