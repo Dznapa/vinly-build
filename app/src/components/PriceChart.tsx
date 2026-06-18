@@ -92,6 +92,34 @@ function generateSeries(timeframe: Timeframe, anchor: number) {
   return pts;
 }
 
+/* Bold pill-chip label drawn on a reference line (navy rounded bg + bold text,
+   right-aligned, centered on the line) so the dashed line never cuts the text. */
+function RefPill({ viewBox, value }: { viewBox?: { x: number; y: number; width: number; height: number }; value: string }) {
+  if (!viewBox) return null;
+  const padX = 9;
+  const h = 21;
+  const w = value.length * 7.1 + padX * 2;
+  const x = viewBox.x + viewBox.width - w - 4;
+  const y = viewBox.y - h / 2;
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} rx={6} fill="#0E2647" stroke="rgba(255,255,255,0.45)" strokeWidth={1} />
+      <text
+        x={x + padX}
+        y={y + h / 2}
+        dominantBaseline="central"
+        fill="#fff"
+        fontFamily="League Spartan, sans-serif"
+        fontSize={12.5}
+        fontWeight={800}
+        letterSpacing={0.6}
+      >
+        {value}
+      </text>
+    </g>
+  );
+}
+
 export default function PriceChart({
   gated,
   msrp = 85,
@@ -237,14 +265,7 @@ export default function PriceChart({
               stroke="rgba(255,255,255,0.55)"
               strokeDasharray="6 4"
               ifOverflow="visible"
-              label={{
-                value: `$${msrp} MSRP`,
-                position: 'insideTopRight',
-                fill: '#fff',
-                fontSize: 11,
-                fontFamily: 'League Spartan',
-                dy: -6,
-              }}
+              label={<RefPill value={`$${msrp} MSRP`} />}
             />
           )}
           {showStreetRef && (
@@ -253,14 +274,7 @@ export default function PriceChart({
               stroke="rgba(255,255,255,0.55)"
               strokeDasharray="6 4"
               ifOverflow="visible"
-              label={{
-                value: `$${street} STREET PRICE`,
-                position: 'insideTopRight',
-                fill: '#fff',
-                fontSize: 11,
-                fontFamily: 'League Spartan',
-                dy: -6,
-              }}
+              label={<RefPill value={`$${street} STREET PRICE`} />}
             />
           )}
 
