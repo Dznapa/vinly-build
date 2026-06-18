@@ -954,7 +954,10 @@ button {
     #f1c40f 55%,
     #2ecc40 100%
   );
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+              0 0 18px rgba(242, 106, 53, 0.3),
+              0 0 6px rgba(255, 255, 255, 0.1);
+  animation: vinly-gauge-trackglow 3s ease-in-out infinite;
 }
 .vinly-gauge-marker {
   position: absolute;
@@ -968,7 +971,8 @@ button {
   border-radius: 50%;
   transform: translateY(-50%);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4),
-              0 0 0 2px rgba(14, 38, 71, 0.85);
+              0 0 0 2px rgba(14, 38, 71, 0.85),
+              0 0 16px rgba(242, 106, 53, 0.7);
   transition: left 400ms ease;
 }
 .vinly-gauge-bottle {
@@ -987,8 +991,28 @@ button {
   92% { transform: translateX(-1px) rotate(-5deg); }
   94% { transform: translateX(0) rotate(0deg); }
 }
+/* Radiating pulse ring around the bottle marker — draws the eye to the level. */
+.vinly-gauge-marker::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: vinly-gauge-radiate 2s ease-out infinite;
+}
+@keyframes vinly-gauge-radiate {
+  0% { box-shadow: 0 0 0 0 rgba(242, 106, 53, 0.55); }
+  70% { box-shadow: 0 0 0 16px rgba(242, 106, 53, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(242, 106, 53, 0); }
+}
+@keyframes vinly-gauge-trackglow {
+  0%, 100% { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 14px rgba(242, 106, 53, 0.22), 0 0 6px rgba(255, 255, 255, 0.08); }
+  50% { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 28px rgba(242, 106, 53, 0.45), 0 0 10px rgba(255, 255, 255, 0.14); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .vinly-gauge-bottle { animation: none; }
+  .vinly-gauge-bottle,
+  .vinly-gauge-marker::after,
+  .vinly-gauge-track { animation: none; }
 }
 .vinly-gauge-axis {
   display: flex;
