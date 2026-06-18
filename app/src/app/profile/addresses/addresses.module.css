@@ -1,0 +1,165 @@
+/* Co-located styles for /profile/addresses. Provides white cards, default badge,
+   inline action buttons, and a form panel that re-uses .field / .check-row. */
+
+.list {
+  max-width: 900px;
+  margin: 0 auto 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty {
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 30px;
+  text-align: center;
+  color: var(--text-gray);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.empty p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 22px 24px;
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.cardLabel {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #2a2a2a;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  background: var(--orange);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.cardActions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.linkBtn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--cyan);
+  cursor: pointer;
+  letter-spacing: 0.3px;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+.linkBtnDanger {
+  color: #b3261e;
+}
+
+.cardBody {
+  color: var(--text-gray);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.fullName {
+  font-weight: 700;
+  color: #2a2a2a;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+
+.addRow {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.addRow .btn-billing {
+  max-width: 320px;
+}
+
+.formCard {
+  background: #fff;
+  border-radius: var(--card-radius);
+  max-width: 900px;
+  margin: 0 auto 60px;
+  padding: 30px 36px;
+}
+
+.formCard h4 {
+  margin: 0 0 18px;
+  color: #1f1f1f;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.row3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  align-items: end;
+}
+
+.select {
+  border: 0;
+  border-bottom: 1px solid #d9dde2;
+  padding: 10px 2px;
+  font-family: inherit;
+  font-size: 15px;
+  color: #333;
+  background: transparent;
+  outline: 0;
+  margin-bottom: 18px;
+}
+
+.formActions {
+  display: flex;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.formActions > * {
+  flex: 1;
+}
+
+@media (max-width: 700px) {
+  .row3 {
+    grid-template-columns: 1fr;
+  }
+  .cardHead {
+    flex-direction: column;
+  }
+}

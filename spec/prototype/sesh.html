@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vinly — SESH (local prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="header"></div>
+  <div id="ticker"></div>
+
+  <main class="wrap" id="seshRoot">
+    <div class="sesh-title"><span class="tag">SESH 6.17.26</span> JUSTIN ISOSCELES | 2021</div>
+
+    <section class="sesh-grid">
+      <!-- LEFT: IPO panel + chart -->
+      <div class="panel ipo-panel">
+        <div class="ipo-head">
+          <h2>VINLY SESH IPO</h2>
+          <button class="btn-unlock">Get SESH Qualified - Unlock to View</button>
+        </div>
+        <div class="price-big">$43.37</div>
+        <div class="price-off"><span class="val">45.79%</span> Off of MSRP</div>
+
+        <div class="chart-wrap"><canvas id="seshChart"></canvas></div>
+        <div class="elapsed-label">Elapsed Time (HH:MM:SS)</div>
+        <div class="timeframes">
+          <button class="tf active">30 Sec</button>
+          <button class="tf">1 Min</button>
+          <button class="tf">5 Min</button>
+          <button class="tf">15 Min</button>
+          <button class="tf">30 Min</button>
+          <button class="tf">Hour</button>
+          <button class="tf">All</button>
+        </div>
+        <div class="offer-dur">Offer Duration: 00:36:50</div>
+      </div>
+
+      <!-- RIGHT: wine detail -->
+      <div class="panel detail-panel">
+        <div class="detail-grid">
+          <div class="bottle"><img src="assets/bottle.svg" alt="Justin Isosceles"></div>
+          <div>
+            <h2>JUSTIN ISOSCELES | 2021</h2>
+            <div class="vol">750mL</div>
+            <div class="rating"><span class="src">WE</span><span class="num">93</span></div>
+            <p class="desc">Paso's benchmark Bordeaux blend. Still nobody's caught it. Wound tight,
+            built to age, and already dangerous. Buy it now. Justin didn't just put Paso on the map —
+            they drew the whole map. Isosceles has been the standard since 1987 and the 2021 is not here
+            to be friendly about it. Limestone Westside…</p>
+            <span class="read-more">Read more</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sesh-grid">
+      <!-- LEFT: inventory gauge -->
+      <div class="panel inv-panel">
+        <h2>INVENTORY</h2>
+        <div class="load">Load Up</div>
+        <div class="gauge-wrap"><div id="gauge"></div></div>
+      </div>
+
+      <!-- RIGHT: explore / buy -->
+      <div class="panel explore-panel">
+        <div class="btn-explore-row">
+          <button class="btn-explore">LOGIN/SIGNUP TO EXPLORE</button>
+          <div class="explore-divider"></div>
+          <div class="explore-skip"><span>Not your glass of wine?</span><button class="btn-skip">SKIP THIS SESH</button></div>
+        </div>
+        <!-- shown only in qualified state -->
+        <button class="btn-buynow">BUY NOW</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer"></div>
+
+  <!-- prototype-only control bar -->
+  <div class="proto-bar">
+    <b>VINLY PROTOTYPE</b> · SESH page
+    <span class="spacer"></span>
+    <span>User state:</span>
+    <button data-proto-state="gated" onclick="setSeshState('gated')">Not qualified (gated)</button>
+    <button data-proto-state="qualified" onclick="setSeshState('qualified')">SESH qualified (unlocked)</button>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <style>
+    /* qualified state: hide explore card, show BUY NOW; gated state hides BUY NOW */
+    #seshRoot.gated .btn-buynow{display:none;}
+    #seshRoot.qualified .btn-explore-row{display:none;}
+  </style>
+</body>
+</html>

@@ -1,0 +1,45 @@
+/* Co-located styles for /login. Builds on the .signup-card grammar; only adds
+   bits unique to this page (error helper, secondary "create account" link). */
+
+.error {
+  color: #b3261e;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+
+.alt {
+  text-align: center;
+  color: #555;
+  font-size: 14px;
+  margin: 18px 0 0;
+}
+
+.altLink {
+  color: var(--orange);
+  font-weight: 700;
+}
+
+.altLink:hover {
+  text-decoration: underline;
+}
+
+.forgotRow {
+  display: flex;
+  justify-content: flex-end;
+  margin: -6px 0 14px;
+}
+
+.forgotLink {
+  background: transparent;
+  border: 0;
+  padding: 4px 0;
+  color: var(--cyan);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.forgotLink:hover {
+  text-decoration: underline;
+}

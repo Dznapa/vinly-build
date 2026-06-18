@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vinly — Sign up (local prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <main class="wrap">
+    <div class="signup-title">Sign up</div>
+    <form class="signup-card" onsubmit="return false">
+      <h4>Contact Information</h4>
+      <input class="field" placeholder="First Name">
+      <input class="field" placeholder="Last Name">
+      <input class="field" placeholder="Email Address">
+      <input class="field" placeholder="Phone Number">
+
+      <h4 class="mt">Password</h4>
+      <input class="field" type="password" placeholder="Create Password">
+      <input class="field" type="password" placeholder="Verify Password">
+
+      <h4 class="mt">*Birth Date</h4>
+      <div class="bdate">
+        <select><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
+        <select><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option></select>
+        <select><option>2005</option><option>2004</option><option>2003</option><option>2002</option></select>
+      </div>
+
+      <label class="check-row"><input type="checkbox"> I am over 21 years of age</label>
+      <label class="check-row"><input type="checkbox"> Agree to <a href="#">terms and conditions</a></label>
+      <label class="check-row"><input type="checkbox" checked> Yes - send me Vinly Ticker and New Drop alerts</label>
+
+      <p class="signup-help">Click SIGN UP to become a Vinly Member now. To purchase or participate in the
+        SESH you will need to provide billing and shipping information.</p>
+
+      <div class="signup-actions">
+        <button class="btn-create">CREATE ACCOUNT</button>
+        <button class="btn-billing">ADD BILLING &amp; SHIPPING</button>
+      </div>
+    </form>
+  </main>
+
+  <div id="footer"></div>
+
+  <div class="proto-bar"><b>VINLY PROTOTYPE</b> · Sign up <span class="spacer"></span><span>Step 1 of 2</span></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

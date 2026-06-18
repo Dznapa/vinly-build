@@ -1,0 +1,228 @@
+/* Cart layout — matches the observed /customer-cart empty-state structure
+   from /spec/SCREEN_NOTES.md (centered CART title, white panel with table
+   header row, empty-state copy, gray KEEP SHOPPING bottom-right). */
+
+.title {
+  text-align: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: 2px;
+  padding: 22px 0 18px;
+  margin: 0;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 26px;
+  align-items: start;
+  margin-bottom: 60px;
+}
+
+@media (max-width: 1000px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cartPanel {
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.twoCol .cartPanel {
+  margin-bottom: 0;
+}
+
+.tableHead {
+  display: grid;
+  grid-template-columns: 90px 1fr 180px 120px;
+  gap: 18px;
+  align-items: center;
+  padding: 14px 22px;
+  background: #f4f5f7;
+  color: #555;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: capitalize;
+  border-bottom: 1px solid #e6e8ec;
+}
+
+.colItem,
+.colTitle,
+.colQty,
+.colTotal {
+  min-width: 0;
+}
+
+.colTotal {
+  text-align: right;
+  color: var(--green);
+  font-weight: 700;
+}
+
+/* Real Commerce7 photos are ≈ 1:3.6. Bound width and let height auto so
+   they stay proportional inside the row. */
+.bottleImg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 56px;
+  max-height: 120px;
+  margin: 0 auto;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: var(--text-gray);
+  font-size: 16px;
+  padding: 56px 22px 48px;
+}
+.emptyCta {
+  margin-top: 22px;
+  padding: 12px 28px;
+  text-decoration: none;
+}
+
+.savedRow {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(14, 173, 37, 0.08);
+  color: var(--green);
+  font-size: 13.5px;
+  text-align: center;
+}
+.savedRow b {
+  font-weight: 800;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 90px 1fr 180px 120px;
+  gap: 18px;
+  align-items: center;
+  padding: 22px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.itemName {
+  margin: 0 0 4px;
+  color: #2a2a2a;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.itemMeta {
+  color: var(--text-gray);
+  font-size: 13px;
+  line-height: 1.45;
+  margin-bottom: 6px;
+}
+
+.removeBtn {
+  background: transparent;
+  border: 0;
+  padding: 2px 0;
+  color: #9aa3ad;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.panelFoot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 22px 22px;
+  border-top: 1px solid #eef0f3;
+  background: #fff;
+}
+
+.keepShopping {
+  /* extra cart-specific spacing on top of the shared .btn-skip variant */
+  letter-spacing: 1px;
+}
+
+/* ---------- order summary (sticky in two-col, only when non-empty) ---------- */
+.summary {
+  margin: 0;
+  position: sticky;
+  top: 86px;
+}
+
+@media (max-width: 1000px) {
+  .summary {
+    position: static;
+  }
+}
+
+.summary h2 {
+  margin: 0 0 14px;
+  color: #2a2a2a;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  color: #444;
+  font-size: 15px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.summaryTotal {
+  font-weight: 700;
+  color: #2a2a2a;
+  font-size: 18px;
+  border-bottom: 0;
+}
+
+.shipFree {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.checkoutBtn {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.freeShipNote {
+  color: var(--green);
+  font-size: 13px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .tableHead,
+  .row {
+    grid-template-columns: 64px 1fr 120px;
+  }
+  .colTotal {
+    display: none;
+  }
+}

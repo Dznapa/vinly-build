@@ -1,0 +1,12 @@
+/* Co-located styles for /profile/edit. The form re-uses .signup-card / .field /
+   .bdate from globals.css; only the CANCEL + SAVE button row is new. */
+
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.actions > * {
+  flex: 1;
+}

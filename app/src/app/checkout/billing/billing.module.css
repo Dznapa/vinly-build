@@ -1,0 +1,134 @@
+/* Co-located styles for /checkout/billing.
+   Only contains layout/visual pieces NOT already covered by globals.css
+   (which provides .signup-card, .field, .check-row, .signup-help, .btn-billing,
+   .panel, .detail-panel). */
+
+.title {
+  text-align: center;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 26px 0 18px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 26px;
+  margin: 0 auto 60px;
+  max-width: 1180px;
+  align-items: start;
+}
+
+/* Override .signup-card centering for the two-column layout. */
+.formCard {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
+
+.summaryCard {
+  padding: 26px 28px;
+  position: sticky;
+  top: 24px;
+}
+
+.summaryTitle {
+  color: var(--orange);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin: 0 0 18px;
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.itemName {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.itemMeta {
+  color: #777;
+  font-size: 12.5px;
+  margin-top: 2px;
+}
+
+.itemPrice {
+  color: #333;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  color: #444;
+  font-size: 15px;
+}
+
+.rowFree {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+  margin-bottom: 18px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.placeOrder {
+  width: 100%;
+  font-size: 16px;
+  padding: 16px;
+}
+
+.fieldRow {
+  display: flex;
+  gap: 16px;
+}
+
+.fieldRow > * {
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .summaryCard {
+    position: static;
+  }
+}

@@ -1,0 +1,125 @@
+/* Admin-only table styling. Not in globals.css; scoped via CSS Module.
+   Color tokens come from globals.css :root vars so we stay on-palette. */
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+@media (max-width: 900px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpiCard {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 120px;
+  justify-content: center;
+}
+.kpiLabel {
+  color: var(--text-gray);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.kpiValue {
+  color: #2a2a2a;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tableWrap {
+  background: #fff;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.table thead th {
+  background: var(--navy-deep);
+  color: #fff;
+  text-align: left;
+  padding: 12px 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.table tbody td {
+  padding: 12px 14px;
+  border-top: 1px solid #e5e7eb;
+  color: #333;
+  vertical-align: middle;
+}
+.table tbody tr:hover td {
+  background: rgba(242, 106, 53, 0.08);
+}
+
+.inStock {
+  color: var(--green);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.outStock {
+  color: #e23b3b;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 4px 0 18px;
+}
+
+.numCell {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Search-and-sort UI on data tabs. */
+.tableTools {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.searchPill {
+  background: #fff;
+  border: 0;
+  border-radius: 999px;
+  height: 38px;
+  padding: 0 18px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #333;
+  outline: 0;
+  min-width: 260px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.searchPill::placeholder {
+  color: #9aa3ad;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.sortable:hover {
+  background: #0a1c34;
+}
+.sortGlyph {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--orange);
+}

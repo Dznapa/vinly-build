@@ -1,0 +1,3882 @@
+/* =========================================================================
+   VINLY — Tokens + global CSS, ported verbatim from
+   /spec/prototype/assets/styles.css. Do not redesign — match the live site.
+   ========================================================================= */
+
+:root {
+  --navy: #14355F;
+  --navy-deep: #0E2647;
+  --navy-panel: #1B4A7A; /* SESH IPO panel / ticker cards */
+  --orange: #F26A35;
+  --green: #0EAD25;
+  --cyan: #39B0E5;
+  --text-gray: #4F4F4F;
+  --white: #ffffff;
+  --radius: 8px;
+  --card-radius: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--navy);
+  color: var(--text-gray);
+  /* Body / UI per /spec/ASSETS.md: Mulish ("Muli" on the live site). */
+  font-family: 'Mulish', -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings + display chrome use League Spartan per spec. */
+h1, h2, h3, h4,
+.logo,
+.sesh-title,
+.shop-hero,
+.search-row .sort,
+.wines-count,
+.btn-search,
+.btn-cart,
+.btn-unlock,
+.btn-explore,
+.btn-buynow,
+.btn-create,
+.btn-billing,
+.tc-name,
+.price-big,
+.tf {
+  font-family: 'League Spartan', -apple-system, Segoe UI, Roboto, sans-serif;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+button {
+  font-family: inherit;
+}
+
+/* Consistent keyboard-focus ring across the app. */
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Toast region — bottom-right, above the dev toolbar (z 9999). */
+.vinly-toast-region {
+  position: fixed;
+  bottom: 64px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10000;
+  pointer-events: none;
+}
+.vinly-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  max-width: 360px;
+  padding: 12px 16px;
+  background: #fff;
+  color: #2a2a2a;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  font-family: 'Mulish', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  animation: vinly-toast-in 220ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+.vinly-toast i {
+  font-size: 18px;
+  flex: 0 0 auto;
+}
+.vinly-toast--success i { color: var(--green); }
+.vinly-toast--info i    { color: var(--cyan); }
+.vinly-toast--error i   { color: #e23b3b; }
+@keyframes vinly-toast-in {
+  from { transform: translateY(20px) scale(0.96); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);     opacity: 1; }
+}
+
+/* Floating "back to top" FAB. */
+.vinly-scroll-top {
+  position: fixed;
+  bottom: 64px;
+  left: 18px;
+  z-index: 9998;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--orange);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  transition: filter 120ms ease, transform 120ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vinly-scroll-top:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+
+/* ---------- shared layout ---------- */
+.wrap {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- header ---------- */
+.site-header {
+  background: var(--navy);
+  padding: 18px 0;
+}
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.logo {
+  font-weight: 800;
+  font-size: 42px;
+  color: var(--orange);
+  letter-spacing: -1px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.logo-img {
+  height: 44px;
+  width: auto;
+  display: block;
+}
+.site-footer .logo-img {
+  height: 40px;
+}
+.header-center {
+  color: var(--white);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+.header-center .start {
+  color: var(--orange);
+  font-weight: 700;
+}
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--orange);
+}
+.header-icons .icon {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+.header-icons svg {
+  width: 26px;
+  height: 26px;
+  stroke: var(--orange);
+  fill: none;
+  stroke-width: 2;
+}
+.header-icons i {
+  font-size: 22px;
+  color: var(--orange);
+  line-height: 1;
+}
+.header-icons .account-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--orange);
+}
+
+/* Account dropdown */
+.account-wrap {
+  position: relative;
+}
+.account-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 240px;
+  background: #fff;
+  color: #333;
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+  padding: 10px 0;
+  /* Must sit above the sticky ticker (z:50) so the menu isn't hidden behind it. */
+  z-index: 120;
+}
+.account-menu-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 12px;
+  border-bottom: 1px solid #eef0f3;
+  font-size: 13px;
+  color: #555;
+}
+.account-menu-head .avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--orange);
+  color: #fff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.account-menu-head .acc-name {
+  flex: 1;
+  min-width: 0;
+}
+.account-menu-head .acc-line1 {
+  font-weight: 700;
+  color: #2a2a2a;
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.account-menu-head .acc-line2 {
+  font-size: 12px;
+  color: #6b7280;
+}
+.account-menu-head .acc-qualified {
+  color: var(--green);
+  font-weight: 700;
+}
+.account-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  font-family: inherit;
+  color: #333;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.account-menu-item:hover {
+  background: #f5f7fa;
+}
+.account-menu-item i {
+  color: #6b7280;
+  width: 18px;
+  text-align: center;
+}
+.account-menu-signout {
+  border-top: 1px solid #eef0f3;
+  color: #b3261e;
+  font-weight: 600;
+}
+.account-menu-signout i {
+  color: #b3261e;
+}
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cart-badge-pop 240ms ease;
+}
+@keyframes cart-badge-pop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.divider-v {
+  width: 1px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* ---------- ticker (CSS marquee per /spec/ASSETS.md) ---------- */
+.slider,
+.ticker {
+  position: relative;
+  padding: 14px 0;
+  overflow: hidden;
+}
+.slide-track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  padding: 0 40px;
+  /* nudge offset set by chevrons */
+  transform: translateX(var(--nudge, 0));
+  animation: vinly-ticker-scroll 40s linear infinite;
+  will-change: transform;
+}
+.slider.is-paused .slide-track,
+.slider:hover .slide-track {
+  animation-play-state: paused;
+}
+@keyframes vinly-ticker-scroll {
+  from {
+    transform: translateX(calc(var(--nudge, 0px) + 0px));
+  }
+  to {
+    transform: translateX(calc(var(--nudge, 0px) - 50%));
+  }
+}
+.ticker-track {
+  display: flex;
+  gap: 14px;
+  transition: none;
+  will-change: transform;
+}
+.ticker-card {
+  flex: 0 0 300px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--navy-panel);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  padding: 10px 14px;
+  position: relative;
+  overflow: hidden;
+}
+.ticker-card .spark {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  pointer-events: none;
+}
+.ticker-card img {
+  width: 46px;
+  height: 64px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+.ticker-card .tc-body {
+  flex: 1;
+  min-width: 0;
+}
+.ticker-card .tc-name {
+  color: var(--cyan);
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ticker-card .tc-sub {
+  color: #cfe6f5;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+.ticker-card .tc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.ticker-card .tc-left {
+  color: #fff;
+  font-size: 12.5px;
+}
+.ticker-card .tc-left b {
+  color: var(--orange);
+}
+.ticker-card .tc-add {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--orange);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 100ms ease, filter 100ms ease;
+}
+.ticker-card .tc-add:hover {
+  filter: brightness(1.08);
+  transform: scale(1.08);
+}
+.ticker-chevron {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--green);
+  font-size: 26px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 2;
+  user-select: none;
+  background: transparent;
+  border: 0;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ticker-chevron i {
+  font-size: 26px;
+  color: var(--green);
+}
+.ticker-chevron.left {
+  left: 6px;
+}
+.ticker-chevron.right {
+  right: 6px;
+}
+
+/* ticker sticky-on-scroll variant (used on pages where ticker stays pinned) */
+.ticker-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--navy);
+}
+
+/* ---------- shop hero line ---------- */
+.shop-hero {
+  text-align: center;
+  color: #fff;
+  padding: 18px 0 6px;
+}
+.shop-hero .l1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.shop-hero .l2 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* ---------- search row ---------- */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 0;
+}
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 14px;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.sort svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--orange);
+}
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 0 14px;
+  height: 46px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.search-box svg {
+  width: 18px;
+  height: 18px;
+  fill: #9aa3ad;
+}
+.search-box input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font-family: inherit;
+  font-size: 16px;
+  color: #333;
+  padding: 0 10px;
+  background: transparent;
+}
+/* ---------- shared button family ---------------------------------------
+   All buttons in the app share a base shape: 8px radius, League Spartan,
+   ~12px vertical / 22px horizontal padding, semi-bold, 0.5px letter-spacing.
+   Variants change ONLY the background/foreground color so the visual rhythm
+   stays consistent across Shop, SESH, Cart, Profile, Checkout, etc.
+   The legacy class names (.btn-search, .btn-cart, …) are kept so existing
+   markup doesn't need to change. */
+.btn-search,
+.btn-cart,
+.btn-unlock,
+.btn-explore,
+.btn-buynow,
+.btn-create,
+.btn-billing,
+.btn-skip {
+  border: 0;
+  border-radius: var(--radius);
+  font-family: 'League Spartan', -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  line-height: 1;
+  transition: filter 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-search:hover,
+.btn-cart:hover,
+.btn-unlock:hover,
+.btn-explore:hover,
+.btn-buynow:hover,
+.btn-create:hover,
+.btn-billing:hover,
+.btn-skip:hover {
+  filter: brightness(1.06);
+}
+.btn-search:active,
+.btn-cart:active,
+.btn-unlock:active,
+.btn-explore:active,
+.btn-buynow:active,
+.btn-create:active,
+.btn-billing:active,
+.btn-skip:active {
+  transform: translateY(1px);
+}
+.btn-search:disabled,
+.btn-cart:disabled,
+.btn-unlock:disabled,
+.btn-explore:disabled,
+.btn-buynow:disabled,
+.btn-create:disabled,
+.btn-billing:disabled,
+.btn-skip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-search {
+  background: var(--orange);
+  color: #fff;
+  height: 46px;
+  padding: 0 22px;
+  font-size: 14px;
+}
+.wines-count {
+  color: var(--orange);
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* ---------- shop grid ---------- */
+.shop-panel {
+  background: var(--navy-panel);
+  border-radius: 18px;
+  padding: 26px;
+  margin-bottom: 60px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.wine-card {
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 22px;
+  display: flex;
+  gap: 16px;
+  min-height: 210px;
+}
+.wine-card .bottle {
+  flex: 0 0 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wine-card .bottle img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 90px;
+  max-height: 200px;
+  object-fit: contain;
+}
+.wine-card .bottle svg {
+  max-width: 90px;
+  max-height: 200px;
+}
+.wine-card .info {
+  flex: 1;
+}
+.wine-card h3 {
+  margin: 0 0 12px;
+  color: #3a3a3a;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.15;
+  font-family: 'League Spartan';
+}
+.wine-card .meta {
+  color: var(--text-gray);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+.wine-card .price {
+  color: var(--green);
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 12px;
+  line-height: 1;
+}
+.wine-card .msrp {
+  color: var(--green);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.wine-card .msrp s {
+  color: #e23b3b;
+}
+.wine-card .controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d9dde2;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.stepper button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: #f2f4f6;
+  font-size: 18px;
+  cursor: pointer;
+  color: #555;
+}
+.stepper .qty {
+  width: 40px;
+  text-align: center;
+  font-size: 15px;
+  color: #333;
+}
+.btn-cart {
+  background: var(--orange);
+  color: #fff;
+  padding: 12px 22px;
+  font-size: 13px;
+}
+.btn-cart.is-added {
+  background: var(--green);
+  color: #fff;
+}
+.out-of-stock {
+  color: #e23b3b;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-top: 14px;
+  font-size: 15px;
+}
+
+/* ---------- SESH page ---------- */
+.sesh-title {
+  text-align: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  padding: 16px 0;
+}
+.sesh-title .tag {
+  color: var(--orange);
+}
+.sesh-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  margin-bottom: 40px;
+}
+
+/* New 2-row puzzle layout for the SESH page (replaces sesh-grid pairs). */
+.sesh-page .sesh-row {
+  display: grid;
+  gap: 22px;
+  margin-bottom: 22px;
+  align-items: stretch;
+}
+.sesh-page .sesh-row-top {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+}
+.sesh-page .sesh-row-bottom {
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-bottom: 60px;
+}
+.sesh-page .panel {
+  display: flex;
+  flex-direction: column;
+}
+.sesh-page .panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.sesh-page .panel-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+/* Compact wine detail card — bottle smaller, content top-aligned, no empty
+   space below. The panel height tracks its content, not the chart panel. */
+.detail-panel--compact .detail-grid {
+  grid-template-columns: 130px 1fr;
+  align-items: start;
+}
+.detail-panel--compact .bottle img,
+.detail-panel--compact .bottle svg {
+  max-width: 130px;
+  max-height: 320px;
+}
+
+@media (max-width: 1100px) {
+  .sesh-page .sesh-row-top { grid-template-columns: 1fr; }
+  .sesh-page .sesh-row-bottom { grid-template-columns: 1fr; }
+}
+
+/* ---------- Time Left panel ---------- */
+.time-panel {
+  background: var(--navy-deep);
+  color: #fff;
+}
+.time-panel .panel-head h2 {
+  color: #fff;
+}
+
+/* ---------- BUY NOW / SESH access panel ---------- */
+.buy-panel {
+  background: #fff;
+  color: #2a2a2a;
+  padding: 24px;
+  border-radius: 18px;
+}
+.buy-panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+.buy-panel-kicker {
+  color: var(--orange);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+.buy-panel-title {
+  margin: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #1f1f1f;
+}
+.buy-panel-copy {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.buy-panel-price {
+  font-family: 'League Spartan', sans-serif;
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--green);
+  line-height: 1;
+}
+.gated .buy-panel-price,
+.gated .buy-panel-savings .val {
+  color: transparent;
+  text-shadow: 0 0 16px #7ef08c;
+}
+.buy-panel-savings {
+  color: var(--green);
+  font-weight: 600;
+  font-size: 15px;
+}
+.buy-panel-cta {
+  margin-top: auto;
+  width: 100%;
+  padding: 18px 22px;
+  font-size: 17px;
+  letter-spacing: 0.8px;
+}
+.buy-panel-skip {
+  width: 100%;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 10px 16px;
+}
+.buy-panel-foot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+.buy-panel-foot i {
+  color: var(--orange);
+}
+
+/* Stop the legacy explore/buy panel and its CSS toggles from interfering. */
+.sesh-page .explore-panel,
+.sesh-page .gauge-wrap,
+.sesh-page .load,
+.sesh-page .offer-dur {
+  display: none;
+}
+
+/* ============================================================
+   Inventory gauge — stage label + gradient track + marker
+   ============================================================ */
+.vinly-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.vinly-gauge-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: 'League Spartan', sans-serif;
+}
+.vinly-gauge-eyebrow {
+  color: #8aa2bb;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.vinly-gauge-stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+}
+.vinly-gauge-stage-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.vinly-gauge-track-wrap {
+  position: relative;
+  padding: 6px 0;
+}
+.vinly-gauge-track {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #e23b3b 0%,
+    #f08a3b 28%,
+    #f1c40f 55%,
+    #2ecc40 100%
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.vinly-gauge-marker {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 22px;
+  margin-left: -7px;
+  background: #fff;
+  border-radius: 4px;
+  transform: translateY(-50%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4),
+              0 0 0 2px rgba(14, 38, 71, 0.8);
+  transition: left 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.vinly-gauge-axis {
+  display: flex;
+  justify-content: space-between;
+  color: #6e8aa6;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.vinly-gauge--sm .vinly-gauge-track { height: 7px; }
+.vinly-gauge--sm .vinly-gauge-marker { width: 10px; height: 16px; margin-left: -5px; }
+.vinly-gauge--sm .vinly-gauge-stage { font-size: 11px; padding: 4px 9px; }
+
+.vinly-gauge--light .vinly-gauge-eyebrow,
+.vinly-gauge--light .vinly-gauge-axis { color: #6b7280; }
+.vinly-gauge--light .vinly-gauge-marker {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18),
+              0 0 0 2px #ffffff;
+  background: #ffffff;
+}
+
+/* ============================================================
+   (legacy InventoryBar classes — left only as placeholders)
+   ============================================================ */
+.vinly-inv2 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.vinly-inv2-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.vinly-inv2-num {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: 'League Spartan', sans-serif;
+}
+.vinly-inv2-big {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+.vinly-inv2-of {
+  color: #8aa2bb;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.vinly-inv2-label {
+  color: #8aa2bb;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.vinly-inv2-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+}
+.vinly-inv2-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.vinly-inv2-row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 4px;
+}
+.vinly-inv2-tick {
+  height: 10px;
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+  transition: background 360ms ease, box-shadow 200ms ease;
+}
+.vinly-inv2-tick.is-filled {
+  box-shadow: none;
+}
+
+.vinly-inv2--sm .vinly-inv2-big { font-size: 26px; }
+.vinly-inv2--sm .vinly-inv2-tick { height: 6px; }
+
+.vinly-inv2--light .vinly-inv2-of,
+.vinly-inv2--light .vinly-inv2-label {
+  color: #6b7280;
+}
+.vinly-inv2--light .vinly-inv2-tick {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12) inset;
+}
+
+/* ============================================================
+   SESH layouts — shared atoms used across all 5 variants
+   ============================================================ */
+
+.sesh-page,
+.sesh-page .panel { color: #e7eef6; }
+
+.sesh-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin: 0 0 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  font-family: 'League Spartan', sans-serif;
+  flex-wrap: wrap;
+  width: fit-content;
+}
+.sesh-picker-label {
+  color: #8aa2bb; font-weight: 700;
+  font-size: 11px; letter-spacing: 2px; padding-right: 4px;
+}
+.sesh-picker-chip {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cfe0ef;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+.sesh-picker-chip.is-active {
+  background: var(--orange); border-color: var(--orange); color: #fff;
+}
+
+.sesh-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'League Spartan', sans-serif;
+  color: #8aa2bb;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 0 14px;
+}
+.sesh-crumb i { font-size: 9px; color: #4d6680; }
+.sesh-crumb-active { color: #fff; }
+.sesh-crumb-ticker {
+  margin-left: 8px; padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(57, 176, 229, 0.12);
+  color: var(--cyan); font-weight: 700;
+  letter-spacing: 1px; font-size: 11px;
+}
+
+.sesh-page .panel {
+  background: #0e2647;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sesh-pricebadge { display: flex; flex-direction: column; gap: 6px; }
+.sesh-pricebadge-num {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 44px;
+  line-height: 1;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 20px rgba(54, 224, 90, 0.18);
+  letter-spacing: -1px;
+}
+.gated .sesh-pricebadge-num { color: transparent; text-shadow: 0 0 18px #7ef08c; }
+.sesh-pricebadge-delta {
+  color: var(--green); font-weight: 700; font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.sesh-ratingchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.25);
+  color: #cfe0ef;
+  font-family: 'Mulish', sans-serif;
+  font-size: 13px;
+  width: fit-content;
+}
+.sesh-ratingchip b {
+  color: var(--orange);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+}
+.sesh-rating-dot { color: #4d6680; }
+
+.sesh-tfs {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px; background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px; align-self: flex-start;
+}
+.sesh-tf {
+  background: transparent; border: 0; color: #8aa2bb;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700; font-size: 12px; letter-spacing: 1px;
+  padding: 6px 12px; border-radius: 7px; cursor: pointer;
+}
+.sesh-tf:hover { color: #fff; }
+.sesh-tf.is-active { background: rgba(255, 255, 255, 0.08); color: #fff; }
+
+.sesh-buy {
+  width: 100%;
+  background: var(--orange);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  box-shadow: 0 12px 28px rgba(242, 106, 53, 0.28);
+  transition: filter 120ms ease, transform 80ms ease;
+}
+.sesh-buy:hover { filter: brightness(1.06); }
+.sesh-buy:active { transform: translateY(1px); }
+.sesh-buy-price { font-variant-numeric: tabular-nums; font-size: 17px; }
+.sesh-buy--gated {
+  background: #0e2647; color: #fff; justify-content: center;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+}
+.sesh-buy--full { width: 100%; }
+.sesh-buyfoot {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: #8aa2bb; font-size: 12px;
+}
+.sesh-buyfoot i { color: var(--orange); }
+
+.sesh-desc {
+  color: #cfe0ef; font-size: 14.5px; line-height: 1.7; margin: 0;
+}
+.sesh-readmore {
+  background: transparent; border: 0; padding: 6px 0 0;
+  color: var(--cyan); font-family: inherit; font-weight: 600;
+  cursor: pointer; font-size: 13.5px;
+}
+
+.sesh-statpair {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 12px;
+}
+.sesh-statpair-label {
+  color: #8aa2bb; font-family: 'Mulish', sans-serif;
+  font-weight: 600; font-size: 12px;
+}
+.sesh-statpair-value {
+  color: #fff; font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 22px; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.sesh-statpair-value.is-strike {
+  color: #cfe0ef;
+  text-decoration: line-through;
+  text-decoration-color: rgba(226, 59, 59, 0.6);
+  text-decoration-thickness: 2px;
+}
+.sesh-statpair-value.is-good { color: var(--green); }
+
+.sesh-statrow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: #cfe0ef; font-size: 14px;
+}
+.sesh-statrow:first-of-type { border-top: 0; }
+.sesh-statrow > span:first-child { color: #8aa2bb; }
+.sesh-statrow-val { font-family: 'League Spartan', sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; color: #fff; }
+.sesh-statrow-val.is-good { color: var(--green); }
+.sesh-statrow-val.is-strike {
+  color: #cfe0ef;
+  text-decoration: line-through;
+  text-decoration-color: rgba(226, 59, 59, 0.6);
+}
+
+/* =================== V1 — SPLIT =================== */
+.sesh-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+  margin-bottom: 22px;
+}
+.sesh-split > .panel { height: 100%; }
+.sesh-split-chartbox { flex: 1; margin: 0 -10px; }
+
+/* Wine-detail white card — single white panel with bottle + info side-by-side.
+   The bottle JPG's near-white photo background blends into the same off-white
+   card; a radial mask softens the bottle's outer edge so the JPG rectangle is
+   invisible. */
+.sesh-winecard {
+  background: #ffffff;
+  color: #2a2a2a;
+  border-radius: 18px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(0, 1.2fr);
+  gap: 24px;
+  align-items: stretch;
+}
+.sesh-winecard-bottle {
+  display: flex; align-items: center; justify-content: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+}
+.sesh-winecard-bottle img,
+.sesh-winecard-bottle svg {
+  display: block;
+  max-width: 100%;
+  max-height: 460px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  /* Soft radial mask fades the JPG's white-rectangle outline into the white
+     card so no visible boundary remains. Tuned to keep the bottle silhouette
+     fully opaque while letting the corners dissolve. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 90% at center,
+    #000 70%,
+    transparent 100%
+  );
+          mask-image: radial-gradient(
+    ellipse 70% 90% at center,
+    #000 70%,
+    transparent 100%
+  );
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.12));
+}
+.sesh-winecard-info {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.sesh-winecard-title {
+  margin: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 28px; line-height: 1.15;
+  color: #2a2a2a;
+}
+.sesh-winecard-vol {
+  color: #555;
+  font-size: 17px;
+}
+.sesh-winecard-ratings {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 8px 0 4px;
+}
+.sesh-winecard-rchip {
+  display: inline-flex; align-items: stretch;
+  border-radius: 8px; overflow: hidden;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  box-shadow: 0 0 0 1px #e5e7eb inset;
+}
+.sesh-winecard-rchip-src {
+  background: var(--navy-deep);
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.sesh-winecard-rchip-num {
+  background: var(--orange);
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+.sesh-winecard .sesh-desc { color: #444; font-size: 15px; line-height: 1.65; margin-top: 6px; }
+.sesh-winecard .sesh-readmore { color: var(--cyan); padding-top: 4px; }
+
+.sesh-split-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+  margin-bottom: 60px;
+}
+.sesh-split-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.sesh-split-invwrap {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+.sesh-split-buycard {
+  justify-content: center;
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .sesh-split, .sesh-split-foot { grid-template-columns: 1fr; }
+  .sesh-winecard { grid-template-columns: 1fr; }
+}
+
+/* =================== V2 — HERO =================== */
+.sesh-hero-head {
+  text-align: center;
+  padding: 6px 0 18px;
+  color: #fff;
+}
+.sesh-hero-name {
+  color: #cfe0ef;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 600; letter-spacing: 1px;
+}
+.sesh-hero-price {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 76px; line-height: 1;
+  color: var(--green); margin: 8px 0;
+  text-shadow: 0 0 24px rgba(54, 224, 90, 0.22);
+  font-variant-numeric: tabular-nums;
+}
+.gated .sesh-hero-price { color: transparent; text-shadow: 0 0 18px #7ef08c; }
+.sesh-hero-delta {
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700; letter-spacing: 1px; font-size: 14px;
+}
+.sesh-hero-chart { margin-bottom: 18px; }
+
+.sesh-hero-row {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+  margin-bottom: 110px;
+}
+.sesh-hero-row > .panel { height: 100%; }
+.sesh-hero-bottle {
+  align-items: center; justify-content: center;
+  background: #ffffff;
+}
+.sesh-hero-bottle img {
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+          mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.12));
+}
+.sesh-hero-meta-title {
+  margin: 4px 0 0;
+  font-family: 'League Spartan', sans-serif;
+  color: #fff; font-weight: 800; font-size: 22px;
+}
+.sesh-hero-meta-sub { color: #8aa2bb; font-size: 13px; letter-spacing: 1.5px; }
+
+.sesh-hero-stickybar {
+  position: fixed;
+  left: 50%; bottom: 56px;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(14, 38, 71, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  z-index: 80;
+  max-width: min(640px, calc(100% - 32px));
+  width: 100%;
+}
+.sesh-hero-stickyprice {
+  display: flex; flex-direction: column; align-items: flex-start;
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  padding: 0 14px;
+}
+.sesh-hero-stickyprice > span:first-child {
+  font-weight: 800; font-size: 22px;
+  color: var(--green); line-height: 1;
+}
+.sesh-hero-stickysub { color: #cfe0ef; font-size: 11px; letter-spacing: 1px; margin-top: 4px; }
+@media (max-width: 900px) {
+  .sesh-hero-row { grid-template-columns: 1fr; }
+  .sesh-hero-price { font-size: 56px; }
+}
+
+/* =================== V3 — TICKET =================== */
+.sesh-ticket-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 22px;
+  align-items: start;
+  margin-bottom: 60px;
+}
+.sesh-ticket-main {
+  display: flex; flex-direction: column; gap: 22px;
+}
+.sesh-ticket-pricehead {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 18px;
+}
+.sesh-ticket-msrp {
+  display: flex; flex-direction: column;
+  color: #cfe0ef; font-size: 13px; line-height: 1.5; text-align: right;
+}
+.sesh-ticket-msrp s { color: #e23b3b; }
+.sesh-ticket-wine {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+}
+.sesh-ticket-wine-left {
+  display: flex; align-items: center; justify-content: center;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px 8px;
+}
+.sesh-ticket-wine-left img {
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+          mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.12));
+}
+.sesh-ticket-wine-right h2 {
+  margin: 0; color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 22px;
+}
+.sesh-ticket-wine-sub { color: #8aa2bb; font-size: 13px; letter-spacing: 1px; margin: 4px 0 10px; }
+.sesh-ticket-card {
+  background: #fff;
+  color: #2a2a2a;
+  border-radius: 16px;
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 12px;
+  position: sticky; top: 86px; align-self: start;
+  border: 2px solid var(--orange);
+  box-shadow: 0 16px 40px rgba(242, 106, 53, 0.18);
+}
+.sesh-ticket-card-kicker {
+  color: var(--orange);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700; letter-spacing: 2px; font-size: 12px;
+}
+.sesh-ticket-card-name {
+  color: #1f1f1f;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 18px; line-height: 1.2; margin-bottom: 4px;
+}
+.sesh-ticket-row {
+  display: flex; align-items: center; justify-content: space-between;
+  color: #444; font-size: 14px;
+}
+.sesh-ticket-num { font-variant-numeric: tabular-nums; font-weight: 700; color: #1f1f1f; }
+.sesh-ticket-good { color: var(--green); }
+.sesh-ticket-step {
+  display: inline-flex; align-items: center;
+  border: 1px solid #d9dde2; border-radius: 8px; overflow: hidden;
+}
+.sesh-ticket-step button {
+  background: #f2f4f6; border: 0; width: 32px; height: 32px;
+  font-size: 16px; cursor: pointer; color: #555;
+}
+.sesh-ticket-step span {
+  width: 36px; text-align: center; font-weight: 700;
+  color: #1f1f1f; font-variant-numeric: tabular-nums;
+}
+.sesh-ticket-divider { border-top: 1px solid #eef0f3; margin: 4px 0; }
+.sesh-ticket-totalrow {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.sesh-ticket-totalrow > span:first-child {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700; letter-spacing: 1px; color: #555; font-size: 12px;
+}
+.sesh-ticket-total {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 28px;
+  color: var(--green); font-variant-numeric: tabular-nums;
+}
+.sesh-ticket-cta { margin-top: 4px; }
+@media (max-width: 1100px) {
+  .sesh-ticket-grid { grid-template-columns: 1fr; }
+  .sesh-ticket-card { position: static; }
+  .sesh-ticket-wine { grid-template-columns: 1fr; }
+}
+
+/* =================== V4 — TERMINAL =================== */
+.sesh-term-headerbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px; align-items: center;
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px; color: #fff;
+  margin-bottom: 18px;
+}
+.sesh-term-sym {
+  color: var(--cyan);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 18px; letter-spacing: 1px;
+}
+.sesh-term-title { color: #cfe0ef; font-family: 'League Spartan', sans-serif; font-weight: 600; }
+.sesh-term-headerprice {
+  display: inline-flex; align-items: baseline; gap: 12px;
+  font-family: 'League Spartan', sans-serif;
+}
+.sesh-term-headerprice > span:first-child {
+  font-weight: 800; font-size: 30px; color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.gated .sesh-term-headerprice > span:first-child { color: transparent; text-shadow: 0 0 18px #7ef08c; }
+.sesh-term-delta {
+  color: var(--green); font-weight: 700; font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.sesh-term-grid {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+.sesh-term-grid > .panel { height: 100%; }
+.sesh-term-left h3 {
+  margin: 0;
+  color: #8aa2bb;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.sesh-term-right { align-items: stretch; }
+.sesh-term-right-stage {
+  display: flex; align-items: center; justify-content: center;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 22px 14px;
+  min-height: 220px;
+}
+.sesh-term-right-stage img {
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+          mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.12));
+}
+.sesh-term-right-title {
+  margin: 0; color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 18px;
+}
+.sesh-term-right-sub { color: #8aa2bb; font-size: 13px; letter-spacing: 1.5px; }
+.sesh-term-foot h2 {
+  margin: 0 0 8px;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #fff;
+}
+.sesh-term-foot { margin-bottom: 60px; }
+@media (max-width: 1200px) {
+  .sesh-term-grid { grid-template-columns: 1fr; }
+}
+
+/* =================== V5 — STACK =================== */
+.sesh-stack-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+}
+.sesh-stack-hero-left {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.sesh-stack-hero-name {
+  color: #cfe0ef; font-family: 'League Spartan', sans-serif;
+  font-weight: 600; letter-spacing: 1px;
+}
+.sesh-stack-hero-price {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 68px; line-height: 1;
+  color: var(--green);
+  text-shadow: 0 0 24px rgba(54, 224, 90, 0.22);
+  font-variant-numeric: tabular-nums;
+}
+.gated .sesh-stack-hero-price { color: transparent; text-shadow: 0 0 18px #7ef08c; }
+.sesh-stack-hero-delta {
+  color: var(--green); font-family: 'League Spartan', sans-serif;
+  font-weight: 700; letter-spacing: 1px; font-size: 13px;
+}
+.sesh-stack-hero-right {
+  display: flex; align-items: center; justify-content: center;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 22px 14px;
+}
+.sesh-stack-hero-right img {
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+          mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.12));
+}
+.sesh-stack-chart, .sesh-stack-stats, .sesh-stack-about {
+  margin-top: 18px;
+}
+.sesh-stack-stats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+.sesh-stack-about h2 {
+  margin: 0 0 8px;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #fff;
+}
+.sesh-stack-fab {
+  position: fixed;
+  left: 50%; bottom: 56px;
+  transform: translateX(-50%);
+  z-index: 80;
+  max-width: min(420px, calc(100% - 32px));
+  width: 100%;
+}
+.sesh-stack-fab .sesh-buy {
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(242, 106, 53, 0.32);
+}
+@media (max-width: 1000px) {
+  .sesh-stack-hero { grid-template-columns: 1fr; }
+  .sesh-stack-stats { grid-template-columns: 1fr 1fr; }
+  .sesh-stack-hero-price { font-size: 52px; }
+}
+
+/* Remove any leftover "pro" CSS from earlier; suppress legacy bits we no longer use. */
+.sesh-page .vinly-ctd { display: none; }
+
+/* ============================================================
+   Legacy variant CSS retained below (kept harmless for old links)
+   ============================================================ */
+.sesh-pro {
+  color: #e7eef6;
+}
+
+.sesh-pro-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'League Spartan', sans-serif;
+  color: #8aa2bb;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 0 14px;
+}
+.sesh-pro-crumb i {
+  font-size: 9px;
+  color: #4d6680;
+}
+.sesh-pro-crumb-active {
+  color: #fff;
+}
+.sesh-pro-tickerchip {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(57, 176, 229, 0.12);
+  color: var(--cyan);
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 11px;
+}
+
+.sesh-pro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 32px;
+  align-items: start;
+  margin-bottom: 64px;
+}
+
+.sesh-pro-main {
+  background: #0e2647;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 28px 30px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sesh-pro-pricehead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.sesh-pro-lead {
+  color: #cfe0ef;
+  font-family: 'Mulish', sans-serif;
+  font-size: 14px;
+}
+.sesh-pro-price {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 56px;
+  line-height: 1;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 24px rgba(54, 224, 90, 0.18);
+  letter-spacing: -1px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.gated .sesh-pro-price {
+  color: transparent;
+  text-shadow: 0 0 18px #7ef08c;
+}
+.sesh-pro-delta {
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.8px;
+  background: rgba(14, 173, 37, 0.12);
+  padding: 5px 10px;
+  border-radius: 999px;
+}
+.gated .sesh-pro-delta { color: var(--green); }
+
+.sesh-pro-bigtimer {
+  text-align: right;
+}
+.sesh-pro-bigtimer-label {
+  color: #8aa2bb;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.sesh-pro-bigtimer-value {
+  color: var(--orange);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.sesh-pro-chart {
+  margin: 4px -10px 0;
+}
+
+.sesh-pro-tfs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  align-self: flex-start;
+}
+.sesh-pro-tf {
+  background: transparent;
+  border: 0;
+  color: #8aa2bb;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+.sesh-pro-tf:hover { color: #fff; }
+.sesh-pro-tf.is-active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.sesh-pro-stats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 18px;
+  padding: 18px 0 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sesh-pro-stat-label {
+  color: #8aa2bb;
+  font-family: 'Mulish', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.sesh-pro-stat-value {
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.sesh-pro-stat-strike {
+  color: #cfe0ef;
+  text-decoration: line-through;
+  text-decoration-color: rgba(226, 59, 59, 0.6);
+  text-decoration-thickness: 2px;
+}
+.sesh-pro-stat-good   { color: var(--green); }
+.sesh-pro-stat-timer  { color: var(--orange); }
+.sesh-pro-stat-faint  { color: #6b7e93; font-weight: 600; }
+
+.sesh-pro-about {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 18px;
+}
+.sesh-pro-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+.sesh-pro-section-head h2 {
+  margin: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #fff;
+}
+.sesh-pro-rating-line {
+  color: #cfe0ef;
+  font-family: 'Mulish', sans-serif;
+  font-size: 13px;
+}
+.sesh-pro-rating-line b {
+  color: var(--orange);
+  font-weight: 800;
+  font-family: 'League Spartan', sans-serif;
+}
+.sesh-pro-rating-dot { color: #4d6680; }
+.sesh-pro-desc {
+  color: #cfe0ef;
+  font-size: 14.5px;
+  line-height: 1.7;
+  margin: 0;
+}
+.sesh-pro-readmore {
+  background: transparent;
+  border: 0;
+  padding: 6px 0 0;
+  color: var(--cyan);
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13.5px;
+}
+
+/* ---------- Right rail (bottle + buy + summary) ---------- */
+.sesh-pro-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 86px;
+  align-self: start;
+}
+
+.sesh-pro-bottle {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 28px 18px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+.sesh-pro-bottle img,
+.sesh-pro-bottle svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 220px;
+  max-height: 360px;
+  object-fit: contain;
+  filter: drop-shadow(0 30px 36px rgba(0, 0, 0, 0.55));
+}
+
+.sesh-pro-winemeta {
+  text-align: center;
+  padding: 0 10px;
+}
+.sesh-pro-winename {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+}
+.sesh-pro-winesub {
+  color: #8aa2bb;
+  font-size: 13px;
+  margin-top: 4px;
+  letter-spacing: 1.5px;
+}
+
+.sesh-pro-buybox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sesh-pro-buybtn {
+  width: 100%;
+  background: var(--orange);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 12px 28px rgba(242, 106, 53, 0.28);
+  transition: filter 120ms ease, transform 80ms ease;
+}
+.sesh-pro-buybtn:hover { filter: brightness(1.06); }
+.sesh-pro-buybtn:active { transform: translateY(1px); }
+.sesh-pro-buybtn-price {
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+}
+.sesh-pro-buybtn--gated {
+  background: #0e2647;
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+  justify-content: center;
+}
+.sesh-pro-buy-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.sesh-pro-buy-tertiary {
+  background: transparent;
+  border: 0;
+  color: #8aa2bb;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 0 0;
+  cursor: pointer;
+}
+.sesh-pro-buy-tertiary:hover { color: #cfe0ef; }
+.sesh-pro-buyfoot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #8aa2bb;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+.sesh-pro-buyfoot i { color: var(--orange); }
+
+.sesh-pro-summary {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px 18px 8px;
+}
+.sesh-pro-summary-head {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.sesh-pro-srow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  color: #cfe0ef;
+  font-size: 13.5px;
+}
+.sesh-pro-srow:first-of-type { border-top: 0; padding-top: 4px; }
+.sesh-pro-srow-label {
+  color: #8aa2bb;
+}
+.sesh-pro-srow-value {
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.sesh-pro-srow-value.is-green  { color: var(--green); }
+.sesh-pro-srow-value.is-orange { color: var(--orange); }
+
+@media (max-width: 1100px) {
+  .sesh-pro-grid { grid-template-columns: 1fr; }
+  .sesh-pro-rail { position: static; }
+  .sesh-pro-stats { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+  .sesh-pro-stats { grid-template-columns: 1fr 1fr; }
+  .sesh-pro-price { font-size: 44px; }
+  .sesh-pro-pricehead { flex-direction: column; align-items: flex-start; }
+  .sesh-pro-bigtimer { text-align: left; }
+}
+
+/* legacy variant picker — keep CSS for any old links but un-render on the pro page */
+.sesh-pro .sesh-variant-picker { display: none; }
+
+/* ============================================================
+   SESH layout variants — picker + per-variant grids
+   ============================================================ */
+
+.sesh-variant-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin: 0 0 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  font-family: 'League Spartan', sans-serif;
+  flex-wrap: wrap;
+}
+.sesh-variant-pickerlabel {
+  color: #8aa2bb;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding-right: 4px;
+}
+.sesh-variant-chip {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cfe0ef;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+.sesh-variant-chip.is-active {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+
+/* ---------- Stat tile (used by V2 + V5) ---------- */
+.sesh-stat {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.sesh-stat-label {
+  color: #8aa2bb;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-size: 11px;
+}
+.sesh-stat-value {
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.sesh-stat-hint {
+  color: #6e8aa6;
+  font-size: 11.5px;
+  margin-top: 4px;
+}
+.sesh-stat--green .sesh-stat-value  { color: var(--green); }
+.sesh-stat--orange .sesh-stat-value { color: var(--orange); }
+.sesh-stat--cyan .sesh-stat-value   { color: var(--cyan); }
+
+/* =========================
+   V2 — Pro Trader
+   ========================= */
+.sesh-v2-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) 360px;
+  gap: 22px;
+  margin-bottom: 60px;
+}
+.sesh-v2-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.sesh-v2-tickerbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #fff;
+}
+.sesh-v2-tk-sym {
+  color: var(--cyan);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-right: 10px;
+}
+.sesh-v2-tk-name {
+  color: #cfe0ef;
+  font-size: 14px;
+}
+.sesh-v2-tk-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.sesh-v2-tk-delta {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.sesh-v2-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.sesh-v2-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 86px;
+  align-self: start;
+}
+.sesh-v2-buy {
+  border: 2px solid var(--orange);
+  box-shadow: 0 16px 40px rgba(242, 106, 53, 0.18);
+}
+@media (max-width: 1100px) {
+  .sesh-v2-grid { grid-template-columns: 1fr; }
+  .sesh-v2-rail { position: static; }
+  .sesh-v2-stats { grid-template-columns: 1fr 1fr; }
+}
+
+/* =========================
+   V3 — Robinhood
+   ========================= */
+.sesh-v3-hero {
+  text-align: center;
+  padding: 14px 0 24px;
+  color: #fff;
+}
+.sesh-v3-name {
+  color: #cfe0ef;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.sesh-v3-price {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 72px;
+  color: var(--green);
+  line-height: 1;
+  margin: 8px 0;
+  text-shadow: 0 0 24px rgba(54, 224, 90, 0.22);
+  font-variant-numeric: tabular-nums;
+}
+.sesh-v3-delta {
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 14px;
+}
+.gated .sesh-v3-price {
+  color: transparent;
+  text-shadow: 0 0 18px #7ef08c;
+}
+.sesh-v3-chart {
+  margin-bottom: 18px;
+}
+.sesh-v3-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 110px; /* leave room for sticky bar */
+}
+.sesh-v3-stickybuy {
+  position: fixed;
+  left: 50%;
+  bottom: 56px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(14, 38, 71, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  z-index: 80;
+  max-width: min(640px, calc(100% - 32px));
+  width: 100%;
+}
+.sesh-v3-stickyprice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  padding: 0 14px;
+}
+.sesh-v3-stickyprice > span:first-child {
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--green);
+  line-height: 1;
+}
+.sesh-v3-stickysub {
+  color: #cfe0ef;
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+.sesh-v3-stickybtn {
+  flex: 1;
+  width: 100%;
+  padding: 16px 22px;
+  font-size: 15px;
+}
+@media (max-width: 900px) {
+  .sesh-v3-meta { grid-template-columns: 1fr; }
+  .sesh-v3-price { font-size: 56px; }
+}
+
+/* =========================
+   V4 — Trade Ticket
+   ========================= */
+.sesh-v4-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 22px;
+  margin-bottom: 60px;
+  align-items: start;
+}
+.sesh-v4-chart {
+  margin-top: 12px;
+}
+.sesh-v4-pricerow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+.sesh-v4-pricerow .price-big {
+  margin: 0;
+}
+.sesh-v4-delta {
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  letter-spacing: 1px;
+  font-size: 12px;
+  margin-left: 10px;
+}
+.sesh-v4-msrp {
+  color: #cfe0ef;
+  font-size: 13px;
+  text-align: right;
+  line-height: 1.5;
+}
+.sesh-v4-msrp s {
+  color: #e23b3b;
+}
+.sesh-v4-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 18px 0;
+}
+.sesh-v4-ticket {
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 86px;
+  align-self: start;
+  border: 2px solid var(--orange);
+  box-shadow: 0 16px 40px rgba(242, 106, 53, 0.18);
+}
+.sesh-v4-kicker {
+  color: var(--orange);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 12px;
+}
+.sesh-v4-ticketname {
+  color: #1f1f1f;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.sesh-v4-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #444;
+  font-size: 14px;
+}
+.sesh-v4-num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+.sesh-v4-good {
+  color: var(--green);
+}
+.sesh-v4-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d9dde2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.sesh-v4-stepper button {
+  background: #f2f4f6;
+  border: 0;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #555;
+}
+.sesh-v4-stepper span {
+  width: 36px;
+  text-align: center;
+  font-weight: 700;
+  color: #1f1f1f;
+  font-variant-numeric: tabular-nums;
+}
+.sesh-v4-divider {
+  border-top: 1px solid #eef0f3;
+  margin: 4px 0;
+}
+.sesh-v4-totalrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sesh-v4-totalrow span:first-child {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #555;
+  font-size: 12px;
+}
+.sesh-v4-total {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.sesh-v4-cta {
+  width: 100%;
+  padding: 16px;
+  font-size: 15px;
+}
+.sesh-v4-foot {
+  color: #6b7280;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sesh-v4-foot i {
+  color: var(--orange);
+}
+@media (max-width: 1100px) {
+  .sesh-v4-grid { grid-template-columns: 1fr; }
+  .sesh-v4-ticket { position: static; }
+  .sesh-v4-info { grid-template-columns: 1fr; }
+}
+
+/* =========================
+   V5 — Terminal
+   ========================= */
+.sesh-v5-headerbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #fff;
+  margin-bottom: 18px;
+}
+.sesh-v5-symbol {
+  color: var(--cyan);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+.sesh-v5-title {
+  color: #cfe0ef;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 600;
+}
+.sesh-v5-headerprice {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.sesh-v5-headerprice .price-big {
+  margin: 0;
+  font-size: 32px;
+}
+.sesh-v5-headerdelta {
+  color: var(--green);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+}
+.sesh-v5-grid {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 320px;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  margin-bottom: 60px;
+}
+.sesh-v5-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  grid-row: span 1;
+}
+.sesh-v5-chart { grid-row: span 1; }
+.sesh-v5-right {
+  grid-row: span 1;
+  border: 2px solid var(--orange);
+  box-shadow: 0 16px 40px rgba(242, 106, 53, 0.18);
+}
+.sesh-v5-inv,
+.sesh-v5-time,
+.sesh-v5-detail {
+  /* fall into the second row of the grid */
+}
+.sesh-v5-grid > .sesh-v5-inv  { grid-column: 1 / 2; }
+.sesh-v5-grid > .sesh-v5-time { grid-column: 2 / 3; }
+.sesh-v5-grid > .sesh-v5-detail { grid-column: 3 / 4; }
+@media (max-width: 1200px) {
+  .sesh-v5-grid {
+    grid-template-columns: 1fr;
+  }
+  .sesh-v5-grid > .sesh-v5-inv,
+  .sesh-v5-grid > .sesh-v5-time,
+  .sesh-v5-grid > .sesh-v5-detail { grid-column: 1 / 2; }
+}
+.panel {
+  border-radius: 18px;
+  padding: 26px;
+}
+.ipo-panel {
+  background: var(--navy-panel);
+  color: #fff;
+}
+.ipo-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ipo-head h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+.btn-unlock {
+  background: var(--orange);
+  color: #fff;
+  padding: 11px 18px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.price-big {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--green);
+  margin: 14px 0 2px;
+  line-height: 1;
+  transition: text-shadow 240ms ease;
+  text-shadow: 0 0 14px rgba(54, 224, 90, 0.18);
+  font-variant-numeric: tabular-nums;
+}
+.buy-panel-price {
+  font-variant-numeric: tabular-nums;
+}
+.price-off {
+  color: var(--green);
+  font-weight: 600;
+  font-size: 18px;
+}
+.gated .price-big,
+.gated .price-off .val {
+  color: transparent;
+  text-shadow: 0 0 18px #7ef08c;
+  user-select: none;
+}
+.chart-wrap {
+  margin-top: 18px;
+  position: relative;
+}
+.chart-wrap canvas {
+  width: 100%;
+  height: 280px;
+  display: block;
+}
+
+/* Inline legend under the chart with hover-tooltips for the dashed refs. */
+.chart-legend {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 8px;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  color: #cfe0ef;
+}
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: help;
+}
+.chart-legend-dash {
+  display: inline-block;
+  width: 22px;
+  height: 0;
+  border-top: 2px dashed rgba(255, 255, 255, 0.65);
+}
+.chart-legend-line {
+  display: inline-block;
+  width: 22px;
+  height: 0;
+  border-top: 2px solid #36e05a;
+}
+.chart-legend-info {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+.chart-legend-item:hover .chart-legend-info {
+  color: #fff;
+}
+.timeframes {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.tf {
+  background: var(--navy-deep);
+  color: #cfe0ef;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.tf.active {
+  background: #bfe0ff;
+  color: #0E2647;
+  font-weight: 700;
+}
+.offer-dur {
+  text-align: right;
+  color: var(--green);
+  font-weight: 600;
+  margin-top: 12px;
+  font-size: 14px;
+}
+.elapsed-label {
+  text-align: center;
+  color: #cfe0ef;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.detail-panel {
+  background: #fff;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 22px;
+}
+.detail-grid .bottle img {
+  max-height: 380px;
+  margin: 0 auto;
+}
+.detail-panel h2 {
+  margin: 0;
+  color: #2a2a2a;
+  font-size: 30px;
+  font-weight: 700;
+}
+.detail-panel .vol {
+  color: #555;
+  margin: 6px 0 14px;
+  font-size: 18px;
+}
+.rating {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 6px;
+  overflow: hidden;
+  font-weight: 700;
+  margin-bottom: 14px;
+  box-shadow: 0 0 0 1px #e5e7eb;
+}
+.rating .src {
+  background: var(--navy-deep);
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+.rating .num {
+  background: var(--orange);
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 15px;
+}
+
+/* Multi-source ratings line per /spec/CHANGE_PROMPT.md (e.g. "95 JS · 92 WA"). */
+.rating-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #2a2a2a;
+  font-size: 15px;
+}
+.rating-line .rating-score {
+  color: var(--orange);
+  font-weight: 800;
+  font-size: 17px;
+}
+.rating-line .rating-src {
+  color: #555;
+  font-weight: 600;
+  margin-right: 4px;
+}
+.rating-line .rating-dot {
+  color: #b8bfc8;
+}
+
+.read-more {
+  background: transparent;
+  border: 0;
+  padding: 4px 0;
+  color: var(--cyan);
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sesh-title .sesh-ticker {
+  color: var(--cyan);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+}
+.detail-panel .desc {
+  color: #444;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.read-more {
+  color: var(--cyan);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.inv-panel {
+  background: var(--navy-deep);
+  color: #fff;
+}
+.inv-panel h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+.inv-panel .load {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 20px;
+  margin-top: 4px;
+}
+.gauge-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* ---------- Countdown ticker (replaces the inventory dial) ---------- */
+.vinly-ctd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.vinly-ctd-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.vinly-ctd-label {
+  color: #cfe0ef;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.vinly-ctd-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #2ecc40;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 11px;
+}
+.vinly-ctd-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2ecc40;
+  box-shadow: 0 0 0 0 rgba(46, 204, 64, 0.6);
+  animation: vinly-ctd-live-pulse 1.4s infinite;
+}
+@keyframes vinly-ctd-live-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46, 204, 64, 0.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(46, 204, 64, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 204, 64, 0); }
+}
+
+.vinly-ctd-time {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 8px 4px 0;
+}
+.vinly-ctd-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.vinly-ctd-num {
+  display: inline-block;
+  min-width: 92px;
+  padding: 12px 16px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 22px rgba(57, 176, 229, 0.15);
+}
+.vinly-ctd-num.is-flipping {
+  animation: vinly-ctd-flip 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@keyframes vinly-ctd-flip {
+  0%   { transform: translateY(-12px); opacity: 0.2; filter: blur(2px); }
+  60%  { transform: translateY(2px);   opacity: 1;   filter: blur(0); }
+  100% { transform: translateY(0);     opacity: 1; }
+}
+.vinly-ctd-tag {
+  color: #8aa2bb;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+}
+.vinly-ctd-sep {
+  color: var(--orange);
+  font-family: 'League Spartan', sans-serif;
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  padding-bottom: 22px;
+  animation: vinly-ctd-blink 1s infinite;
+}
+@keyframes vinly-ctd-blink {
+  0%, 55%   { opacity: 1; }
+  56%, 100% { opacity: 0.28; }
+}
+
+.vinly-ctd-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c, #2ecc40) 18%, transparent);
+  color: var(--c, #2ecc40);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.vinly-ctd-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c, #2ecc40);
+}
+
+@media (max-width: 600px) {
+  .vinly-ctd-num { min-width: 70px; font-size: 40px; padding: 10px 12px; }
+  .vinly-ctd-sep { font-size: 32px; padding-bottom: 16px; }
+  .vinly-ctd-time { gap: 8px; }
+}
+
+/* ---------- Bottle-row inventory widget ---------- */
+.vinly-inv {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.vinly-inv-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.vinly-inv-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+}
+.vinly-inv-big {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+}
+.vinly-inv-sub {
+  color: #cfe0ef;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.vinly-inv-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #2ecc40;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 11px;
+}
+.vinly-inv-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2ecc40;
+  box-shadow: 0 0 0 0 rgba(46, 204, 64, 0.6);
+  animation: vinly-inv-live-pulse 1.4s infinite;
+}
+@keyframes vinly-inv-live-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46, 204, 64, 0.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(46, 204, 64, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 204, 64, 0); }
+}
+
+.vinly-inv-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px 0 6px;
+}
+.vinly-inv-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 200ms ease;
+}
+.vinly-inv-slot--edge svg {
+  animation: vinly-inv-edge-pulse 1.6s infinite ease-in-out;
+}
+@keyframes vinly-inv-edge-pulse {
+  0%, 100% { transform: translateY(0); opacity: 0.85; }
+  50%      { transform: translateY(-2px); opacity: 1; }
+}
+
+.vinly-inv-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--status-color, #2ecc40) 18%, transparent);
+  color: var(--status-color, #2ecc40);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.vinly-inv-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-color, #2ecc40);
+}
+
+@media (max-width: 600px) {
+  .vinly-inv-big { font-size: 36px; }
+  .vinly-inv-row { gap: 4px; }
+}
+
+.explore-panel {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.btn-explore {
+  background: var(--orange);
+  color: #fff;
+  padding: 13px 22px;
+  font-size: 14px;
+  align-self: flex-start;
+}
+.explore-divider {
+  border-top: 1px solid #e5e7eb;
+  margin: 18px 0;
+}
+.explore-skip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  color: #555;
+}
+.btn-skip {
+  background: #d9dde2;
+  color: #333;
+  padding: 12px 22px;
+  font-size: 13px;
+}
+
+/* qualified state overrides */
+.qualified .btn-unlock {
+  display: none;
+}
+.qualified .btn-explore-row {
+  display: none;
+}
+.gated .btn-buynow {
+  display: none;
+}
+.btn-buynow {
+  background: var(--orange);
+  color: #fff;
+  padding: 16px 22px;
+  font-size: 16px;
+  width: 100%;
+}
+
+/* ---------- signup ---------- */
+.signup-title {
+  text-align: center;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+  padding: 22px 0;
+}
+.signup-card {
+  background: #fff;
+  border-radius: 6px;
+  max-width: 600px;
+  margin: 0 auto 50px;
+  padding: 34px 40px;
+}
+.signup-card h4 {
+  margin: 0 0 18px;
+  color: #1f1f1f;
+  font-size: 16px;
+  font-weight: 700;
+}
+.signup-card h4.mt {
+  margin-top: 26px;
+}
+.field {
+  border: 0;
+  border-bottom: 1px solid #d9dde2;
+  width: 100%;
+  padding: 10px 2px;
+  font-family: inherit;
+  font-size: 15px;
+  color: #333;
+  outline: 0;
+  margin-bottom: 18px;
+  background: transparent;
+}
+.field::placeholder {
+  color: #b8bdc4;
+}
+.bdate {
+  display: flex;
+  gap: 20px;
+}
+.bdate select {
+  flex: 1;
+  border: 0;
+  border-bottom: 1px solid #d9dde2;
+  padding: 10px 2px;
+  font-family: inherit;
+  font-size: 15px;
+  color: #333;
+  background: transparent;
+  outline: 0;
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  color: #333;
+  font-size: 15px;
+}
+.check-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--orange);
+}
+.check-row a {
+  color: var(--orange);
+  text-decoration: none;
+}
+.signup-help {
+  color: #777;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 18px 0 22px;
+}
+.signup-actions {
+  display: flex;
+  gap: 16px;
+}
+.btn-create {
+  flex: 1;
+  background: var(--cyan);
+  color: #fff;
+  padding: 15px 22px;
+  font-size: 14px;
+}
+.btn-billing {
+  flex: 1;
+  background: var(--orange);
+  color: #fff;
+  padding: 15px 22px;
+  font-size: 14px;
+}
+
+/* ---------- footer ---------- */
+.site-footer {
+  background: var(--navy-deep);
+  padding: 44px 0;
+}
+.site-footer .wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.site-footer .logo {
+  font-size: 40px;
+}
+.foot-links {
+  display: flex;
+  gap: 60px;
+}
+.foot-links a {
+  color: var(--orange);
+  text-decoration: underline;
+  font-size: 15px;
+  display: block;
+  margin-bottom: 10px;
+}
+.foot-social {
+  display: flex;
+  gap: 16px;
+}
+.foot-social .icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 2px solid var(--orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--orange);
+}
+.foot-social svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--orange);
+}
+.foot-social i {
+  font-size: 16px;
+  color: var(--orange);
+  line-height: 1;
+}
+
+.foot-fineprint {
+  max-width: 1360px;
+  margin: 28px auto 0;
+  padding: 16px 24px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #6b7e93;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- prototype-only dev toolbar ---------- */
+.proto-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #101418;
+  color: #cfd3d8;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  z-index: 9999;
+  font-size: 13px;
+  border-top: 2px solid var(--orange);
+}
+.proto-bar b {
+  color: var(--orange);
+}
+.proto-bar button {
+  background: #262c33;
+  color: #fff;
+  border: 1px solid #3a424b;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+.proto-bar button.on {
+  background: var(--orange);
+  border-color: var(--orange);
+}
+.proto-bar .spacer {
+  flex: 1;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .sesh-grid {
+    grid-template-columns: 1fr;
+  }
+  .detail-grid {
+    grid-template-columns: 120px 1fr;
+  }
+  .header-center {
+    display: none;
+  }
+  .foot-links {
+    gap: 30px;
+  }
+}
+
+/* ---------- quick-buy popover (qbp-) — NEEDS REVIEW: built from spec only ---------- */
+.qbp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 38, 71, 0.72); /* --navy-deep @ 72% */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.qbp-modal {
+  background: #fff;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 18px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.qbp-header {
+  background: var(--navy-panel);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+}
+.qbp-header-label {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 14px;
+}
+.qbp-close {
+  background: transparent;
+  color: #fff;
+  border: 0;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.qbp-body {
+  padding: 20px;
+  color: var(--text-gray);
+}
+.qbp-top {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.qbp-bottle {
+  flex: 0 0 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qbp-bottle img {
+  max-height: 140px;
+  width: auto;
+}
+.qbp-info {
+  flex: 1;
+  min-width: 0;
+}
+.qbp-name {
+  color: #2a2a2a;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.2;
+}
+.qbp-region {
+  color: var(--text-gray);
+  font-size: 13px;
+  margin-top: 2px;
+}
+.qbp-price {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 26px;
+  margin-top: 8px;
+  line-height: 1;
+}
+.qbp-msrp {
+  color: var(--text-gray);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.qbp-msrp s {
+  color: #e23b3b;
+}
+.qbp-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.qbp-qty-label {
+  font-weight: 700;
+  color: #333;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+.qbp-stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d9dde2;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.qbp-stepper button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: #f2f4f6;
+  font-size: 18px;
+  cursor: pointer;
+  color: #555;
+}
+.qbp-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.qbp-stepper .qbp-qty {
+  width: 40px;
+  text-align: center;
+  font-size: 15px;
+  color: #333;
+}
+.qbp-locked {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 16px;
+  text-align: center;
+  margin: 10px 0 16px;
+  letter-spacing: 0.3px;
+}
+.qbp-expired {
+  color: #e23b3b;
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  margin: 10px 0 16px;
+  letter-spacing: 0.3px;
+}
+.qbp-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.qbp-lock,
+.qbp-confirm,
+.qbp-buynow {
+  flex: 1;
+  background: var(--orange);
+  color: #fff;
+  border: 0;
+  border-radius: var(--radius);
+  padding: 12px 16px 9px;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.qbp-cancel {
+  flex: 1;
+  background: #cfd3d8;
+  color: #333;
+  border: 0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.qbp-cancel:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.qbp-cancel-limit {
+  color: #e23b3b;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* ============================================================
+   Quick-buy modal — v2 (redesigned, brokerage-styled, dark theme)
+   ============================================================ */
+.qbp-overlay {
+  background: rgba(7, 18, 35, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: qbp-fade 200ms ease;
+}
+@keyframes qbp-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.qbp-modal {
+  background: linear-gradient(180deg, #0e2647 0%, #0a1d36 100%);
+  color: #e7eef6;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 18px;
+  padding: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: 'Mulish', sans-serif;
+  animation: qbp-pop 240ms cubic-bezier(0.18, 0.89, 0.32, 1.18);
+}
+@keyframes qbp-pop {
+  from { transform: translateY(12px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.qbp-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.qbp-modal-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--orange);
+  text-transform: uppercase;
+}
+.qbp-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cfe0ef;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease;
+}
+.qbp-modal-close:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.qbp-modal-close:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.qbp-modal-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.5px;
+  border: 1px solid;
+}
+.qbp-modal-banner--locked {
+  background: rgba(46, 204, 64, 0.12);
+  border-color: rgba(46, 204, 64, 0.32);
+  color: var(--green);
+}
+.qbp-modal-banner--locked b { font-variant-numeric: tabular-nums; }
+.qbp-modal-banner--expired {
+  background: rgba(226, 59, 59, 0.12);
+  border-color: rgba(226, 59, 59, 0.3);
+  color: #e23b3b;
+}
+
+.qbp-modal-product {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+.qbp-modal-bottle {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1.55;
+}
+.qbp-modal-bottle img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+          mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.12));
+}
+.qbp-modal-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.qbp-modal-name {
+  color: #ffffff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+}
+.qbp-modal-region {
+  color: #8aa2bb;
+  font-size: 13px;
+}
+.qbp-modal-pricerow {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 8px;
+}
+.qbp-modal-price {
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 18px rgba(54, 224, 90, 0.18);
+}
+.qbp-modal-msrp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: #8aa2bb;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.qbp-modal-msrp s { color: #e23b3b; font-weight: 700; }
+.qbp-modal-savings {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(46, 204, 64, 0.14);
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.qbp-modal-qtyrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+.qbp-modal-meta {
+  display: block;
+  color: #8aa2bb;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.qbp-modal-step {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  width: fit-content;
+}
+.qbp-modal-step button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+.qbp-modal-step button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+.qbp-modal-step button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.qbp-modal-step > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  color: #ffffff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+.qbp-modal-qty-hint {
+  display: block;
+  color: #6e8aa6;
+  font-size: 11px;
+  margin-top: 8px;
+  letter-spacing: 0.3px;
+}
+.qbp-modal-total-block {
+  text-align: right;
+}
+.qbp-modal-total-block .qbp-modal-meta {
+  text-align: right;
+}
+.qbp-modal-total {
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.qbp-modal-total-save {
+  display: block;
+  color: var(--green);
+  font-size: 12px;
+  margin-top: 6px;
+  letter-spacing: 0.3px;
+}
+
+.qbp-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.qbp-modal-primary {
+  width: 100%;
+  background: var(--orange);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 14px 32px rgba(242, 106, 53, 0.32);
+  transition: filter 120ms ease, transform 80ms ease;
+}
+.qbp-modal-primary:hover { filter: brightness(1.06); }
+.qbp-modal-primary:active { transform: translateY(1px); }
+.qbp-modal-primary-total {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+}
+.qbp-modal-secondary {
+  width: 100%;
+  background: transparent;
+  color: #cfe0ef;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.qbp-modal-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.qbp-modal-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.qbp-modal-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8aa2bb;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.3px;
+}
+.qbp-modal-foot i { color: var(--orange); }
+.qbp-modal-foot-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #e23b3b;
+  font-weight: 700;
+}
+.qbp-modal-foot-warn i { color: #e23b3b; }
+
+@media (max-width: 520px) {
+  .qbp-modal-qtyrow { grid-template-columns: 1fr; }
+  .qbp-modal-total-block { text-align: left; }
+  .qbp-modal-total-block .qbp-modal-meta { text-align: left; }
+  .qbp-modal-product { grid-template-columns: 80px minmax(0, 1fr); }
+}

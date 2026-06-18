@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 240" width="80" height="240">
+  <defs>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1f2a26"/>
+      <stop offset="35%" stop-color="#0b1612"/>
+      <stop offset="65%" stop-color="#0b1612"/>
+      <stop offset="100%" stop-color="#1f2a26"/>
+    </linearGradient>
+    <linearGradient id="label" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f4ead6"/>
+      <stop offset="100%" stop-color="#dccaa0"/>
+    </linearGradient>
+    <linearGradient id="foil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#3a3a3a"/>
+    </linearGradient>
+  </defs>
+  <!-- cork -->
+  <rect x="33" y="4" width="14" height="6" rx="1.5" fill="#caa15a"/>
+  <!-- foil capsule -->
+  <path d="M30 10 H50 V42 C50 46 47 48 44 48 H36 C33 48 30 46 30 42 Z" fill="url(#foil)"/>
+  <!-- neck taper -->
+  <path d="M32 48 C32 56 30 62 28 70 H52 C50 62 48 56 48 48 Z" fill="url(#glass)"/>
+  <!-- bottle body -->
+  <path d="M18 84 C18 76 22 70 28 70 H52 C58 70 62 76 62 84 L62 226 C62 232 58 236 52 236 H28 C22 236 18 232 18 226 Z" fill="url(#glass)"/>
+  <!-- highlight -->
+  <path d="M24 82 L24 220" stroke="#3b524a" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+  <!-- label -->
+  <rect x="22" y="120" width="36" height="74" rx="2" fill="url(#label)"/>
+  <!-- label band -->
+  <rect x="22" y="128" width="36" height="8" fill="#7a3b2e"/>
+  <text x="40" y="160" text-anchor="middle" font-family="League Spartan, sans-serif" font-weight="700" font-size="9" fill="#3a2a1a">VINLY</text>
+  <text x="40" y="180" text-anchor="middle" font-family="Mulish, sans-serif" font-size="7" fill="#5a4632">Cellar Select</text>
+</svg>

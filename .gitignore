@@ -1,0 +1,31 @@
+# Node / Next
+**/node_modules/
+**/.next/
+**/out/
+**/dist/
+**/.turbo/
+
+# Logs
+**/*.log
+**/npm-debug.log*
+**/yarn-error.log*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Env files — never commit
+**/.env
+**/.env.*
+!.env.example
+
+# Build / cache
+**/coverage/
+**/.nyc_output/
+**/.cache/
+
+# Vercel
+**/.vercel

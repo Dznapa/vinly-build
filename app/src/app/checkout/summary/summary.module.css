@@ -1,0 +1,189 @@
+/* Co-located styles for /checkout/summary.
+   Reuses tokens from globals.css; does not redefine .shop-panel, .btn-skip,
+   .btn-billing — those come from globals.css.
+   NEEDS REVIEW: built from spec only — match prototype once available. */
+
+.confirmHead {
+  text-align: center;
+  color: #fff;
+  padding: 28px 0 22px;
+}
+
+.confirmTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+.check {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+.confirmSub {
+  margin-top: 10px;
+  color: #cfe0ef;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* White card sitting inside the navy .shop-panel — mirrors .detail-panel. */
+.summaryCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  color: var(--text-gray);
+}
+
+.cardTitle {
+  margin: 0 0 18px;
+  color: #2a2a2a;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 14px;
+}
+
+.itemList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.itemRow:last-child {
+  border-bottom: 0;
+}
+
+.thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb img,
+.thumbImg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 60px;
+  max-height: 110px;
+  object-fit: contain;
+}
+
+.itemBody {
+  min-width: 0;
+}
+
+.itemName {
+  color: #2a2a2a;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.itemQty {
+  color: #555;
+  font-size: 14px;
+}
+
+.lineTotal {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 20px;
+  white-space: nowrap;
+}
+
+.totals {
+  margin-top: 8px;
+  border-top: 2px solid #e5e7eb;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.totalsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: #444;
+  font-size: 15px;
+}
+
+.totalsRow span:last-child {
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.freeShip {
+  color: var(--green) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+}
+
+.totalsGrand {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.totalsGrand span:last-child {
+  color: var(--green);
+  font-size: 24px;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+.actions :global(.btn-skip),
+.actions :global(.btn-billing) {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  min-width: 220px;
+  padding: 14px 22px;
+  font-size: 15px;
+}
+
+@media (max-width: 700px) {
+  .summaryCard {
+    padding: 22px 18px;
+  }
+  .itemRow {
+    grid-template-columns: 50px 1fr auto;
+    gap: 12px;
+  }
+  .actions {
+    flex-direction: column;
+  }
+  .actions :global(.btn-skip),
+  .actions :global(.btn-billing) {
+    width: 100%;
+  }
+}

@@ -1,0 +1,362 @@
+/* Co-located styles for /winemaker-spotlight routes. Builds on .wine-card /
+   .shop-panel grammar in globals.css. The spotlight index is a horizontal
+   carousel of LARGER tiles (per /spec/SCREEN_NOTES.md). */
+
+.heroTag {
+  color: var(--orange);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* ---------- spotlight carousel ---------- */
+.spotlightPanel {
+  /* override the default vertical padding so the carousel fills the panel */
+  padding: 26px 20px;
+}
+
+.spotlightCarousel {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+  /* hide horizontal scrollbar visually but keep keyboard/touch scroll */
+  scrollbar-width: thin;
+}
+.spotlightCarousel::-webkit-scrollbar {
+  height: 10px;
+}
+.spotlightCarousel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 5px;
+}
+
+.spotlightTile {
+  flex: 0 0 320px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 26px 24px;
+  min-height: 540px;
+}
+
+.tileBottle {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px 0 18px;
+  min-height: 300px;
+}
+.tileBottle img,
+.tileBottle svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 180px;
+  max-height: 300px;
+  object-fit: contain;
+}
+.tileBottleImg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 180px;
+  max-height: 300px;
+}
+
+.tileName {
+  margin: 0;
+  color: #3a3a3a;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.15;
+  font-family: 'League Spartan';
+}
+
+.tileMeta {
+  color: var(--text-gray);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.tilePrice {
+  color: var(--green);
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 8px;
+  line-height: 1;
+}
+
+.tileMsrp {
+  color: var(--green);
+  font-size: 13px;
+}
+.tileMsrp s {
+  color: #e23b3b;
+}
+
+.tileControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* ---------- Featured Winemaker ---------- */
+.featuredTitle {
+  text-align: center;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-size: 18px;
+  margin: 0 0 18px;
+}
+
+.featuredPanel {
+  background: var(--navy-panel);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 60px;
+}
+
+.videoFrame {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  margin-bottom: 28px;
+}
+.videoFrame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.featuredGrid {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) 1fr;
+  gap: 32px;
+  color: #fff;
+  padding: 10px 6px 6px;
+}
+
+@media (max-width: 900px) {
+  .featuredGrid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+.featuredAside {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.featuredKicker {
+  color: var(--orange);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 14px;
+}
+
+.featuredName {
+  margin: 0;
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.featuredLede {
+  margin: 0;
+  color: #cfe0ef;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.featuredBody {
+  color: #e7eef6;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.featuredBody p {
+  margin: 0 0 14px;
+}
+
+.featuredBody p:last-child {
+  margin-bottom: 0;
+}
+
+.featuredBody em {
+  color: #fff;
+  font-style: italic;
+}
+
+.makerCard {
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+  gap: 14px;
+}
+
+.makerHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.makerName {
+  margin: 0;
+  color: #3a3a3a;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.1;
+  font-family: 'League Spartan';
+}
+
+.makerTagline {
+  color: var(--text-gray);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.makerRegion {
+  color: var(--orange);
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.bottleRow {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 6px 0 4px;
+}
+
+.bottleRow img {
+  height: 110px;
+  width: auto;
+}
+
+.viewBtn {
+  display: inline-block;
+  text-align: center;
+  align-self: center;
+  padding: 11px 22px 8px;
+  text-decoration: none;
+}
+
+/* ---------- detail page ---------- */
+.bioMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 14px 0 18px;
+  color: #cfe0ef;
+  font-size: 14px;
+}
+
+.bioMeta b {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-right: 6px;
+}
+
+.bio {
+  color: #e7eef6;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.miniCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 18px;
+  border: 1px solid #eef0f3;
+}
+
+.miniBottle {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 6px 0;
+  min-height: 140px;
+}
+
+.miniBottle img,
+.miniBottle svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100px;
+  max-height: 140px;
+  object-fit: contain;
+}
+.miniBottleImg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100px;
+  max-height: 140px;
+}
+
+.miniName {
+  margin: 0;
+  color: #3a3a3a;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.miniMeta {
+  color: var(--text-gray);
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.miniPrice {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.miniBtn {
+  margin-top: 6px;
+  align-self: stretch;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,209 @@
+/* Co-located styles for /profile. Builds on the .panel / .sesh-grid / .btn-*
+   grammar from globals.css; only adds Profile-specific bits (status dots,
+   avatar, stacked button rows, order-history rows, preferences spacing). */
+
+.accountInner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.accountHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 24px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.accountName {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.accountMeta {
+  color: #cfe0ef;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.accountMeta div {
+  margin: 2px 0;
+}
+
+.accountActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* All ACCOUNT-card buttons render at the same full-card width + height. */
+.accountBtn {
+  width: 100%;
+  align-self: stretch;
+}
+
+.accountActions .btn-explore {
+  align-self: stretch;
+  text-align: center;
+}
+
+.statusHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.statusHead h2 {
+  margin: 0;
+  color: #2a2a2a;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2a2a2a;
+  margin: 6px 0 18px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.04);
+}
+
+.dotRed {
+  background: #e23b3b;
+}
+
+.dotYellow {
+  background: #f5b400;
+}
+
+.dotGreen {
+  background: var(--green);
+}
+
+.qualifiedChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(14, 173, 37, 0.12);
+  color: var(--green);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  margin-left: 4px;
+}
+
+.statusActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* SESH-status card CTAs use the same width so all three states match visually. */
+.statusBtn {
+  width: 100%;
+  flex: none;
+}
+
+.statusHint {
+  color: var(--text-gray);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+
+/* order history */
+.historyHead {
+  margin: 0 0 14px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.orderRow {
+  display: grid;
+  grid-template-columns: 110px 1fr 90px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 14px;
+}
+
+.orderRow:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.orderDate {
+  color: #cfe0ef;
+}
+
+.orderItem {
+  color: #fff;
+  font-weight: 600;
+}
+
+.orderTotal {
+  color: var(--green);
+  font-weight: 700;
+  text-align: right;
+}
+
+.greeting {
+  text-align: center;
+  color: #cfe0ef;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  margin: -8px 0 14px;
+}
+.greeting b {
+  color: var(--orange);
+  font-weight: 700;
+}
+
+/* preferences */
+.prefsHead {
+  margin: 0 0 6px;
+  color: #2a2a2a;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.prefsBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

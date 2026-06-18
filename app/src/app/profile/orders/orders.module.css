@@ -1,0 +1,184 @@
+/* /profile/orders styles — list of collapsible order rows. */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px auto 60px;
+  max-width: 880px;
+}
+
+.empty {
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-gray);
+  font-size: 15px;
+}
+.shopLink {
+  color: var(--orange);
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.row {
+  background: #fff;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+}
+
+.rowHead {
+  display: grid;
+  grid-template-columns: 140px 90px 1fr 110px 24px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 22px;
+  background: #fff;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.rowHead:hover {
+  background: #f7f9fc;
+}
+
+.rowId {
+  font-weight: 700;
+  color: #2a2a2a;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+.rowDate {
+  color: #555;
+  font-size: 13px;
+}
+.rowTotal {
+  text-align: right;
+  color: var(--green);
+  font-weight: 700;
+  font-size: 16px;
+}
+.chev {
+  color: #6b7280;
+  font-size: 14px;
+  text-align: center;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  justify-self: start;
+}
+.pillDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.pillPlaced {
+  background: rgba(57, 176, 229, 0.14);
+  color: var(--cyan);
+}
+.pillShipped {
+  background: rgba(242, 106, 53, 0.14);
+  color: var(--orange);
+}
+.pillDelivered {
+  background: rgba(14, 173, 37, 0.14);
+  color: var(--green);
+}
+.pillCancelled {
+  background: #eef0f3;
+  color: #6b7280;
+}
+
+.rowBody {
+  padding: 0 22px 18px;
+  border-top: 1px solid #eef0f3;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+}
+.lineItem {
+  display: grid;
+  grid-template-columns: 36px 1fr 90px 90px;
+  gap: 12px;
+  align-items: center;
+  font-size: 14px;
+  color: #333;
+}
+.lineQty {
+  font-weight: 700;
+  color: var(--orange);
+  text-align: right;
+}
+.lineName {
+  color: #2a2a2a;
+  font-weight: 600;
+}
+.lineUnit {
+  color: #6b7280;
+  font-size: 13px;
+  text-align: right;
+}
+.lineTotal {
+  text-align: right;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.breakdown {
+  border-top: 1px solid #eef0f3;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.breakdownRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #444;
+}
+.totalRow {
+  font-weight: 700;
+  color: #2a2a2a;
+  font-size: 16px;
+  padding-top: 6px;
+  border-top: 1px solid #eef0f3;
+}
+
+@media (max-width: 700px) {
+  .rowHead {
+    grid-template-columns: 1fr 1fr 24px;
+    grid-template-areas:
+      'id total chev'
+      'date status .';
+    row-gap: 6px;
+  }
+  .rowId { grid-area: id; }
+  .rowDate { grid-area: date; }
+  .pill { grid-area: status; }
+  .rowTotal { grid-area: total; }
+  .chev { grid-area: chev; }
+  .lineItem {
+    grid-template-columns: 32px 1fr 70px;
+  }
+  .lineUnit { display: none; }
+}
