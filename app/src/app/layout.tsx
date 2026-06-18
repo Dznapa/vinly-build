@@ -7,6 +7,8 @@ import { ProfileProvider } from '@/context/ProfileContext';
 import { ToastProvider } from '@/components/ToastProvider';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { DevToolbar } from '@/components/DevToolbar';
+import { PriceLock } from '@/components/PriceLock';
+import { WelcomeModal } from '@/components/WelcomeModal';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -43,6 +45,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   {children}
                   <ScrollToTop />
                   <DevToolbar />
+                  <PriceLock />
+                  <WelcomeModal />
                 </ToastProvider>
               </CartProvider>
             </BillingGateProvider>

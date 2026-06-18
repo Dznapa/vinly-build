@@ -203,13 +203,24 @@ function Desc({ offer, readMore, setReadMore }: Pick<SharedProps, 'offer' | 'rea
 
 function BuyButton(p: SharedProps & { full?: boolean }) {
   const { isGated, livePrice, openBuy, openBillingGate, full } = p;
-  // Viewers (non-qualified) see the same BUY NOW + live price, but tapping it
-  // opens the "add billing to participate" gate instead of the purchase flow.
+  // Non-qualified: pricing is locked, so the CTA invites them to unlock it and
+  // routes to the billing wizard instead of showing a price / buy flow.
+  if (isGated) {
+    return (
+      <button
+        type="button"
+        className={`sesh-buy sesh-buy--view${full ? ' sesh-buy--full' : ''}`}
+        onClick={openBillingGate}
+      >
+        <i className="fa-solid fa-lock" aria-hidden /> <span>VIEW PRICING</span>
+      </button>
+    );
+  }
   return (
     <button
       type="button"
       className={`sesh-buy${full ? ' sesh-buy--full' : ''}`}
-      onClick={isGated ? openBillingGate : openBuy}
+      onClick={openBuy}
     >
       <span>BUY NOW</span>
       <span className="sesh-buy-price">${livePrice.toFixed(2)}</span>
@@ -263,7 +274,7 @@ function LayoutSplit(p: SharedProps) {
         <div className="sesh-split-chart panel">
           <PriceBadge livePrice={livePrice} offMsrpPct={offMsrpPct} />
           <div className="sesh-split-chartbox">
-            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -329,7 +340,7 @@ function LayoutHero(p: SharedProps) {
 
       <div className="panel sesh-hero-chart">
         <div className="chart-wrap">
-          <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
+          <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
                       timeframe={timeframe} onPriceChange={handlePriceTick} />
         </div>
         <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -380,7 +391,7 @@ function LayoutTicket(p: SharedProps) {
             </div>
           </div>
           <div className="chart-wrap">
-            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -473,7 +484,7 @@ function LayoutTerminal(p: SharedProps) {
 
         <div className="panel sesh-term-chart">
           <div className="chart-wrap">
-            <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
@@ -523,7 +534,7 @@ function LayoutStack(p: SharedProps) {
 
       <div className="panel sesh-stack-chart">
         <div className="chart-wrap">
-          <PriceChart gated={false} msrp={offer.msrp} street={offer.street}
+          <PriceChart gated={isGated} msrp={offer.msrp} street={offer.street}
                       timeframe={timeframe} onPriceChange={handlePriceTick} />
         </div>
         <TFs timeframe={timeframe} setTimeframe={setTimeframe} />

@@ -3998,3 +3998,117 @@ body { padding-bottom: 56px; }
   /* Birth-date: stack the three selects so long month names don't clip */
   .bdate { flex-direction: column; gap: 8px; }
 }
+
+/* =================================================================
+   PRICE LOCK + WELCOME WIZARD (homepage redesign)
+   ================================================================= */
+
+/* Non-SESH-qualified users see ALL pricing blurred until they add billing.
+   <PriceLock> toggles body.prices-locked. */
+body.prices-locked .price,
+body.prices-locked .msrp,
+body.prices-locked .sesh-pricebadge-num,
+body.prices-locked .sesh-pricebadge-delta,
+body.prices-locked .sesh-term-headerprice > span:first-child,
+body.prices-locked .sesh-term-delta,
+body.prices-locked .sesh-statrow-val.is-strike,
+body.prices-locked .sesh-statrow-val.is-good,
+body.prices-locked .sesh-statpair-value.is-strike,
+body.prices-locked .sesh-statpair-value.is-good,
+body.prices-locked .sesh-buy-price {
+  filter: blur(7px);
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+body.prices-locked .chart-wrap {
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+/* SESH buy button in locked (view-pricing) state — centered, no price shown. */
+.sesh-buy--view { justify-content: center; gap: 10px; }
+
+/* Welcome-to-Vinly wizard — lighter backdrop than the billing gate. */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 20, 38, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.welcome-modal {
+  width: 100%;
+  max-width: 560px;
+  background: var(--navy-deep);
+  border: 1px solid rgba(99, 162, 222, 0.4);
+  border-radius: 18px;
+  padding: 34px 34px 30px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+.welcome-eyebrow { color: #8aa2bb; letter-spacing: 3px; font-size: 12px; font-weight: 700; }
+.welcome-wordmark {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  color: var(--orange);
+  font-size: 54px;
+  line-height: 1;
+  margin: 2px 0 6px;
+}
+.welcome-tagline { color: #cfe0ef; font-size: 16px; font-style: italic; margin-bottom: 18px; }
+.welcome-body { color: #b7c6d8; font-size: 14.5px; line-height: 1.6; text-align: left; }
+.welcome-body p { margin: 0 0 12px; }
+.welcome-body b { color: #fff; }
+.welcome-note { color: #cfe0ef; }
+.welcome-cta {
+  margin-top: 8px;
+  width: 100%;
+  background: var(--orange);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(212, 84, 28, 0.3);
+  transition: filter 120ms ease, transform 80ms ease;
+}
+.welcome-cta:hover { filter: brightness(1.06); }
+.welcome-cta:active { transform: translateY(1px); }
+
+@media (max-width: 600px) {
+  .welcome-modal { padding: 24px 18px 22px; }
+  .welcome-wordmark { font-size: 42px; }
+}
+
+/* Price-chart hover tooltip — accurate live price at the cursor + MSRP + Street. */
+.chart-tip {
+  background: #0e2647;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: 'Mulish', sans-serif;
+  font-size: 12px;
+  min-width: 128px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+.chart-tip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 2px 0;
+  color: #8aa2bb;
+}
+.chart-tip-row b { color: #fff; font-variant-numeric: tabular-nums; font-weight: 700; }
+.chart-tip-row.is-live span { color: #fff; }
+.chart-tip-row.is-live b { color: var(--green); }

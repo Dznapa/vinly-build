@@ -217,16 +217,18 @@ export default function PriceChart({
 
           <Tooltip
             cursor={{ stroke: 'rgba(255,255,255,0.25)', strokeDasharray: 4 }}
-            contentStyle={{
-              background: '#0E2647',
-              border: '1px solid rgba(255,255,255,0.25)',
-              borderRadius: 6,
-              color: '#fff',
-              fontFamily: 'Mulish',
-              fontSize: 12,
+            content={(props) => {
+              if (!props.active || !props.payload || !props.payload.length) return null;
+              // Last payload entry is the live-price series at the hovered point.
+              const live = Number(props.payload[props.payload.length - 1].value);
+              return (
+                <div className="chart-tip">
+                  <div className="chart-tip-row is-live"><span>Live</span><b>${live.toFixed(2)}</b></div>
+                  <div className="chart-tip-row"><span>MSRP</span><b>${msrp.toFixed(2)}</b></div>
+                  <div className="chart-tip-row"><span>Street</span><b>${street.toFixed(2)}</b></div>
+                </div>
+              );
             }}
-            labelFormatter={() => ''}
-            formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Live']}
           />
 
           {showMsrpRef && (
