@@ -7,7 +7,7 @@
      • finalized          → confirmation of what was charged / shipping outcome
    ESC minimizes (does not cancel); focus is trapped while the modal is open. */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 
@@ -49,6 +49,19 @@ export function ShippingWindowModal() {
     return () => window.removeEventListener('keydown', onKey);
   }, [modalOpen, w]);
 
+  // Alert when the cart crosses from 6+ down to under 6 while the window is open.
+  const [dropAlert, setDropAlert] = useState(false);
+  const prevBottles = useRef(w.bottles);
+  useEffect(() => {
+    if (w.active && prevBottles.current >= FREE_AT && w.bottles < FREE_AT) setDropAlert(true);
+    prevBottles.current = w.bottles;
+  }, [w.bottles, w.active]);
+  useEffect(() => {
+    if (!dropAlert) return;
+    const t = window.setTimeout(() => setDropAlert(false), 7000);
+    return () => window.clearTimeout(t);
+  }, [dropAlert]);
+
   // FINALIZED — charge ran, show the outcome.
   if (w.finalized) {
     const f = w.finalized;
@@ -88,16 +101,31 @@ export function ShippingWindowModal() {
   // MINIMIZED — floating timer badge, timer still running.
   if (w.minimized) {
     return (
-      <button
-        type="button"
-        className={`ship-badge${danger ? ' is-danger' : ''}`}
-        onClick={w.expand}
-        aria-label={`Free shipping window: ${mmss(w.secondsLeft)} left, ${filled} of 6 bottles. Expand.`}
-      >
-        <span className="ship-badge-dot" aria-hidden />
-        <span className="ship-badge-time">{mmss(w.secondsLeft)}</span>
-        <span className="ship-badge-meta">{filled}/6</span>
-      </button>
+      <>
+        {dropAlert && (
+          <div className="ship-drop" role="alert">
+            <button type="button" className="ship-drop-x" onClick={() => setDropAlert(false)} aria-label="Dismiss">
+              <i className="fa-solid fa-xmark" aria-hidden />
+            </button>
+            <div className="ship-drop-title">
+              <i className="fa-solid fa-triangle-exclamation" aria-hidden /> Below 6 bottles
+            </div>
+            <p>You dropped under 6 — add more before the window closes, or it&apos;s a flat $35.</p>
+          </div>
+        )}
+        <button
+          type="button"
+          className={`ship-badge${danger ? ' is-danger' : ''}`}
+          onClick={w.expand}
+          aria-label={`Free shipping window: ${mmss(w.secondsLeft)} left, ${filled} of 6 bottles. Expand.`}
+        >
+          <span className="ship-badge-dot" aria-hidden />
+          <span className="ship-badge-main">
+            <span className="ship-badge-time">{mmss(w.secondsLeft)}</span>
+            <span className="ship-badge-label">{filled}/6 · free-ship window</span>
+          </span>
+        </button>
+      </>
     );
   }
 
