@@ -4445,3 +4445,130 @@ body.prices-locked .chart-tip {
   .ship-hl { font-size: 21px; }
   .ship-badge { bottom: 64px; }
 }
+
+/* =================================================================
+   SESH CLOSED "CLOSING BELL" RECAP MODAL
+   ================================================================= */
+.recap-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(6, 14, 26, 0.78);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  overflow-y: auto;
+}
+.recap-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 94vh;
+  overflow-y: auto;
+  background: var(--navy-deep);
+  border: 1px solid rgba(99, 162, 222, 0.28);
+  border-radius: 20px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+  outline: none;
+}
+.recap-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #c7d5e6;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 2;
+}
+.recap-x:hover { color: #fff; background: rgba(255, 255, 255, 0.12); }
+.recap-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid rgba(99, 162, 222, 0.18);
+}
+.recap-head-l { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.recap-ticker { font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 20px; color: var(--orange); letter-spacing: 1px; }
+.recap-wine { font-size: 13px; color: #c7d5e6; font-weight: 500; max-width: 220px; line-height: 1.3; }
+.recap-closed {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(143, 163, 188, 0.12);
+  border: 1px solid rgba(143, 163, 188, 0.3);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  color: #8aa2bb;
+  flex: 0 0 auto;
+}
+.recap-closed-dot { width: 7px; height: 7px; border-radius: 50%; background: #8aa2bb; }
+.recap-hero { text-align: center; padding: 24px 24px 8px; }
+.recap-eye { font-family: 'League Spartan', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2.6px; color: #8aa2bb; margin-bottom: 8px; }
+.recap-settle { font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 56px; line-height: 1; letter-spacing: -1px; font-variant-numeric: tabular-nums; color: #fff; }
+.recap-save { display: inline-block; margin-top: 12px; background: rgba(14, 173, 37, 0.12); border: 1px solid rgba(14, 173, 37, 0.35); color: var(--green); font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 999px; }
+.recap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: rgba(99, 162, 222, 0.18);
+  margin-top: 22px;
+  border-top: 1px solid rgba(99, 162, 222, 0.18);
+  border-bottom: 1px solid rgba(99, 162, 222, 0.18);
+}
+.recap-cell { background: var(--navy-deep); padding: 16px 22px; }
+.recap-k { font-family: 'League Spartan', sans-serif; font-size: 10.5px; font-weight: 700; letter-spacing: 1.6px; color: #8aa2bb; margin-bottom: 6px; }
+.recap-v { font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 22px; font-variant-numeric: tabular-nums; color: #fff; }
+.recap-v.low { color: var(--green); }
+.recap-v.high { color: var(--orange); }
+.recap-csub { font-size: 11px; color: #8aa2bb; margin-top: 3px; }
+.recap-tape { padding: 18px 24px; text-align: center; border-bottom: 1px solid rgba(99, 162, 222, 0.18); }
+.recap-tape p { font-size: 14px; line-height: 1.55; color: #c7d5e6; margin: 0; }
+.recap-tape b { color: #fff; }
+.recap-float { color: var(--green); font-weight: 700; }
+.recap-next { padding: 22px 24px 8px; text-align: center; }
+.recap-next-eye { font-family: 'League Spartan', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2.6px; color: var(--orange); margin-bottom: 10px; }
+.recap-when { font-family: 'League Spartan', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #fff; margin-bottom: 6px; }
+.recap-hint { font-size: 13px; color: #8aa2bb; font-style: italic; }
+.recap-ctas { padding: 18px 24px 12px; }
+.recap-btn {
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  padding: 15px;
+  background: var(--orange);
+  color: #fff;
+  box-shadow: 0 0 26px rgba(242, 106, 53, 0.4);
+  transition: transform 120ms ease, filter 200ms ease;
+}
+.recap-btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.recap-btn.is-confirmed { background: rgba(14, 173, 37, 0.16); color: var(--green); box-shadow: 0 0 0 1px rgba(14, 173, 37, 0.4) inset; cursor: default; }
+.recap-foot { border-top: 1px solid rgba(99, 162, 222, 0.18); padding: 13px; text-align: center; }
+.recap-foot i { font-size: 12px; color: #8aa2bb; }
+.recap-byline { color: #c7d5e6; font-weight: 600; font-style: normal; }
+@media (prefers-reduced-motion: reduce) {
+  .recap-btn:hover:not(:disabled) { transform: none; }
+}
+@media (max-width: 430px) {
+  .recap-settle { font-size: 46px; }
+  .recap-v { font-size: 19px; }
+  .recap-wine { max-width: 160px; }
+}

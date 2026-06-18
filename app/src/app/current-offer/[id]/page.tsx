@@ -14,7 +14,8 @@ import InventoryBar from '@/components/InventoryBar';
 import BottlePlaceholder from '@/components/BottlePlaceholder';
 import { useQuickBuy } from '@/components/useQuickBuy';
 import { useBillingGate } from '@/context/BillingGateContext';
-import { getSeshOffer, type SeshOffer } from '@/data/mock';
+import { getSeshOffer, getSeshRecap, type SeshOffer } from '@/data/mock';
+import { SeshClosedRecap } from '@/components/SeshClosedRecap';
 import { useUserState } from '@/context/UserStateContext';
 
 const TIMEFRAMES: Timeframe[] = ['30 Sec', '1 Min', '5 Min', '15 Min', '30 Min', 'Hour', 'All'];
@@ -71,6 +72,7 @@ function CurrentOfferInner({ id }: { id: string }) {
   }, []);
   const invPct = totalBottles > 0 ? Math.max(0, Math.min(100, (bottlesLeft / totalBottles) * 100)) : 0;
   const floorClosed = bottlesLeft <= 0;
+  const [recapDismissed, setRecapDismissed] = useState(false);
 
   const { openGate: openBillingGate } = useBillingGate();
 
@@ -113,6 +115,9 @@ function CurrentOfferInner({ id }: { id: string }) {
         {variant === 'v5' && <LayoutStack {...shared} />}
 
         {popover}
+        {floorClosed && !recapDismissed && (
+          <SeshClosedRecap recap={getSeshRecap(offer)} onClose={() => setRecapDismissed(true)} />
+        )}
       </main>
     </PageChrome>
   );

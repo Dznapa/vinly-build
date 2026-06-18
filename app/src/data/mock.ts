@@ -311,6 +311,7 @@ export type SeshOffer = {
   description: string;
   offerDuration: string;
   inventoryPct: number;
+  nextSeshHint?: string; // editable per-drop teaser for the closed-recap "next SESH" block
 };
 
 export const SESH_OFFERS: SeshOffer[] = [
@@ -334,8 +335,58 @@ export const SESH_OFFERS: SeshOffer[] = [
       "Paso's benchmark Bordeaux blend. Still nobody's caught it. Wound tight, built to age, and already dangerous. Buy it now. Justin didn't just put Paso on the map — they drew the whole map. Isosceles has been the standard since 1987 and the 2021 is not here to be friendly about it. Limestone Westside fruit, four years on lees, and a profile that says \"come back in a decade.\" Aged in 75% new French oak.",
     offerDuration: '00:36:50',
     inventoryPct: 0.5,
+    nextSeshHint: "Howell Mountain. That's all we'll say.",
   },
 ];
 
 export const getSeshOffer = (id: string) =>
   SESH_OFFERS.find((o) => o.id === id) ?? SESH_OFFERS[0];
+
+/* ===== SESH closed "closing bell" recap =====
+   ⚠️ PROTOTYPE: this clone has no order history or pricing-session store, so the
+   recap is DERIVED deterministically from the drop's existing fields rather than
+   computed from real settled prices. In production these MUST come server-side
+   from the drop's actual pricing + order data (and `payingAttention` needs real
+   per-order lock-price instrumentation). The modal only renders what's here. */
+
+export type SeshRecap = {
+  ticker: string;
+  wineName: string;
+  settled: number; // avg price paid across bottles sold
+  msrpSavingsPct: number; // (msrp - settled) / msrp, whole %
+  opened: number; // first print
+  floor: number; // lowest the drop touched
+  soldOutIn: string; // elapsed open -> sold out
+  bottlesMoved: number;
+  buyers: number;
+  payingAttention?: number; // buyers who locked at/under the floor (optional)
+  nextSeshWhen: string;
+  nextSeshHint?: string;
+};
+
+// Mock campaign schedule — replace with the real next-SESH slot server-side.
+export const NEXT_SESH_WHEN = 'Thursday · 12:00 PM PT';
+
+export function getSeshRecap(offer: SeshOffer): SeshRecap {
+  const settled = Math.round(offer.livePrice);
+  const opened = Math.round(offer.livePrice * 1.18);
+  const floor = Math.round(offer.livePrice * 0.84);
+  const msrpSavingsPct = offer.msrp > 0 ? Math.round(((offer.msrp - settled) / offer.msrp) * 100) : 0;
+  const bottlesMoved = 120 + (Math.round(offer.msrp) % 140);
+  const buyers = Math.round(bottlesMoved * 0.7);
+  const payingAttention = Math.max(0, Math.round(buyers * 0.18));
+  return {
+    ticker: offer.ticker ?? `$${offer.id.slice(0, 4).toUpperCase()}`,
+    wineName: offer.title,
+    settled,
+    msrpSavingsPct,
+    opened,
+    floor,
+    soldOutIn: offer.offerDuration,
+    bottlesMoved,
+    buyers,
+    payingAttention,
+    nextSeshWhen: NEXT_SESH_WHEN,
+    nextSeshHint: offer.nextSeshHint,
+  };
+}
