@@ -3891,6 +3891,21 @@ button {
   cursor: not-allowed;
 }
 
+.qbp-modal-ship {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(14, 173, 37, 0.1);
+  box-shadow: 0 0 0 1px rgba(14, 173, 37, 0.28) inset;
+  color: #cfe0ef;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.qbp-modal-ship i { color: var(--green); font-size: 15px; flex: 0 0 auto; }
+.qbp-modal-ship b { color: #fff; }
 .qbp-modal-foot {
   display: flex;
   align-items: center;

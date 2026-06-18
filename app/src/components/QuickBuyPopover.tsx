@@ -213,6 +213,15 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
           </div>
         </div>
 
+        {/* FREE SHIPPING / MIX & MATCH */}
+        <div className="qbp-modal-ship">
+          <i className="fa-solid fa-truck-fast" aria-hidden />
+          <span>
+            <b>Free shipping at 6 bottles.</b> Mix &amp; match across the floor — SESH, Ticker &amp;
+            Market all count.
+          </span>
+        </div>
+
         {/* ACTIONS */}
         <div className="qbp-modal-actions">
           {!isLocked && !expired && (
