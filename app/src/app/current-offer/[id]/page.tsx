@@ -479,7 +479,7 @@ function LayoutTerminal(p: SharedProps) {
           <StatRow label="Off MSRP" value={`${offMsrpPct.toFixed(2)}%`} good />
           <StatRow label="Off Street" value={`${offStreetPct.toFixed(2)}%`} good />
           <StatRow label="You Save" value={`$${savings.toFixed(2)}`} good />
-          <StatRow label="Rating Avg" value={`${avgRating(offer.ratings)} pts`} />
+          <StatRow label="Highest Critic Rating" value={`${topRating(offer.ratings)} pts`} />
         </aside>
 
         <div className="panel sesh-term-chart">
@@ -546,7 +546,7 @@ function LayoutStack(p: SharedProps) {
         <StatPair label="You Save" value={`$${savings.toFixed(2)}`} good />
         <StatPair label="Off MSRP" value={`${offMsrpPct.toFixed(2)}%`} good />
         <StatPair label="vs Street" value={`${offStreetPct.toFixed(1)}%`} good />
-        <StatPair label="Rating" value={`${avgRating(offer.ratings)}`} />
+        <StatPair label="Highest Critic Rating" value={`${topRating(offer.ratings)}`} />
       </div>
 
       <div className="panel sesh-stack-about">
@@ -579,8 +579,7 @@ function StatRow({ label, value, strike, good }: { label: string; value: string;
     </div>
   );
 }
-function avgRating(ratings: { src: string; score: number }[]) {
+function topRating(ratings: { src: string; score: number }[]) {
   if (!ratings.length) return '—';
-  const sum = ratings.reduce((a, r) => a + r.score, 0);
-  return (sum / ratings.length).toFixed(1);
+  return Math.max(...ratings.map((r) => r.score)).toString();
 }
