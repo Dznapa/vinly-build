@@ -29,7 +29,7 @@ function SpotlightTile({ wine }: { wine: ShopWine }) {
 
   const handleAdd = () => {
     // Blocked (not billing-verified) → billing gate popup shown; bail out.
-    if (!addItem(wine.id, qty)) return;
+    if (!addItem({ wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.maker }, qty)) return;
     setAdded(true);
     setQty(1);
     window.setTimeout(() => setAdded(false), 1100);

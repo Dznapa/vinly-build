@@ -43,7 +43,7 @@ function MiniWineCard({ wine }: { wine: ShopWine }) {
         <button
           type="button"
           className={`btn-cart ${styles.miniBtn}`}
-          onClick={() => addItem(wine.id, 1)}
+          onClick={() => addItem({ wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.maker }, 1)}
         >
           ADD TO CART
         </button>

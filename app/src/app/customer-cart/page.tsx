@@ -13,7 +13,6 @@ import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE } from '@/context/CartContext';
 import { useToast } from '@/components/ToastProvider';
-import { SHOP } from '@/data/mock';
 import BottlePlaceholder, { pickVariant } from '@/components/BottlePlaceholder';
 import styles from './cart.module.css';
 
@@ -34,24 +33,16 @@ export default function CustomerCartPage() {
   const tax = useMemo(() => Number((subtotal * TAX_RATE).toFixed(2)), [subtotal]);
   const grandTotal = useMemo(() => Number((subtotal + shipping + tax).toFixed(2)), [subtotal, shipping, tax]);
 
-  const rows = items
-    .map((item) => {
-      const wine = SHOP.find((w) => w.id === item.wineId);
-      return wine ? { item, wine } : null;
-    })
-    .filter((r): r is NonNullable<typeof r> => r !== null);
+  const hasItems = items.length > 0;
 
-  const hasItems = rows.length > 0;
-
-  // How much they're saving vs MSRP — computed across all cart items.
+  // How much they're saving vs MSRP — computed across all cart items (snapshot).
   const savings = useMemo(
     () =>
-      rows.reduce(
-        (sum, { item, wine }) =>
-          sum + Math.max(0, wine.msrp - wine.price) * item.qty,
+      items.reduce(
+        (sum, item) => sum + (item.msrp ? Math.max(0, item.msrp - item.unitPrice) * item.qty : 0),
         0,
       ),
-    [rows],
+    [items],
   );
 
   const handleRemove = (wineId: string, name: string) => {
@@ -83,30 +74,29 @@ export default function CustomerCartPage() {
               </div>
             ) : (
               <div className={styles.rows}>
-                {rows.map(({ item, wine }) => {
-                  const lineTotal = wine.price * item.qty;
-                  const variant = wine.isPack ? 'pack' : pickVariant(wine.name, wine.maker);
+                {items.map((item) => {
+                  const lineTotal = item.unitPrice * item.qty;
+                  const variant = pickVariant(item.name, item.meta ?? '');
                   return (
-                    <div className={styles.row} key={wine.id}>
+                    <div className={styles.row} key={item.wineId}>
                       <div className={styles.colItem}>
-                        {wine.image ? (
+                        {item.image ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={wine.image} alt={wine.name} className={styles.bottleImg} loading="lazy" />
+                          <img src={item.image} alt={item.name} className={styles.bottleImg} loading="lazy" />
                         ) : (
-                          <BottlePlaceholder name={wine.name} variant={variant} width={56} height={120} />
+                          <BottlePlaceholder name={item.name} variant={variant} width={56} height={120} />
                         )}
                       </div>
                       <div className={styles.colTitle}>
-                        <div className={styles.itemName}>{wine.name}</div>
+                        <div className={styles.itemName}>{item.name}</div>
                         <div className={styles.itemMeta}>
-                          {wine.maker}
-                          <br />
-                          {wine.size}
+                          {item.meta && <>{item.meta}<br /></>}
+                          750ml
                         </div>
                         <button
                           type="button"
                           className={styles.removeBtn}
-                          onClick={() => handleRemove(wine.id, wine.name)}
+                          onClick={() => handleRemove(item.wineId, item.name)}
                         >
                           Remove
                         </button>
@@ -116,7 +106,7 @@ export default function CustomerCartPage() {
                           <button
                             type="button"
                             aria-label="Decrease quantity"
-                            onClick={() => setQty(wine.id, clampQty(item.qty - 1))}
+                            onClick={() => setQty(item.wineId, clampQty(item.qty - 1))}
                           >
                             &minus;
                           </button>
@@ -124,7 +114,7 @@ export default function CustomerCartPage() {
                           <button
                             type="button"
                             aria-label="Increase quantity"
-                            onClick={() => setQty(wine.id, clampQty(item.qty + 1))}
+                            onClick={() => setQty(item.wineId, clampQty(item.qty + 1))}
                           >
                             +
                           </button>

@@ -76,12 +76,18 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     return () => window.removeEventListener('keydown', onKey);
   }, [open, isLocked, onClose]);
 
-  const addToCart = useCallback((wineId: string, quantity: number) => {
-    const added = addItem(wineId, quantity);
+  const addToCart = useCallback((quantity: number) => {
+    if (!wine) return;
+    // Carry a full price/name snapshot so the bottle is a real, visible, charged
+    // cart line regardless of which catalog its id lives in.
+    const added = addItem(
+      { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region },
+      quantity,
+    );
     onClose();
     // A SESH or Ticker commit opens (or extends) the free-shipping window.
     if (added && (source === 'sesh' || source === 'ticker')) shipWindow.open();
-  }, [addItem, onClose, source, shipWindow]);
+  }, [wine, addItem, onClose, source, shipWindow]);
 
   const handleLockIn = useCallback(() => {
     if (!wine) return;
@@ -95,7 +101,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   }, [cancelLimitReached]);
 
   const handleBuyNowExpired = useCallback(() => {
-    if (!wine) return; addToCart(wine.id, qty);
+    if (!wine) return; addToCart(qty);
   }, [wine, qty, addToCart]);
 
   const handleBackdropClick = useCallback(() => {
@@ -243,7 +249,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
               <button
                 type="button"
                 className="qbp-modal-primary"
-                onClick={() => addToCart(wine.id, qty)}
+                onClick={() => addToCart(qty)}
               >
                 <i className="fa-solid fa-check" aria-hidden /> CONFIRM &amp; ADD TO CART
                 <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span>

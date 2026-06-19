@@ -22,7 +22,6 @@ import {
 } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useProfile } from '@/context/ProfileContext';
-import { SHOP } from '@/data/mock';
 
 const STORAGE_KEY = 'vinly:shipWindow';
 const WINDOW_MS = 15 * 60 * 1000;
@@ -87,12 +86,10 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   const finalize = useCallback(() => {
     const c = cartRef.current;
     const pr = profileRef.current;
-    const lines = c.items
-      .map((i) => {
-        const w = SHOP.find((s) => s.id === i.wineId);
-        return w ? { wineId: i.wineId, qty: i.qty, unitPrice: w.price, name: w.name } : null;
-      })
-      .filter((x): x is NonNullable<typeof x> => x !== null);
+    // Charge from the cart's own snapshot — every line is priced, none dropped.
+    const lines = c.items.map((i) => ({
+      wineId: i.wineId, qty: i.qty, unitPrice: i.unitPrice, name: i.name,
+    }));
     const freeShip = c.count >= FREE_AT;
     const shipping = freeShip ? 0 : c.count > 0 ? FLAT_SHIP : 0;
     const subtotal = c.subtotal;

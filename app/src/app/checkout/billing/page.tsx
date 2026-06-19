@@ -14,7 +14,6 @@ import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
 import { useProfile, cardBrand as detectBrand } from '@/context/ProfileContext';
-import { SHOP } from '@/data/mock';
 import styles from './billing.module.css';
 
 const US_STATES = [
@@ -155,19 +154,13 @@ export default function BillingPage() {
       paymentCardId = selectedCardId;
     }
 
-    // 3) Build order lines from cart + SHOP catalog.
-    const lines = items
-      .map((i) => {
-        const w = SHOP.find((s) => s.id === i.wineId);
-        if (!w) return null;
-        return {
-          wineId: i.wineId,
-          qty: i.qty,
-          unitPrice: w.price,
-          name: w.name,
-        };
-      })
-      .filter((x): x is NonNullable<typeof x> => x !== null);
+    // 3) Build order lines from the cart's own price/name snapshot.
+    const lines = items.map((i) => ({
+      wineId: i.wineId,
+      qty: i.qty,
+      unitPrice: i.unitPrice,
+      name: i.name,
+    }));
 
     // 4) Place the order, clear the cart, route to summary.
     const id = placeOrder({
@@ -350,23 +343,19 @@ export default function BillingPage() {
                   <div className={styles.itemName}>Your cart is empty.</div>
                 </div>
               ) : (
-                items.map((i) => {
-                  const wine = SHOP.find((w) => w.id === i.wineId);
-                  if (!wine) return null;
-                  return (
-                    <div key={i.wineId} className={styles.item}>
-                      <div className={styles.itemName}>
-                        {wine.name}
-                        <div className={styles.itemMeta}>
-                          {wine.maker} · Qty {i.qty}
-                        </div>
-                      </div>
-                      <div className={styles.itemPrice}>
-                        {money(wine.price * i.qty)}
+                items.map((i) => (
+                  <div key={i.wineId} className={styles.item}>
+                    <div className={styles.itemName}>
+                      {i.name}
+                      <div className={styles.itemMeta}>
+                        {i.meta ? `${i.meta} · ` : ''}Qty {i.qty}
                       </div>
                     </div>
-                  );
-                })
+                    <div className={styles.itemPrice}>
+                      {money(i.unitPrice * i.qty)}
+                    </div>
+                  </div>
+                ))
               )}
             </div>
 

@@ -2,7 +2,14 @@
 
 /* CartContext — backs the Cart / Edit Cart page with a real list of items.
    Pattern mirrors UserStateContext: localStorage-persisted client state.
-   Spec: "Free ground shipping at 6+ bottles; flat shipping under 6." */
+   Spec: "Free ground shipping at 6+ bottles; flat shipping under 6."
+
+   SINGLE SOURCE OF TRUTH: every cart line carries its own price/name snapshot
+   (taken at add time), so the cart never depends on whether an id lives in SHOP.
+   That keeps count, subtotal, the cart table, the order summary, the shipping
+   window, the badge, and the auto-charge all derived from this one `items` array —
+   no instrument (SESH / Ticker / Market) can add a bottle that counts toward free
+   shipping without also being visible and charged. */
 
 import {
   createContext,
@@ -17,7 +24,18 @@ import { SHOP } from '@/data/mock';
 import { useUserState } from '@/context/UserStateContext';
 import { useBillingGate } from '@/context/BillingGateContext';
 
-export type CartItem = { wineId: string; qty: number };
+export type CartItem = {
+  wineId: string;
+  qty: number;
+  name: string;
+  unitPrice: number;
+  image?: string;
+  msrp?: number;
+  meta?: string; // secondary descriptor line (maker / region) for the cart table
+};
+
+/** Everything needed to add a line — the per-instrument caller supplies the snapshot. */
+export type CartAdd = Omit<CartItem, 'qty'>;
 
 // Flat shipping under the free-shipping threshold (owner-confirmed $35).
 export const SHIPPING_RATE = 35.0;
@@ -26,7 +44,7 @@ export const FREE_SHIP_THRESHOLD = 6;
 type Ctx = {
   items: CartItem[];
   /** Returns true if added, false if blocked by the billing gate. */
-  addItem: (wineId: string, qty: number) => boolean;
+  addItem: (add: CartAdd, qty: number) => boolean;
   removeItem: (wineId: string) => void;
   setQty: (wineId: string, qty: number) => void;
   clear: () => void;
@@ -48,6 +66,15 @@ function clampQty(n: number) {
   return Math.floor(n);
 }
 
+// Migration helper: resolve a legacy (pre-snapshot) cart entry against the SHOP
+// catalog. Anything that doesn't resolve was an un-renderable ghost line and is
+// dropped — which clears the phantom free-shipping bottles from older carts.
+function snapshotFromShop(wineId: string): Omit<CartItem, 'wineId' | 'qty'> | null {
+  const w = SHOP.find((s) => s.id === wineId);
+  if (!w) return null;
+  return { name: w.name, unitPrice: w.price, image: w.image, msrp: w.msrp, meta: w.maker };
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
@@ -64,13 +91,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
           const valid: CartItem[] = [];
           for (const entry of parsed) {
             if (
-              entry &&
-              typeof entry === 'object' &&
-              typeof (entry as CartItem).wineId === 'string' &&
-              typeof (entry as CartItem).qty === 'number'
+              !entry ||
+              typeof entry !== 'object' ||
+              typeof (entry as CartItem).wineId !== 'string' ||
+              typeof (entry as CartItem).qty !== 'number'
             ) {
-              const q = clampQty((entry as CartItem).qty);
-              if (q > 0) valid.push({ wineId: (entry as CartItem).wineId, qty: q });
+              continue;
+            }
+            const e = entry as Partial<CartItem> & { wineId: string; qty: number };
+            const q = clampQty(e.qty);
+            if (q <= 0) continue;
+            if (typeof e.name === 'string' && typeof e.unitPrice === 'number') {
+              // New, self-contained shape — keep the snapshot as-is.
+              valid.push({
+                wineId: e.wineId,
+                qty: q,
+                name: e.name,
+                unitPrice: e.unitPrice,
+                image: e.image,
+                msrp: e.msrp,
+                meta: e.meta,
+              });
+            } else {
+              // Legacy shape ({wineId, qty}) — resolve via SHOP or drop the ghost.
+              const snap = snapshotFromShop(e.wineId);
+              if (snap) valid.push({ wineId: e.wineId, qty: q, ...snap });
             }
           }
           setItems(valid);
@@ -92,7 +137,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, hydrated]);
 
-  const addItem = useCallback((wineId: string, qty: number): boolean => {
+  const addItem = useCallback((add: CartAdd, qty: number): boolean => {
     // Billing gate: only SESH-qualified (billing-verified) users can add to
     // cart anywhere in the app. Everyone else gets the billing wizard popup
     // instead — and nothing is added. (This never fires during account
@@ -101,16 +146,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
       openGate();
       return false;
     }
-    const add = clampQty(qty);
-    if (add <= 0) return false;
+    const qadd = clampQty(qty);
+    if (qadd <= 0 || !add.wineId) return false;
     setItems((prev) => {
-      const existing = prev.find((i) => i.wineId === wineId);
+      const existing = prev.find((i) => i.wineId === add.wineId);
       if (existing) {
+        // Refresh the snapshot too (price may have moved since the first add).
         return prev.map((i) =>
-          i.wineId === wineId ? { ...i, qty: clampQty(i.qty + add) } : i,
+          i.wineId === add.wineId
+            ? { ...i, ...add, qty: clampQty(i.qty + qadd) }
+            : i,
         );
       }
-      return [...prev, { wineId, qty: add }];
+      return [...prev, { ...add, qty: qadd }];
     });
     return true;
   }, [userState, openGate]);
@@ -119,15 +167,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((i) => i.wineId !== wineId));
   }, []);
 
+  // Adjusts an EXISTING line only (cart steppers). Never creates a line — adds
+  // must go through addItem so they always carry a snapshot.
   const setQty = useCallback((wineId: string, qty: number) => {
     const next = clampQty(qty);
     setItems((prev) => {
       if (next <= 0) return prev.filter((i) => i.wineId !== wineId);
-      const existing = prev.find((i) => i.wineId === wineId);
-      if (existing) {
-        return prev.map((i) => (i.wineId === wineId ? { ...i, qty: next } : i));
-      }
-      return [...prev, { wineId, qty: next }];
+      return prev.map((i) => (i.wineId === wineId ? { ...i, qty: next } : i));
     });
   }, []);
 
@@ -137,12 +183,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     let bottles = 0;
     let sub = 0;
     for (const item of items) {
-      // Every bottle counts toward free shipping regardless of instrument/catalog
-      // (SESH + Ticker + Shop/Market all count). Subtotal uses the catalog price
-      // when the wine is in SHOP; the bottle COUNT is never filtered.
+      // Every line is a real bottle with its own price snapshot — count and
+      // subtotal are always in lockstep across all instruments.
       bottles += item.qty;
-      const wine = SHOP.find((w) => w.id === item.wineId);
-      if (wine) sub += wine.price * item.qty;
+      sub += item.unitPrice * item.qty;
     }
     const ship = bottles >= FREE_SHIP_THRESHOLD ? 0 : bottles > 0 ? SHIPPING_RATE : 0;
     return {
