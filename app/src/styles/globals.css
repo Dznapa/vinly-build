@@ -4256,7 +4256,12 @@ body { padding-bottom: 56px; }
 
 /* Only LIVE pricing (the SESH + ticker) is gated for non-qualified users.
    Shop and Winemaker Spotlight are fixed-price commerce and stay visible.
+   Ticker keeps "Bottles Left" visible — only its price/discount blurs.
    <PriceLock> toggles body.prices-locked. */
+body.prices-locked .tc-price,
+body.prices-locked .tc-was,
+body.prices-locked .tc-off,
+body.prices-locked .tc-caret,
 body.prices-locked .sesh-pricebadge-num,
 body.prices-locked .sesh-pricebadge-delta,
 body.prices-locked .sesh-term-livehero-price,
