@@ -215,7 +215,8 @@ export default function ShopPage() {
     <PageChrome>
       <main className="wrap">
         <div className="shop-hero">
-          <div className="l1">&uarr; MOVING FAST. WATCH THE TICKER. &uarr;</div>
+          {/* Branch B headline — scarcity, not price-movement. Editable copy (final TBD). */}
+          <div className="l1">&uarr; DEEP CUTS. ALMOST GONE. &uarr;</div>
           <div className="l2">&darr; FIXED PRICES. DEEP CUTS. &darr;</div>
         </div>
 

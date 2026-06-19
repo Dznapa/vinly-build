@@ -23,18 +23,30 @@ export type TickerWine = {
   sub: string;
   left: number;
   image: string;
+  price: number; // fixed sale price (Branch B — scarce, not live-moving)
+  msrp: number; // anchor / reference price the discount is measured from
 };
 
 // Matches the live SESH ticker (vinlywine.com/current-offer). Bottle photos for
 // EDICT / SHAFER / CLOUDY BAY / DAOU are placeholders until the owner supplies the
 // real Commerce7 images (Domaine des Perdrix already has its real CDN photo).
 export const TICKER: TickerWine[] = [
-  { id: 'edict-pinot-noir', name: 'EDICT PINOT NOIR RUSSIAN RIVER VALLEY', region: 'California', sub: 'Pinot Noir 2018', left: 10, image: '' },
-  { id: 'shafer-hillside-select', name: 'SHAFER HILLSIDE SELECT', region: 'California', sub: 'Cabernet Sauvignon', left: 6, image: '' },
-  { id: 'cloudy-bay-sauv-blanc', name: 'CLOUDY BAY SAUVIGNON BLANC', region: 'Marlborough', sub: 'Sauvignon Blanc 2024', left: 9, image: '' },
-  { id: 'daou-rose-paso-robles', name: 'DAOU ROSÉ PASO ROBLES', region: 'California', sub: 'Rose 2023', left: 16, image: '' },
-  { id: 'domaine-des-perdrix', name: 'DOMAINE DES PERDRIX VOSNE-ROMANÉE', region: 'Burgundy', sub: 'Pinot Noir 2019', left: 7, image: BOTTLE_IMG.domaine },
+  { id: 'edict-pinot-noir', name: 'EDICT PINOT NOIR RUSSIAN RIVER VALLEY', region: 'California', sub: 'Pinot Noir 2018', left: 10, image: '', price: 42, msrp: 70 },
+  { id: 'shafer-hillside-select', name: 'SHAFER HILLSIDE SELECT', region: 'California', sub: 'Cabernet Sauvignon', left: 6, image: '', price: 240, msrp: 360 },
+  { id: 'cloudy-bay-sauv-blanc', name: 'CLOUDY BAY SAUVIGNON BLANC', region: 'Marlborough', sub: 'Sauvignon Blanc 2024', left: 9, image: '', price: 28, msrp: 40 },
+  { id: 'daou-rose-paso-robles', name: 'DAOU ROSÉ PASO ROBLES', region: 'California', sub: 'Rose 2023', left: 16, image: '', price: 22, msrp: 30 },
+  { id: 'domaine-des-perdrix', name: 'DOMAINE DES PERDRIX VOSNE-ROMANÉE', region: 'Burgundy', sub: 'Pinot Noir 2019', left: 7, image: BOTTLE_IMG.domaine, price: 110, msrp: 150 },
 ];
+
+// % off the anchor (MSRP) — computed here in the data layer, not in the card.
+// Returns null when there's no valid anchor, so the card hides the % OFF.
+export function tickerOffPct(w: TickerWine): number | null {
+  if (!w.msrp || w.msrp <= w.price) return null;
+  return Math.round(((w.msrp - w.price) / w.msrp) * 100);
+}
+
+// Editable first-visit orientation line shown above the ticker for new visitors.
+export const TICKER_HINT = "Rare bottles, deep cuts, limited stock. Grab one before it's gone.";
 
 export type ShopWine = {
   id: string;

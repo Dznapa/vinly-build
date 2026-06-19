@@ -369,14 +369,14 @@ button {
   will-change: transform;
 }
 .ticker-card {
-  flex: 0 0 320px;
+  flex: 0 0 360px;
   display: flex;
   align-items: center;
   gap: 12px;
   background: var(--navy-panel);
   border: 1px solid rgba(99, 162, 222, 0.55);
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   position: relative;
   overflow: hidden;
 }
@@ -396,35 +396,83 @@ button {
   flex: 1;
   min-width: 0;
 }
+/* Wine NAME gets priority — up to 2 lines so similar wines stay distinguishable. */
 .ticker-card .tc-name {
   color: var(--cyan);
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 800;
+  font-size: 14.5px;
+  line-height: 1.18;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Varietal/region is the line that truncates instead. */
+.ticker-card .tc-sub {
+  color: #cfe6f5;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ticker-card .tc-sub {
-  color: #cfe6f5;
-  font-size: 12.5px;
-  line-height: 1.35;
+.ticker-card .tc-pricerow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.ticker-card .tc-price {
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.ticker-card .tc-was {
+  color: #8aa2bb;
+  font-size: 12px;
+  text-decoration: line-through;
+}
+.ticker-card .tc-off {
+  background: rgba(14, 173, 37, 0.16);
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(14, 173, 37, 0.35) inset;
 }
 .ticker-card .tc-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  gap: 10px;
+  margin-top: 8px;
 }
 .ticker-card .tc-left {
-  color: #fff;
+  color: #cfe0ef;
   font-size: 12.5px;
+  font-weight: 600;
 }
 .ticker-card .tc-left b {
   color: var(--orange);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  margin-left: 2px;
 }
+.ticker-card .tc-left.is-low { color: #ff8a6b; }
+.ticker-card .tc-left.is-low b { color: #e23b3b; }
 .ticker-card .tc-add {
-  width: 24px;
-  height: 24px;
+  position: relative;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: 0;
   background: var(--orange);
@@ -432,16 +480,61 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1;
   cursor: pointer;
   padding: 0;
+  flex: 0 0 auto;
   transition: transform 100ms ease, filter 100ms ease;
 }
 .ticker-card .tc-add:hover {
   filter: brightness(1.08);
   transform: scale(1.08);
 }
+.ticker-card .tc-add:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.ticker-card .tc-add-tip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--navy-deep);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease;
+}
+.ticker-card .tc-add:hover .tc-add-tip,
+.ticker-card .tc-add:focus-visible .tc-add-tip { opacity: 1; }
+/* First-visit orientation line above the ticker. */
+.ticker-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: rgba(242, 106, 53, 0.1);
+  border-bottom: 1px solid rgba(242, 106, 53, 0.28);
+  color: #cfe0ef;
+  font-size: 13.5px;
+}
+.ticker-hint > i { color: var(--orange); }
+.ticker-hint > span { flex: 1; }
+.ticker-hint-x {
+  background: transparent;
+  border: 0;
+  color: #8aa2bb;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+.ticker-hint-x:hover { color: #fff; }
 .ticker-chevron {
   position: absolute;
   top: 50%;
@@ -4126,7 +4219,7 @@ body { padding-bottom: 56px; }
 
 @media (max-width: 480px) {
   /* Ticker cards: smaller on tiny screens */
-  .ticker-card { flex-basis: 240px; }
+  .ticker-card { flex-basis: 300px; }
   .slide-track { padding: 0 20px; }
 
   /* Shop wine card: go vertical so the stepper + ADD TO CART aren't crushed */
