@@ -137,10 +137,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     let bottles = 0;
     let sub = 0;
     for (const item of items) {
-      const wine = SHOP.find((w) => w.id === item.wineId);
-      if (!wine) continue;
+      // Every bottle counts toward free shipping regardless of instrument/catalog
+      // (SESH + Ticker + Shop/Market all count). Subtotal uses the catalog price
+      // when the wine is in SHOP; the bottle COUNT is never filtered.
       bottles += item.qty;
-      sub += wine.price * item.qty;
+      const wine = SHOP.find((w) => w.id === item.wineId);
+      if (wine) sub += wine.price * item.qty;
     }
     const ship = bottles >= FREE_SHIP_THRESHOLD ? 0 : bottles > 0 ? SHIPPING_RATE : 0;
     return {
