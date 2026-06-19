@@ -256,7 +256,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                 className="qbp-modal-primary"
                 onClick={() => addToCart(qty)}
               >
-                <i className="fa-solid fa-check" aria-hidden /> {isTicker ? 'CONFIRM & PURCHASE' : 'CONFIRM & ADD TO CART'}
+                <i className="fa-solid fa-check" aria-hidden /> {isTicker ? 'LOCK IT IN & PURCHASE' : 'CONFIRM & ADD TO CART'}
                 <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span>
               </button>
             </>
