@@ -8,7 +8,7 @@
 
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { TICKER, TICKER_HINT, tickerOffPct } from '@/data/mock';
+import { TICKER, TICKER_HINT, tickerOffPct, type TickerWine } from '@/data/mock';
 import { useUserState } from '@/context/UserStateContext';
 import { useBillingGate } from '@/context/BillingGateContext';
 import { useQuickBuy } from './useQuickBuy';
@@ -33,6 +33,14 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
   const dismissHint = () => {
     try { window.localStorage.setItem(HINT_KEY, '1'); } catch { /* ignore */ }
     setHintShown(false);
+  };
+
+  // Buy action — fired by clicking anywhere on the card OR the + button.
+  const buy = (w: TickerWine) => {
+    dismissHint();
+    // Not billing-verified → billing gate popup, not the buy flow.
+    if (userState !== 'sesh_qualified') { openGate(); return; }
+    openQuickBuy({ id: w.id, name: w.name, region: w.region, price: w.price, image: w.image, msrp: w.msrp });
   };
 
   // Chevrons nudge a CSS variable that offsets the animated track.
@@ -72,7 +80,7 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
             const off = tickerOffPct(w);
             const low = w.left <= LOW_STOCK;
             return (
-              <div className="slide ticker-card" key={`${w.id}-${i}`}>
+              <div className="slide ticker-card" key={`${w.id}-${i}`} onClick={() => buy(w)}>
                 {w.image ? (
                   <Image src={w.image} alt="" width={54} height={76} unoptimized loading="lazy" />
                 ) : (
@@ -94,20 +102,7 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
                       type="button"
                       className="tc-add"
                       aria-label={`Add ${w.name} to cart — limited stock`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        dismissHint();
-                        // Not billing-verified → billing gate popup, not the buy flow.
-                        if (userState !== 'sesh_qualified') { openGate(); return; }
-                        openQuickBuy({
-                          id: w.id,
-                          name: w.name,
-                          region: w.region,
-                          price: w.price,
-                          image: w.image,
-                          msrp: w.msrp,
-                        });
-                      }}
+                      onClick={(e) => { e.stopPropagation(); buy(w); }}
                     >
                       <i className="fa-solid fa-plus" aria-hidden />
                       <span className="tc-add-tip" aria-hidden>Add to cart</span>
