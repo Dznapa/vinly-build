@@ -18,7 +18,7 @@ import { getSeshOffer, getSeshRecap, type SeshOffer } from '@/data/mock';
 import { SeshClosedRecap } from '@/components/SeshClosedRecap';
 import { useUserState } from '@/context/UserStateContext';
 
-const TIMEFRAMES: Timeframe[] = ['30 Sec', '1 Min', '5 Min', '15 Min', '30 Min', 'Hour', 'All'];
+const TIMEFRAMES: Timeframe[] = ['30 Sec', '1 Min', '5 Min', '15 Min', 'All'];
 const DESC_PREVIEW = 220;
 
 type VariantId = 'v1' | 'v2' | 'v3' | 'v4' | 'v5';
