@@ -4079,8 +4079,8 @@ body { padding-bottom: 56px; }
    <PriceLock> toggles body.prices-locked. */
 body.prices-locked .sesh-pricebadge-num,
 body.prices-locked .sesh-pricebadge-delta,
-body.prices-locked .sesh-term-headerprice > span:first-child,
-body.prices-locked .sesh-term-delta,
+body.prices-locked .sesh-term-livehero-price,
+body.prices-locked .sesh-term-livehero-delta,
 body.prices-locked .sesh-statrow-val.is-strike,
 body.prices-locked .sesh-statrow-val.is-good,
 body.prices-locked .sesh-statpair-value.is-strike,
@@ -4596,4 +4596,41 @@ body.prices-locked .chart-tip {
 @media (prefers-reduced-motion: reduce) {
   .pc-beacon-ring { animation: none; opacity: 0; }
   .pc-beacon-core { animation: none; }
+}
+
+/* Centered live-price hero above the SESH chart — the headline fluctuating price. */
+.sesh-term-livehero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 0 14px;
+  text-align: center;
+}
+.sesh-term-livehero-label {
+  font-family: 'League Spartan', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.4px;
+  color: #8aa2bb;
+}
+.sesh-term-livehero-price {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+  color: #34e06b;
+  text-shadow: 0 0 26px rgba(52, 224, 107, 0.4);
+}
+.sesh-term-livehero-delta {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: #34e06b;
+}
+@media (max-width: 600px) {
+  .sesh-term-livehero-price { font-size: 40px; }
 }

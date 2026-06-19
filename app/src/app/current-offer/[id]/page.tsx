@@ -483,10 +483,6 @@ function LayoutTerminal(p: SharedProps) {
       <div className="sesh-term-headerbar">
         <div className="sesh-term-sym">{offer.ticker ?? offer.id.toUpperCase()}</div>
         <div className="sesh-term-title">{offer.title}</div>
-        <div className="sesh-term-headerprice">
-          <span>${livePrice.toFixed(2)}</span>
-          <span className="sesh-term-delta">▼ {offMsrpPct.toFixed(2)}%</span>
-        </div>
       </div>
 
       <div className="sesh-term-grid">
@@ -501,6 +497,11 @@ function LayoutTerminal(p: SharedProps) {
         </aside>
 
         <div className="panel sesh-term-chart">
+          <div className="sesh-term-livehero">
+            <span className="sesh-term-livehero-label">LIVE SESH PRICE</span>
+            <span className="sesh-term-livehero-price">${livePrice.toFixed(2)}</span>
+            <span className="sesh-term-livehero-delta">▼ {offMsrpPct.toFixed(2)}% off MSRP</span>
+          </div>
           <div className="chart-wrap">
             <PriceChart gated={false} frozen={p.floorClosed} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
