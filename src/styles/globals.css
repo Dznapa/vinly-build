@@ -1335,10 +1335,13 @@ button {
 
 .sesh-buy {
   width: 100%;
-  /* Deeper orange than the global --orange (#F26A35) for the SESH BUY NOW CTA */
-  background: #D4541C;
+  /* Qualified BUY NOW: translucent glassy orange (qualified users already know the
+     flow — a lighter, less shouty CTA). Gated/soldout variants below stay solid. */
+  background: rgba(212, 84, 28, 0.8);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
   color: #fff;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 12px;
   padding: 16px 20px;
   font-family: 'League Spartan', sans-serif;
@@ -1347,9 +1350,10 @@ button {
   letter-spacing: 1px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  box-shadow: 0 12px 28px rgba(212, 84, 28, 0.28);
-  transition: filter 120ms ease, transform 80ms ease;
+  box-shadow: 0 10px 24px rgba(212, 84, 28, 0.2);
+  transition: filter 120ms ease, transform 80ms ease, background 120ms ease;
 }
+.sesh-buy:hover { background: rgba(212, 84, 28, 0.92); }
 .sesh-buy:hover { filter: brightness(1.06); }
 .sesh-buy:active { transform: translateY(1px); }
 .sesh-buy-price { font-variant-numeric: tabular-nums; font-size: 17px; }
@@ -3503,19 +3507,16 @@ button {
 
 /* ---------- prototype-only dev toolbar ---------- */
 .proto-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   background: #101418;
   color: #cfd3d8;
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 8px 16px;
-  z-index: 9999;
+  z-index: 50;
   font-size: 13px;
-  border-top: 2px solid var(--orange);
+  border-bottom: 2px solid var(--orange);
 }
 .proto-bar b {
   color: var(--orange);
@@ -4243,7 +4244,16 @@ button {
   .qbp-modal-qtyrow { grid-template-columns: 1fr; }
   .qbp-modal-total-block { text-align: left; }
   .qbp-modal-total-block .qbp-modal-meta { text-align: left; }
-  .qbp-modal-product { grid-template-columns: 80px minmax(0, 1fr); }
+
+  /* Phone: the side-by-side bottle + info overlapped (name/price ran under the
+     bottle card). Stack them — bottle centered on top, details centered below. */
+  .qbp-overlay { align-items: flex-start; padding: 12px; overflow-y: auto; }
+  .qbp-modal { max-height: none; overflow: visible; gap: 14px; }
+  .qbp-modal-product { grid-template-columns: 1fr; gap: 12px; }
+  .qbp-modal-bottle { width: 150px; aspect-ratio: 1 / 1.4; margin: 0 auto; }
+  .qbp-modal-info { align-items: center; text-align: center; }
+  .qbp-modal-pricerow { justify-content: center; flex-wrap: wrap; gap: 6px 10px; }
+  .qbp-modal-savings { justify-content: center; }
 }
 
 /* =================================================================
@@ -4252,8 +4262,8 @@ button {
    shared signup-form grammar (previously only a ~700–1000px tier).
    ================================================================= */
 
-/* Reserve room so the fixed prototype DevToolbar never hides page content. */
-body { padding-bottom: 56px; }
+/* (DevToolbar now sits in-flow at the top of the page, above the header — no
+   fixed bottom bar, so no bottom padding reservation is needed.) */
 
 @media (max-width: 600px) {
   /* Container: tighter side gutters on phones */
@@ -4360,8 +4370,18 @@ body.prices-locked .chart-tip {
   user-select: none;
 }
 
-/* SESH buy button in locked (view-pricing) state — centered, no price shown. */
-.sesh-buy--view { justify-content: center; gap: 10px; }
+/* SESH buy button in locked (view-pricing) state — centered, no price shown.
+   Stays SOLID orange (drives non-qualified users to unlock), unlike the
+   translucent qualified BUY NOW. */
+.sesh-buy--view {
+  justify-content: center;
+  gap: 10px;
+  background: #D4541C;
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.sesh-buy--view:hover { background: #D4541C; }
 
 /* SESH buy button when the floor is closed — sold out, no price, no action. */
 .sesh-buy--soldout {
@@ -4370,9 +4390,49 @@ body.prices-locked .chart-tip {
   background: #1b2c44;
   color: #8aa2bb;
   box-shadow: none;
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   cursor: not-allowed;
 }
 .sesh-buy--soldout:hover { filter: none; transform: none; }
+
+/* Mobile-only sticky floating BUY bar on the SESH offer page (desktop is fine
+   without it, so it's hidden ≥601px). Mirrors the inline BuyButton states. */
+.sesh-fab { display: none; }
+@media (max-width: 600px) {
+  .sesh-fab {
+    display: flex;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+  }
+  .sesh-fab-btn {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 16px 20px;
+    border: 0;
+    border-radius: 14px;
+    font-family: 'League Spartan', sans-serif;
+    font-weight: 800; font-size: 16px; letter-spacing: 1px;
+    color: #fff; cursor: pointer;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+  }
+  .sesh-fab-btn.is-buy {
+    background: rgba(212, 84, 28, 0.88);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    justify-content: space-between;
+  }
+  .sesh-fab-btn.is-gated { background: #D4541C; }
+  .sesh-fab-btn.is-soldout { background: #1b2c44; color: #8aa2bb; cursor: not-allowed; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35); }
+  .sesh-fab-price { font-variant-numeric: tabular-nums; font-size: 18px; }
+  /* keep page content clear of the floating bar */
+  .sesh-page { padding-bottom: 92px; }
+}
 
 /* Welcome-to-Vinly wizard — lighter backdrop than the billing gate. */
 .welcome-overlay {

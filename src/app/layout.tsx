@@ -45,9 +45,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <CartProvider>
                 <ShippingWindowProvider>
                   <ToastProvider>
+                    {/* Prototype/user-state bar sits above the header, in-flow. */}
+                    <DevToolbar />
                     {children}
                     <ScrollToTop />
-                    <DevToolbar />
                     <PriceLock />
                     <WelcomeModal />
                     <ShippingWindowModal />

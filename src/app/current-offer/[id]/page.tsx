@@ -115,6 +115,9 @@ function CurrentOfferInner({ id }: { id: string }) {
         {variant === 'v4' && <LayoutTerminal {...shared} />}
         {variant === 'v5' && <LayoutStack {...shared} />}
 
+        {/* Mobile-only sticky buy bar (hidden on desktop via CSS). */}
+        <FloatingBuy {...shared} />
+
         {popover}
         {floorClosed && !recapDismissed && (
           <SeshClosedRecap recap={getSeshRecap(offer)} onClose={() => setRecapDismissed(true)} />
@@ -217,6 +220,38 @@ function Desc({ offer, readMore, setReadMore }: Pick<SharedProps, 'offer' | 'rea
         {readMore ? 'Read less' : 'Read more'}
       </button>
     </>
+  );
+}
+
+// Mobile-only sticky floating buy bar — mirrors BuyButton's three states.
+// (CSS hides it on desktop; rendered only on the SESH offer page.)
+function FloatingBuy(p: SharedProps) {
+  const { isGated, livePrice, openBuy, openBillingGate, floorClosed } = p;
+  if (floorClosed) {
+    return (
+      <div className="sesh-fab">
+        <button type="button" className="sesh-fab-btn is-soldout" disabled>
+          <i className="fa-solid fa-circle-xmark" aria-hidden /> <span>SOLD OUT</span>
+        </button>
+      </div>
+    );
+  }
+  if (isGated) {
+    return (
+      <div className="sesh-fab">
+        <button type="button" className="sesh-fab-btn is-gated" onClick={openBillingGate}>
+          <i className="fa-solid fa-lock" aria-hidden /> <span>VIEW PRICING</span>
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="sesh-fab">
+      <button type="button" className="sesh-fab-btn is-buy" onClick={openBuy}>
+        <span>BUY NOW</span>
+        <span className="sesh-fab-price">${livePrice.toFixed(2)}</span>
+      </button>
+    </div>
   );
 }
 
