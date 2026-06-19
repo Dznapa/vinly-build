@@ -50,8 +50,9 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
           </div>
           <h3 className="qbp-gate-title">Add billing to participate</h3>
           <p className="qbp-gate-copy">
-            You can watch live SESH prices as a viewer. To lock in a bottle, add your billing
-            information and get SESH-qualified.
+            As a viewer you see full prices in the Shop and Winemaker Spotlight. Live SESH and
+            Ticker pricing stays locked until you&apos;re SESH-qualified — add your billing
+            information to reveal it and lock in bottles.
           </p>
         </div>
 
@@ -67,7 +68,7 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
 
         <div className="qbp-modal-foot">
           <span>
-            <i className="fa-solid fa-eye" aria-hidden /> Viewer mode · prices visible · no purchases until billing is added
+            <i className="fa-solid fa-eye" aria-hidden /> Viewer mode · Shop &amp; Spotlight prices visible · SESH/Ticker locked until billing&apos;s added
           </span>
         </div>
       </div>
