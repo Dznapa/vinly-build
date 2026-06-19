@@ -1078,6 +1078,51 @@ button {
   .vinly-gauge-closeblurb { animation: none; }
 }
 
+/* Stage-aware live SESH promo card (SeshLiveCard) — shown below the inventory bar
+   while live; mirrors the closing-bell card's style with a per-stage accent. The
+   gauge's redundant microline is hidden on the SESH page so the two don't overlap. */
+.sesh-page .vinly-gauge-micro { display: none; }
+
+.sesh-live-card {
+  --accent: var(--orange);
+  position: relative;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.sesh-live-card--open { --accent: var(--green); }
+.sesh-live-card--mid { --accent: var(--orange); }
+.sesh-live-card--low { --accent: var(--orange); }
+.sesh-live-card--last { --accent: #e23b3b; }
+.sesh-live-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.sesh-live-ic { font-size: 15px; color: var(--accent); flex: 0 0 auto; }
+.sesh-live-title {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 15px; letter-spacing: 0.3px; color: #fff;
+}
+.sesh-live-live {
+  display: inline-flex; align-items: center; gap: 6px; margin-left: auto;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 10px; font-weight: 800; letter-spacing: 1.4px;
+  color: var(--accent); white-space: nowrap;
+}
+.sesh-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+  animation: sesh-live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes sesh-live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.sesh-live-body { margin: 0; color: #c7d5e6; font-size: 13px; line-height: 1.55; }
+.sesh-live-hl { font-weight: 700; color: var(--orange); }
+.sesh-live-card--open .sesh-live-hl { color: var(--green); }
+@media (prefers-reduced-motion: reduce) {
+  .sesh-live-dot { animation: none; }
+}
+
 /* ============================================================
    (legacy InventoryBar classes — left only as placeholders)
    ============================================================ */

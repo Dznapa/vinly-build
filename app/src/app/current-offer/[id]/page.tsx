@@ -11,6 +11,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } f
 import { PageChrome } from '@/components/PageChrome';
 import PriceChart, { type Timeframe } from '@/components/PriceChart';
 import InventoryBar from '@/components/InventoryBar';
+import SeshLiveCard from '@/components/SeshLiveCard';
 import BottlePlaceholder from '@/components/BottlePlaceholder';
 import { useQuickBuy } from '@/components/useQuickBuy';
 import { useBillingGate } from '@/context/BillingGateContext';
@@ -521,6 +522,10 @@ function LayoutTerminal(p: SharedProps) {
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
           <InventoryBar percentRemaining={p.invPct} variant="dark" />
+          {/* Stage-aware live promo card; replaces the gauge microline (hidden via CSS
+              on .sesh-page) while live, and self-hides at close so the closing-bell
+              card takes over. Reads the same invPct the gauge does. */}
+          <SeshLiveCard pct={p.invPct} />
         </div>
 
         <aside className="panel sesh-term-right">
