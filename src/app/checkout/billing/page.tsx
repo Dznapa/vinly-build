@@ -91,6 +91,12 @@ export default function BillingPage() {
     addresses.length === 0 || selectedAddressId === NEW_ADDR_ID;
   const usingNewCard = cards.length === 0 || selectedCardId === NEW_CARD_ID;
 
+  // Locked SESH/Ticker reservations auto-charge the default card when the window
+  // closes — the payment method can't be changed while any are in the cart.
+  const hasLocked = items.some((i) => i.locked);
+  const lockedCardId = defaultOrFirstId(cards);
+  const lockedCard = cards.find((c) => c.id === lockedCardId);
+
   // ----- Totals -----
   const { tax, total } = useMemo(() => {
     const t = subtotal * TAX_RATE;
@@ -135,7 +141,10 @@ export default function BillingPage() {
 
     // 2) Resolve / create the payment card.
     let paymentCardId: string | undefined;
-    if (usingNewCard) {
+    if (hasLocked && lockedCardId) {
+      // Reservations settle on the default card — never create/change it here.
+      paymentCardId = lockedCardId;
+    } else if (usingNewCard) {
       const digits = cardNumber.replace(/\s+/g, '');
       if (!digits || !cardName || !cardExp || !cardCvc) {
         return;
@@ -274,7 +283,26 @@ export default function BillingPage() {
 
             <h4 className="mt">Payment</h4>
 
-            {cards.length > 0 && (
+            {hasLocked && lockedCard ? (
+              <>
+                <label className="check-row" style={{ marginTop: 0 }}>
+                  Payment method
+                </label>
+                <div className={styles.lockedPay}>
+                  <span>
+                    {lockedCard.brand} •••• {lockedCard.last4} (exp {lockedCard.expMonth}/{lockedCard.expYear})
+                  </span>
+                  <span className={styles.lockedPayTag}>
+                    <i className="fa-solid fa-lock" aria-hidden /> Default
+                  </span>
+                </div>
+                <p className={styles.lockedPayNote}>
+                  Your cart has locked SESH/Ticker reservations — they settle automatically
+                  on your default card when the window closes, so the payment method can&apos;t
+                  be changed here.
+                </p>
+              </>
+            ) : cards.length > 0 ? (
               <>
                 <label className="check-row" style={{ marginTop: 0 }}>
                   Use saved card
@@ -293,9 +321,9 @@ export default function BillingPage() {
                   <option value={NEW_CARD_ID}>Use a different card…</option>
                 </select>
               </>
-            )}
+            ) : null}
 
-            {usingNewCard && (
+            {!hasLocked && usingNewCard && (
               <>
                 <input
                   className="field"

@@ -124,6 +124,36 @@
   flex: 1;
 }
 
+/* Locked payment method — read-only default card when reservations are in the cart. */
+.lockedPay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e2e6ea;
+  border-radius: 8px;
+  background: #f7f8fa;
+  color: #2a2a2a;
+  font-weight: 600;
+}
+.lockedPayTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.lockedPayTag i { font-size: 11px; }
+.lockedPayNote {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;
