@@ -512,9 +512,16 @@ function LayoutTerminal(p: SharedProps) {
 
         <aside className="panel sesh-term-right">
           <div className="sesh-term-right-stage">
-            <Bottle offer={offer} size="md" />
+            <div className="sesh-term-ratings-vert">
+              {offer.ratings.map((r, i) => (
+                <span className="sesh-term-rating" key={r.src + i}>
+                  <b>{r.score}</b>
+                  <span>{r.src}</span>
+                </span>
+              ))}
+            </div>
+            <Bottle offer={offer} size="lg" />
           </div>
-          <RatingChip offer={offer} />
           <h2 className="sesh-term-right-title">{offer.title}</h2>
           <div className="sesh-term-right-sub">{offer.volume}</div>
           <BuyButton {...p} full />
@@ -522,7 +529,10 @@ function LayoutTerminal(p: SharedProps) {
       </div>
 
       <section className="panel sesh-term-foot">
-        <h2>About this wine</h2>
+        <div className="sesh-term-foot-head">
+          <span className="sesh-term-foot-kicker"><i className="fa-solid fa-wine-bottle" aria-hidden /> THE STORY</span>
+          <h2>About this wine</h2>
+        </div>
         <Desc offer={offer} readMore={readMore} setReadMore={setReadMore} />
       </section>
     </>

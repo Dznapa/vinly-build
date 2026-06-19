@@ -1691,14 +1691,19 @@ button {
   font-size: 11px; letter-spacing: 2px;
   text-transform: uppercase;
 }
-.sesh-term-right { align-items: stretch; }
+.sesh-term-right { align-items: stretch; display: flex; flex-direction: column; gap: 14px; }
 .sesh-term-right-stage {
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
   background: #ffffff;
   border-radius: 14px;
-  padding: 22px 14px;
-  min-height: 220px;
+  padding: 14px 12px;
 }
+/* Critic scores listed vertically down the left of the bottle. */
+.sesh-term-ratings-vert { display: flex; flex-direction: column; gap: 16px; flex: 0 0 auto; }
+.sesh-term-rating { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.sesh-term-rating b { color: var(--orange); font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 24px; }
+.sesh-term-rating span { color: #555; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-top: 3px; }
+.sesh-term-right .sesh-buy { margin-top: auto; }
 .sesh-term-right-stage img {
   -webkit-mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
           mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
@@ -1710,13 +1715,36 @@ button {
   font-weight: 800; font-size: 18px;
 }
 .sesh-term-right-sub { color: #8aa2bb; font-size: 13px; letter-spacing: 1.5px; }
-.sesh-term-foot h2 {
-  margin: 0 0 8px;
+.sesh-term-foot {
+  margin-bottom: 60px;
+  box-shadow: inset 3px 0 0 var(--orange);
+}
+.sesh-term-foot-head { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.sesh-term-foot-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--orange);
   font-family: 'League Spartan', sans-serif;
-  font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase;
+  font-weight: 800; font-size: 12px; letter-spacing: 2px;
+}
+.sesh-term-foot h2 {
+  margin: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 22px; letter-spacing: 0.4px;
   color: #fff;
 }
-.sesh-term-foot { margin-bottom: 60px; }
+.sesh-term-foot .sesh-readmore {
+  display: inline-flex; align-items: center;
+  margin-top: 14px;
+  padding: 9px 18px;
+  border: 1px solid rgba(57, 176, 229, 0.5);
+  border-radius: 999px;
+  font-weight: 700;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.sesh-term-foot .sesh-readmore:hover {
+  background: rgba(57, 176, 229, 0.12);
+  border-color: var(--cyan);
+}
 @media (max-width: 1200px) {
   .sesh-term-grid { grid-template-columns: 1fr; }
 }
