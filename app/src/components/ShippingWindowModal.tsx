@@ -13,6 +13,20 @@ import { useShippingWindow } from '@/context/ShippingWindowContext';
 
 const FREE_AT = 6;
 
+// Editable headlines for the under-6 progress states. The >= 6 (free) headline is
+// left inline below and untouched. Plural/singular handled here; driven by the same
+// cart bottle total the meter and counter use.
+const SHIP_HL_ONE = 'One bottle’s in. Get to six.';
+const shipHlLastOne = (bottles: number) => `${bottles} in. One bottle to go.`;
+const shipHlMany = (bottles: number, remaining: number) => `${bottles} bottles in. ${remaining} to go.`;
+
+function progressHeadline(bottles: number): string {
+  const remaining = FREE_AT - bottles;
+  if (bottles <= 1) return SHIP_HL_ONE;
+  if (remaining === 1) return shipHlLastOne(bottles);
+  return shipHlMany(bottles, remaining);
+}
+
 function mmss(total: number): string {
   const m = Math.floor(total / 60);
   const s = total % 60;
@@ -164,7 +178,7 @@ export function ShippingWindowModal() {
         </div>
 
         <div className="ship-body">
-          <h2 className="ship-hl">{free ? 'Shipping’s on us.' : 'One bottle’s in. Get to six.'}</h2>
+          <h2 className="ship-hl">{free ? 'Shipping’s on us.' : progressHeadline(w.bottles)}</h2>
           <p className="ship-mech">
             {free ? (
               <>You’ve got <b>{w.bottles} bottle{w.bottles === 1 ? '' : 's'}</b> — shipping’s <b className="ship-free">free</b>. The card still runs when time’s up.</>
