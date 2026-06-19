@@ -183,6 +183,45 @@ button {
   color: var(--orange);
   font-weight: 700;
 }
+
+/* Anonymous header CTAs: Learn More (link) · Create An Account (light blue) ·
+   Get SESH Qualified (orange). */
+.header-cta-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.header-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.5px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: filter 120ms ease, color 120ms ease, text-decoration-color 120ms ease;
+}
+.header-cta--link {
+  background: transparent;
+  color: #fff;
+  padding: 9px 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 255, 255, 0.4);
+}
+.header-cta--link:hover { color: var(--orange); text-decoration-color: var(--orange); }
+.header-cta--blue { background: var(--cyan); color: #0e2647; }
+.header-cta--blue:hover { filter: brightness(1.06); }
+.header-cta--orange { background: var(--orange); color: #fff; }
+.header-cta--orange:hover { filter: brightness(1.06); }
 .header-icons {
   display: flex;
   align-items: center;
@@ -3562,7 +3601,8 @@ button {
   .detail-grid {
     grid-template-columns: 120px 1fr;
   }
-  .header-center {
+  .header-center,
+  .header-cta-group {
     display: none;
   }
   .foot-links {

@@ -12,11 +12,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useUserState } from '@/context/UserStateContext';
 import { useCart } from '@/context/CartContext';
 import { useProfile } from '@/context/ProfileContext';
+import { useBillingGate } from '@/context/BillingGateContext';
 
 export function Header() {
   const { userState } = useUserState();
   const { count: cartCount } = useCart();
   const { logout, basics, hydrated } = useProfile();
+  const { openGate } = useBillingGate();
   const router = useRouter();
   const pathname = usePathname();
   const showCenter = userState === 'anonymous';
@@ -68,9 +70,22 @@ export function Header() {
         </Link>
 
         {showCenter && (
-          <Link href="/register_details" className="header-center">
-            NEW TO VINLY? <span className="start">START HERE</span>
-          </Link>
+          <div className="header-cta-group">
+            <a
+              href="https://vinly.wine"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="header-cta header-cta--link"
+            >
+              Learn More About Vinly
+            </a>
+            <Link href="/register_details" className="header-cta header-cta--blue">
+              Create An Account
+            </Link>
+            <button type="button" className="header-cta header-cta--orange" onClick={openGate}>
+              Get SESH Qualified
+            </button>
+          </div>
         )}
 
         <nav className="header-icons" aria-label="Primary">
