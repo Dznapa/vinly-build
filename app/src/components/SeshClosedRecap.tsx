@@ -70,10 +70,10 @@ export function SeshClosedRecap({ recap, onClose }: { recap: SeshRecap; onClose:
             <span className="recap-ticker">{recap.ticker}</span>
             <span className="recap-wine">{recap.wineName}</span>
           </div>
-          <span className="recap-closed"><span className="recap-closed-dot" aria-hidden /> CLOSED</span>
         </div>
 
         <div className="recap-hero">
+          <div className="recap-status"><span className="recap-status-dot" aria-hidden /> SESH CLOSED</div>
           <div className="recap-eye">SETTLED AT</div>
           <div className="recap-settle">{money(recap.settled)}</div>
           {isNum(recap.msrpSavingsPct) && recap.msrpSavingsPct > 0 && (
