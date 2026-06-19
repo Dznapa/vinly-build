@@ -97,7 +97,7 @@ export default function CustomerCartPage() {
                           // SESH/Ticker reservations auto-purchase when the 15-min
                           // window closes — they can't be removed from the cart.
                           <span className={styles.lockedNote}>
-                            <i className="fa-solid fa-lock" aria-hidden /> Reserved — auto-purchases at window close
+                            <i className="fa-solid fa-lock" aria-hidden /> Locked in. No action needed — it settles at close.
                           </span>
                         ) : (
                           <button
