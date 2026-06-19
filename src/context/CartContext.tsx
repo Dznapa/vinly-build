@@ -32,6 +32,7 @@ export type CartItem = {
   image?: string;
   msrp?: number;
   meta?: string; // secondary descriptor line (maker / region) for the cart table
+  locked?: boolean; // true for SESH/Ticker quick-buy reservations — qty can't be changed
 };
 
 /** Everything needed to add a line — the per-instrument caller supplies the snapshot. */
@@ -111,6 +112,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 image: e.image,
                 msrp: e.msrp,
                 meta: e.meta,
+                locked: e.locked === true,
               });
             } else {
               // Legacy shape ({wineId, qty}) — resolve via SHOP or drop the ghost.
@@ -152,9 +154,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existing = prev.find((i) => i.wineId === add.wineId);
       if (existing) {
         // Refresh the snapshot too (price may have moved since the first add).
+        // Once locked (SESH/Ticker reservation), stay locked.
         return prev.map((i) =>
           i.wineId === add.wineId
-            ? { ...i, ...add, qty: clampQty(i.qty + qadd) }
+            ? { ...i, ...add, qty: clampQty(i.qty + qadd), locked: i.locked || add.locked }
             : i,
         );
       }

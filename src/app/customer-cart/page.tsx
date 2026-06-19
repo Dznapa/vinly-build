@@ -102,23 +102,32 @@ export default function CustomerCartPage() {
                         </button>
                       </div>
                       <div className={styles.colQty}>
-                        <div className="stepper">
-                          <button
-                            type="button"
-                            aria-label="Decrease quantity"
-                            onClick={() => setQty(item.wineId, clampQty(item.qty - 1))}
-                          >
-                            &minus;
-                          </button>
-                          <span className="qty">{item.qty}</span>
-                          <button
-                            type="button"
-                            aria-label="Increase quantity"
-                            onClick={() => setQty(item.wineId, clampQty(item.qty + 1))}
-                          >
-                            +
-                          </button>
-                        </div>
+                        {item.locked ? (
+                          <div className={styles.lockedQty}>
+                            <span className={styles.lockedQtyNum}>{item.qty}</span>
+                            <span className={styles.lockedTag}>
+                              <i className="fa-solid fa-lock" aria-hidden /> Locked in
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="stepper">
+                            <button
+                              type="button"
+                              aria-label="Decrease quantity"
+                              onClick={() => setQty(item.wineId, clampQty(item.qty - 1))}
+                            >
+                              &minus;
+                            </button>
+                            <span className="qty">{item.qty}</span>
+                            <button
+                              type="button"
+                              aria-label="Increase quantity"
+                              onClick={() => setQty(item.wineId, clampQty(item.qty + 1))}
+                            >
+                              +
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <div className={styles.colTotal}>${lineTotal.toFixed(2)}</div>
                     </div>

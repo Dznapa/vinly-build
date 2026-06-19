@@ -86,7 +86,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     // Carry a full price/name snapshot so the bottle is a real, visible, charged
     // cart line regardless of which catalog its id lives in.
     const added = addItem(
-      { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region },
+      { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true },
       quantity,
     );
     onClose();
