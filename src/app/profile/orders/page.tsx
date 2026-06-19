@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { PageChrome } from '@/components/PageChrome';
+import ProfileBack from '@/components/ProfileBack';
 import { useProfile, type Order } from '@/context/ProfileContext';
 import styles from './orders.module.css';
 
@@ -104,6 +105,7 @@ export default function OrdersPage() {
   return (
     <PageChrome ticker={false}>
       <main className="wrap">
+        <ProfileBack />
         <div className="sesh-title">
           <span className="tag">PROFILE</span> Orders
         </div>

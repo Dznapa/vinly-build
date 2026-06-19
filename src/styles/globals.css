@@ -222,6 +222,23 @@ button {
 .header-cta--blue:hover { filter: brightness(1.06); }
 .header-cta--orange { background: var(--orange); color: #fff; }
 .header-cta--orange:hover { filter: brightness(1.06); }
+
+/* Back link at the top of profile sub-pages. */
+.profile-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: #cfe0ef;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+.profile-back:hover { color: var(--orange); }
+.profile-back i { font-size: 12px; }
 .header-icons {
   display: flex;
   align-items: center;

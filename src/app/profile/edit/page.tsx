@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
+import ProfileBack from '@/components/ProfileBack';
 import { useProfile } from '@/context/ProfileContext';
 import styles from './edit.module.css';
 
@@ -84,6 +85,7 @@ export default function ProfileEditPage() {
   return (
     <PageChrome ticker={false}>
       <main className="wrap">
+        <ProfileBack />
         <div className="signup-title">Edit profile</div>
         <form className="signup-card" onSubmit={onSubmit}>
           <h4>Contact Information</h4>

@@ -8,6 +8,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { PageChrome } from '@/components/PageChrome';
+import ProfileBack from '@/components/ProfileBack';
 import {
   useProfile,
   cardBrand,
@@ -144,6 +145,7 @@ export default function PaymentPage() {
   return (
     <PageChrome ticker={false}>
       <main className="wrap">
+        <ProfileBack />
         <div className="sesh-title">
           <span className="tag">PROFILE</span> Payment methods
         </div>

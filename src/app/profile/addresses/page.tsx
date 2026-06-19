@@ -7,6 +7,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { PageChrome } from '@/components/PageChrome';
+import ProfileBack from '@/components/ProfileBack';
 import { useProfile, type Address } from '@/context/ProfileContext';
 import styles from './addresses.module.css';
 
@@ -136,6 +137,7 @@ export default function AddressesPage() {
   return (
     <PageChrome ticker={false}>
       <main className="wrap">
+        <ProfileBack />
         <div className="sesh-title">
           <span className="tag">PROFILE</span> Addresses
         </div>
