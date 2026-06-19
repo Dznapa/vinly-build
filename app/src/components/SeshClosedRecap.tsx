@@ -16,6 +16,51 @@ const NOTIFY_KEY = 'vinly:seshNotify';
 const money = (n: number) => `$${Math.round(n)}`;
 const isNum = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
 
+// Editable — generic, brand-voice teasers for the next drop. Must NEVER name a
+// specific wine, region, varietal, or producer (offerings change on the fly).
+const NEXT_SESH_HINTS: string[] = [
+  `If we told you, it wouldn't be a SESH.`,
+  `We know what's dropping. You'll find out at noon.`,
+  `The kind of bottle people lie about getting in on.`,
+  `Set an alarm. Thank us later.`,
+  `Big enough that we're staying quiet about it.`,
+  `No hints. Just be at the screen when it opens.`,
+  `The watchers will eat well. The hesitators will read about it.`,
+  `We could tell you. We'd rather watch you find out.`,
+  `Something good. Something fast. Something gone by 12:30.`,
+  `The kind of drop that makes the group chat go quiet.`,
+  `No tasting notes. No scores. Just a number that moves.`,
+  `Show up early. The good stuff doesn't announce itself twice.`,
+  `One bottle. One window. Don't blink.`,
+  `Somebody's going to brag about this one. Might as well be you.`,
+  `Worth rearranging your Thursday for.`,
+  `The sommeliers will pretend they saw it coming. You'll have the bottle.`,
+  `We don't hype. We open the floor and let it speak.`,
+  `Loaded and waiting. The rest is up to your reflexes.`,
+  `Miss it and you'll hear about it for a week.`,
+  `The floor opens at noon. Bring your nerve.`,
+];
+
+// One random teaser per recap load; avoids the immediately-previous (sessionStorage).
+function NextSeshHint() {
+  const [hint, setHint] = useState<string | null>(null);
+  useEffect(() => {
+    let last = -1;
+    try {
+      const s = window.sessionStorage.getItem('vinly:nextSeshHint');
+      if (s != null) last = Number(s);
+    } catch { /* ignore */ }
+    let idx = Math.floor(Math.random() * NEXT_SESH_HINTS.length);
+    if (NEXT_SESH_HINTS.length > 1) {
+      while (idx === last) idx = Math.floor(Math.random() * NEXT_SESH_HINTS.length);
+    }
+    try { window.sessionStorage.setItem('vinly:nextSeshHint', String(idx)); } catch { /* ignore */ }
+    setHint(NEXT_SESH_HINTS[idx]);
+  }, []);
+  if (!hint) return null;
+  return <div className="recap-hint">{hint}</div>;
+}
+
 export function SeshClosedRecap({ recap, onClose }: { recap: SeshRecap; onClose: () => void }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [subscribed, setSubscribed] = useState(false);
@@ -106,7 +151,7 @@ export function SeshClosedRecap({ recap, onClose }: { recap: SeshRecap; onClose:
         <div className="recap-next">
           <div className="recap-next-eye">NEXT SESH</div>
           <div className="recap-when">{recap.nextSeshWhen}</div>
-          {recap.nextSeshHint && <div className="recap-hint">{recap.nextSeshHint}</div>}
+          <NextSeshHint />
         </div>
 
         <div className="recap-ctas">
