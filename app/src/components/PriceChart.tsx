@@ -319,35 +319,7 @@ export default function PriceChart({
         </ComposedChart>
       </ResponsiveContainer>
       </div>
-
-      {/* Legend lives BELOW the chart so it doesn't overlap captions / buttons.
-          MSRP/Street rows hide when the current zoom doesn't include them
-          (the dashed reference line is also auto-hidden in that case). */}
-      <div className="chart-legend">
-        {showMsrpRef && (
-          <span
-            className="chart-legend-item"
-            title="MSRP — Manufacturer's Suggested Retail Price."
-          >
-            <span className="chart-legend-dash" /> ${msrp} MSRP
-            <i className="fa-solid fa-circle-info chart-legend-info" aria-hidden />
-          </span>
-        )}
-        {showStreetRef && (
-          <span
-            className="chart-legend-item"
-            title="STREET PRICE — what you'd typically pay at retail."
-          >
-            <span className="chart-legend-dash" /> ${street} STREET
-            <i className="fa-solid fa-circle-info chart-legend-info" aria-hidden />
-          </span>
-        )}
-        {!gated && (
-          <span className="chart-legend-item" title="LIVE — the current Vinly SESH price.">
-            <span className="chart-legend-line" /> LIVE
-          </span>
-        )}
-      </div>
+      {/* Legend removed — MSRP/Street are labeled on the chart lines and in KEY STATS. */}
     </div>
   );
 }
