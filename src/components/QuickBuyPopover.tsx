@@ -53,10 +53,12 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     if (!wine) { lastWineIdRef.current = null; return; }
     if (lastWineIdRef.current !== wine.id) {
       lastWineIdRef.current = wine.id;
-      setQty(1); setLockedAt(null); setSecondsLeft(LOCK_SECONDS);
+      // Ticker is a single-step flow — open already "locked in" (timer running)
+      // so there's just one popup. SESH keeps the explicit LOCK IN first step.
+      setQty(1); setLockedAt(source === 'ticker' ? Date.now() : null); setSecondsLeft(LOCK_SECONDS);
       setCancelCount(0); setExpired(false);
     }
-  }, [wine]);
+  }, [wine, source]);
 
   useEffect(() => {
     if (!isLocked || lockedAt === null) return;
@@ -73,10 +75,11 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !isLocked) onClose(); };
+    // Ticker can always be dismissed (no commitment); SESH locks dismissal once locked.
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && (!isLocked || isTicker)) onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, isLocked, onClose]);
+  }, [open, isLocked, isTicker, onClose]);
 
   const addToCart = useCallback((quantity: number) => {
     if (!wine) return;
@@ -107,8 +110,8 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   }, [wine, qty, addToCart]);
 
   const handleBackdropClick = useCallback(() => {
-    if (!isLocked) onClose();
-  }, [isLocked, onClose]);
+    if (!isLocked || isTicker) onClose();
+  }, [isLocked, isTicker, onClose]);
 
   const savings = useMemo(() => {
     if (!wine || wine.msrp === undefined) return 0;
@@ -143,7 +146,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
             className="qbp-modal-close"
             aria-label="Close"
             onClick={onClose}
-            disabled={isLocked}
+            disabled={isLocked && !isTicker}
           >
             <i className="fa-solid fa-xmark" aria-hidden />
           </button>
@@ -243,7 +246,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
               <button
                 type="button"
                 className="qbp-modal-secondary"
-                onClick={handleCancelReservation}
+                onClick={isTicker ? onClose : handleCancelReservation}
                 disabled={cancelLimitReached}
               >
                 Cancel reservation
@@ -253,7 +256,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                 className="qbp-modal-primary"
                 onClick={() => addToCart(qty)}
               >
-                <i className="fa-solid fa-check" aria-hidden /> CONFIRM &amp; ADD TO CART
+                <i className="fa-solid fa-check" aria-hidden /> {isTicker ? 'CONFIRM & PURCHASE' : 'CONFIRM & ADD TO CART'}
                 <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span>
               </button>
             </>
