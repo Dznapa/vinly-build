@@ -4571,3 +4571,29 @@ body.prices-locked .chart-tip {
   .recap-v { font-size: 19px; }
   .recap-wine { max-width: 160px; }
 }
+
+/* Live-price beacon — pulsing radar ring + glowing core at the end of the chart line. */
+.pc-beacon-ring {
+  r: 4px;
+  fill: none;
+  stroke: #36e05a;
+  stroke-width: 1.5;
+  animation: pc-beacon-ring 1.8s ease-out infinite;
+}
+@keyframes pc-beacon-ring {
+  0% { r: 4px; opacity: 0.7; }
+  100% { r: 18px; opacity: 0; }
+}
+.pc-beacon-core {
+  fill: #36e05a;
+  filter: drop-shadow(0 0 5px rgba(54, 224, 90, 0.9));
+  animation: pc-beacon-core 1.8s ease-in-out infinite;
+}
+@keyframes pc-beacon-core {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-beacon-ring { animation: none; opacity: 0; }
+  .pc-beacon-core { animation: none; }
+}

@@ -297,7 +297,21 @@ export default function PriceChart({
               dataKey="price"
               stroke="#36e05a"
               strokeWidth={2}
-              dot={false}
+              dot={(props: { cx?: number; cy?: number; index?: number }) => {
+                const { cx, cy, index } = props;
+                const key = `pc-dot-${index}`;
+                // Flashing beacon only on the latest point — and only while live.
+                if (frozen || index !== data.length - 1 || typeof cx !== 'number' || typeof cy !== 'number') {
+                  return <g key={key} />;
+                }
+                return (
+                  <g key={key} style={{ pointerEvents: 'none' }}>
+                    <circle cx={cx} cy={cy} r={9} fill="rgba(54, 224, 90, 0.18)" />
+                    <circle className="pc-beacon-ring" cx={cx} cy={cy} />
+                    <circle className="pc-beacon-core" cx={cx} cy={cy} r={4.5} />
+                  </g>
+                );
+              }}
               activeDot={{ r: 4, fill: '#36e05a', stroke: '#fff', strokeWidth: 1 }}
               isAnimationActive={false}
             />
