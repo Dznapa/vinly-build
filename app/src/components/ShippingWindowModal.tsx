@@ -49,11 +49,13 @@ export function ShippingWindowModal() {
     return () => window.removeEventListener('keydown', onKey);
   }, [modalOpen, w]);
 
-  // Alert when the cart crosses from 6+ down to under 6 while the window is open.
+  // Alerts when the cart crosses the free-shipping threshold (either direction).
   const [dropAlert, setDropAlert] = useState(false);
+  const [unlockAlert, setUnlockAlert] = useState(false);
   const prevBottles = useRef(w.bottles);
   useEffect(() => {
-    if (w.active && prevBottles.current >= FREE_AT && w.bottles < FREE_AT) setDropAlert(true);
+    if (w.active && prevBottles.current >= FREE_AT && w.bottles < FREE_AT) { setDropAlert(true); setUnlockAlert(false); }
+    if (w.active && prevBottles.current < FREE_AT && w.bottles >= FREE_AT) { setUnlockAlert(true); setDropAlert(false); }
     prevBottles.current = w.bottles;
   }, [w.bottles, w.active]);
   useEffect(() => {
@@ -61,6 +63,11 @@ export function ShippingWindowModal() {
     const t = window.setTimeout(() => setDropAlert(false), 7000);
     return () => window.clearTimeout(t);
   }, [dropAlert]);
+  useEffect(() => {
+    if (!unlockAlert) return;
+    const t = window.setTimeout(() => setUnlockAlert(false), 8000);
+    return () => window.clearTimeout(t);
+  }, [unlockAlert]);
 
   // FINALIZED — charge ran, show the outcome.
   if (w.finalized) {
@@ -102,6 +109,17 @@ export function ShippingWindowModal() {
   if (w.minimized) {
     return (
       <>
+        {unlockAlert && (
+          <div className="ship-unlock" role="status">
+            <button type="button" className="ship-drop-x" onClick={() => setUnlockAlert(false)} aria-label="Dismiss">
+              <i className="fa-solid fa-xmark" aria-hidden />
+            </button>
+            <div className="ship-unlock-head">
+              <i className="fa-solid fa-circle-check" aria-hidden /> Free shipping unlocked!
+            </div>
+            <p>You&apos;re past 6 bottles — shipping&apos;s on us. Add more or check out; the card runs when the window closes.</p>
+          </div>
+        )}
         {dropAlert && (
           <div className="ship-drop" role="alert">
             <button type="button" className="ship-drop-x" onClick={() => setDropAlert(false)} aria-label="Dismiss">
@@ -115,14 +133,14 @@ export function ShippingWindowModal() {
         )}
         <button
           type="button"
-          className={`ship-badge${danger ? ' is-danger' : ''}`}
+          className={`ship-badge${free ? ' is-free' : ''}${danger ? ' is-danger' : ''}`}
           onClick={w.expand}
-          aria-label={`Free shipping window: ${mmss(w.secondsLeft)} left, ${filled} of 6 bottles. Expand.`}
+          aria-label={`Free shipping window: ${mmss(w.secondsLeft)} left, ${filled} of 6 bottles${free ? ' — free shipping unlocked' : ''}. Expand.`}
         >
           <span className="ship-badge-dot" aria-hidden />
           <span className="ship-badge-main">
             <span className="ship-badge-time">{mmss(w.secondsLeft)}</span>
-            <span className="ship-badge-label">{filled}/6 · free-ship window</span>
+            <span className="ship-badge-label">{free ? 'FREE SHIPPING ✓' : `${filled}/6 · free-ship window`}</span>
           </span>
         </button>
       </>
@@ -146,10 +164,10 @@ export function ShippingWindowModal() {
         </div>
 
         <div className="ship-body">
-          <h2 className="ship-hl">{free ? 'Six in. Shipping’s on us.' : 'One bottle’s in. Get to six.'}</h2>
+          <h2 className="ship-hl">{free ? 'Shipping’s on us.' : 'One bottle’s in. Get to six.'}</h2>
           <p className="ship-mech">
             {free ? (
-              <>You hit <b>6 bottles</b> — shipping’s <b className="ship-free">free</b>. The card still runs when time’s up.</>
+              <>You’ve got <b>{w.bottles} bottle{w.bottles === 1 ? '' : 's'}</b> — shipping’s <b className="ship-free">free</b>. The card still runs when time’s up.</>
             ) : (
               <>Reach <b>6 bottles</b> before the clock hits zero and shipping’s <b className="ship-free">free</b>. Stop short and we add a flat <b>$35</b>. Either way, the card runs when time’s up.</>
             )}
@@ -159,7 +177,11 @@ export function ShippingWindowModal() {
         <div className="ship-prog">
           <div className="ship-prog-top">
             <span className="ship-prog-label">CART</span>
-            <span className="ship-prog-count"><span className="n">{filled}</span> <span className="of">of 6 bottles</span></span>
+            <span className="ship-prog-count">
+              {free
+                ? <><span className="n">{w.bottles}</span> <span className="of">bottles · free shipping</span></>
+                : <><span className="n">{filled}</span> <span className="of">of 6 bottles</span></>}
+            </span>
           </div>
           <div className="ship-bars">
             {Array.from({ length: FREE_AT }).map((_, i) => (

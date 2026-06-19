@@ -4604,6 +4604,39 @@ body.prices-locked .chart-tip {
 .ship-badge.is-danger { border-color: #e23b3b; animation: none; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(226, 61, 61, 0.5); }
 .ship-badge.is-danger .ship-badge-dot { background: #e23b3b; box-shadow: 0 0 10px #e23b3b; }
 .ship-badge.is-danger .ship-badge-time { color: #ff6b6b; }
+.ship-badge.is-free {
+  border-color: var(--green);
+  animation: none;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(14, 173, 37, 0.5);
+}
+.ship-badge.is-free .ship-badge-dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+.ship-badge.is-free .ship-badge-time { color: #fff; }
+.ship-badge.is-free .ship-badge-label { color: var(--green); }
+
+/* Congrats popup — fires when the cart crosses up to 6 (free shipping). */
+.ship-unlock {
+  position: fixed;
+  right: 20px;
+  bottom: 142px;
+  z-index: 1200;
+  width: 264px;
+  background: var(--navy-deep);
+  border: 1px solid rgba(14, 173, 37, 0.55);
+  border-radius: 12px;
+  padding: 14px 16px 13px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 26px rgba(14, 173, 37, 0.25);
+  animation: ship-drop-in 240ms ease;
+}
+.ship-unlock-head {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: 0.3px;
+  margin-bottom: 5px;
+}
+.ship-unlock-head i { color: var(--green); margin-right: 6px; }
+.ship-unlock p { margin: 0; font-size: 12.5px; line-height: 1.45; color: #c7d5e6; }
 
 /* "Dropped below 6" alert — sits just above the floating timer badge. */
 .ship-drop {
