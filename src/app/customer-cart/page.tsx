@@ -93,13 +93,21 @@ export default function CustomerCartPage() {
                           {item.meta && <>{item.meta}<br /></>}
                           750ml
                         </div>
-                        <button
-                          type="button"
-                          className={styles.removeBtn}
-                          onClick={() => handleRemove(item.wineId, item.name)}
-                        >
-                          Remove
-                        </button>
+                        {item.locked ? (
+                          // SESH/Ticker reservations auto-purchase when the 15-min
+                          // window closes — they can't be removed from the cart.
+                          <span className={styles.lockedNote}>
+                            <i className="fa-solid fa-lock" aria-hidden /> Reserved — auto-purchases at window close
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className={styles.removeBtn}
+                            onClick={() => handleRemove(item.wineId, item.name)}
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
                       <div className={styles.colQty}>
                         {item.locked ? (

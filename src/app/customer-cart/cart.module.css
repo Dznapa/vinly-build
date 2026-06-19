@@ -179,6 +179,18 @@
   cursor: pointer;
 }
 
+/* Locked reservation note in the title cell (replaces the Remove link). */
+.lockedNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.lockedNote i { font-size: 10px; }
+
 .panelFoot {
   display: flex;
   justify-content: flex-end;
