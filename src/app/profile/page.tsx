@@ -100,7 +100,7 @@ function moneyStr(n: number): string {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { userState, setUserState } = useUserState();
+  const { userState } = useUserState();
   const {
     basics,
     orders,
@@ -126,10 +126,6 @@ export default function ProfilePage() {
   const onGetQualified = () => {
     setQualified();
     router.push('/current-offer/justin-isosceles');
-  };
-
-  const onResetQualification = () => {
-    setUserState('signed_in');
   };
 
   const onSignOut = () => {
@@ -260,15 +256,6 @@ export default function ProfilePage() {
                 <p className={styles.statusHint}>
                   You&apos;re cleared for live SESH purchases and quick-buy.
                 </p>
-                <div className={styles.statusActions}>
-                  <button
-                    type="button"
-                    className={`btn-skip ${styles.statusBtn}`}
-                    onClick={onResetQualification}
-                  >
-                    RESET QUALIFICATION
-                  </button>
-                </div>
                 <SeshQuip />
                 <FloorRules />
               </>
