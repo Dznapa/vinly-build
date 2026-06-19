@@ -1420,8 +1420,17 @@ button {
 }
 .sesh-statrow-pts { font-size: 12px; color: #8aa2bb; font-weight: 600; margin-left: 3px; }
 /* KEY rows (Off MSRP, You Save) — subtle table-row emphasis: wash + accent + nudge. */
-.sesh-statrow.is-key { background: rgba(14, 173, 37, 0.07); }
-.sesh-statrow.is-key::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--green); }
+.sesh-statrow.is-key {
+  background: rgba(14, 173, 37, 0.07);
+  margin: 0 -14px;          /* extend the wash into the panel's 24px gutter… */
+  padding: 11px 14px;       /* …then re-inset content so labels stay aligned + clear the accent bar */
+  border-top: 0;
+  border-radius: 8px;
+}
+.sesh-statrow.is-key::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--green); border-radius: 8px 0 0 8px;
+}
 .sesh-statrow.is-key > span:first-child { color: #fff; font-weight: 600; }
 .sesh-statrow.is-key .sesh-statrow-val { font-size: 19px; font-weight: 700; }
 /* KEY STATS header with LIVE indicator. */

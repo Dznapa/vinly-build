@@ -8,10 +8,9 @@ A pixel-faithful, click-through **UI/UX clone** of the Vinly wine site (`vinlywi
 
 ## Commands
 
-All commands run from the `app/` directory (not the repo root):
+All commands run from the repo root (the Next.js app lives at the root):
 
 ```bash
-cd app
 npm install
 npm run dev        # dev server on http://localhost:3000
 npm run build      # next build
@@ -24,13 +23,13 @@ There is no test suite. Validate changes with `npm run typecheck` and `npm run l
 
 ## Architecture
 
-Next.js 14 **App Router** + TypeScript (strict). Import alias `@/*` → `app/src/*`.
+Next.js 14 **App Router** + TypeScript (strict). Import alias `@/*` → `src/*`. The Next.js app lives at the **repo root**, and Vercel deploys production (`main` branch) from the repo root.
 
-**Two halves of the repo:**
-- `app/` — the actual Next.js UI.
+**Repo layout:**
+- Repo root — the actual Next.js UI (`src/`, `public/`, `package.json`, `next.config.js`).
 - `spec/` — ground-truth docs and reference. Read these before making UI changes: `BUILD_PROMPT.md` (brief + design tokens), `SCREEN_NOTES.md` (per-screen notes from the live site), `ASSETS.md` (real logo/font/CDN-image URLs), `CHANGE_PROMPT.md` (fidelity-pass updates). `spec/prototype/` is the original static HTML/CSS/JS prototype the React app was ported from — useful for exact behavior/styling reference.
 
-**State lives in three React Contexts, all client-side and `localStorage`-persisted** (composed in `app/src/app/layout.tsx`, wrapping every page):
+**State lives in three React Contexts, all client-side and `localStorage`-persisted** (composed in `src/app/layout.tsx`, wrapping every page):
 - `UserStateContext` (`vinly:userState`) — the global user state: `'anonymous' | 'signed_in' | 'sesh_qualified'`. This drives most conditional UI, especially SESH gating (non-qualified users see a blurred price + "Get SESH Qualified"; qualified users see the live price + BUY NOW).
 - `CartContext` (`vinly:cart`) — cart items + derived subtotal/shipping/total. Free ground shipping at 6+ bottles (`FREE_SHIP_THRESHOLD`).
 - `ProfileContext` (`vinly:profile`) — one blob for the signed-in account: profile, addresses, payment cards, orders, prefs.

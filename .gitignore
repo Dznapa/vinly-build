@@ -26,6 +26,7 @@ Thumbs.db
 **/coverage/
 **/.nyc_output/
 **/.cache/
+**/tsconfig.tsbuildinfo
 
 # Vercel
 **/.vercel
