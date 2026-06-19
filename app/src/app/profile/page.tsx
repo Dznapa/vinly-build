@@ -6,11 +6,74 @@
    globals.css; only Profile-specific bits live in profile.module.css. */
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useUserState } from '@/context/UserStateContext';
 import { useProfile } from '@/context/ProfileContext';
 import styles from './profile.module.css';
+
+// Editable — rotating deadpan one-liners shown to SESH-qualified members.
+const SESH_QUIPS: string[] = [
+  `You used to "think about it." Look at you now.`,
+  `Your card's on file. Your instincts are on notice.`,
+  `Somewhere a sommelier is still describing "notes of wet slate." You'll have bought the bottle before he finishes.`,
+  `Welcome to the floor — the only room where "I'll wait for it to come back" is a punchline.`,
+  `Qualified. The wine doesn't care about your feelings. Neither does the clock.`,
+  `You're cleared for live buying. Try not to make it weird by overthinking a Tuesday Pinot.`,
+  `Cleared for the floor. The hesitation was holding you back anyway.`,
+  `Fleece Vest Guy reviewed your file. He nodded once. That's the highest praise he gives.`,
+  `The good bottles don't wait for a committee. Neither do you. Allegedly.`,
+  `Status: dangerous. You now know what things actually cost.`,
+  `Verified. Your group chat will never agree fast enough — buy without them.`,
+  `You're on the floor. Swirling optional. Deciding fast, mandatory.`,
+  `Other people are reading tasting notes. You're reading the tape.`,
+  `Locked, loaded, and one click from a bottle you'll be smug about later.`,
+  `Congratulations. "Let me sleep on it" is no longer a viable strategy here.`,
+  `The floor's open. The clock's honest. Your move.`,
+  `You qualified. The wine's still better than your last impulse buy. Probably.`,
+  `No scores. No swirling theater. Just bottles and the nerve to grab them.`,
+];
+
+// Editable — static tongue-in-cheek anchor block.
+const FLOOR_RULES: string[] = [
+  `The price moves. So do you.`,
+  `Hesitation is a personality flaw in here.`,
+  `"Let me run it by the group chat" is not a hedging strategy.`,
+  `We don't do 100-point scores. We do bottles in boxes.`,
+  `If you snooze, someone in a fleece vest is already checking out.`,
+];
+
+// One random quip per page load; avoids the immediately-previous one (sessionStorage).
+function SeshQuip() {
+  const [quip, setQuip] = useState<string | null>(null);
+  useEffect(() => {
+    let last = -1;
+    try {
+      const s = window.sessionStorage.getItem('vinly:seshQuip');
+      if (s != null) last = Number(s);
+    } catch { /* ignore */ }
+    let idx = Math.floor(Math.random() * SESH_QUIPS.length);
+    if (SESH_QUIPS.length > 1) {
+      while (idx === last) idx = Math.floor(Math.random() * SESH_QUIPS.length);
+    }
+    try { window.sessionStorage.setItem('vinly:seshQuip', String(idx)); } catch { /* ignore */ }
+    setQuip(SESH_QUIPS[idx]);
+  }, []);
+  if (!quip) return null;
+  return <p className={styles.seshQuip}>{quip}</p>;
+}
+
+function FloorRules() {
+  return (
+    <div className={styles.floorRules}>
+      <div className={styles.floorRulesHead}>THE FLOOR RULES</div>
+      <ol className={styles.floorRulesList}>
+        {FLOOR_RULES.map((r, i) => <li key={i}>{r}</li>)}
+      </ol>
+    </div>
+  );
+}
 
 // NEEDS REVIEW: layout/grammar inferred — no live screenshot for Profile.
 // Buttons and copy are speculative until owner confirms.
@@ -206,6 +269,8 @@ export default function ProfilePage() {
                     RESET QUALIFICATION
                   </button>
                 </div>
+                <SeshQuip />
+                <FloorRules />
               </>
             )}
           </div>

@@ -217,3 +217,33 @@
   flex-direction: column;
   gap: 4px;
 }
+
+/* SESH-status garnish: rotating deadpan one-liner + static Floor Rules (white panel). */
+.seshQuip {
+  margin-top: 16px;
+  color: #8a93a0;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.floorRules {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #d9dde2;
+}
+.floorRulesHead {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+.floorRulesList {
+  margin: 0;
+  padding-left: 18px;
+  color: #6b7280;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+.floorRulesList li { margin-bottom: 2px; }
