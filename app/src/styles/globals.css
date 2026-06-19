@@ -437,6 +437,18 @@ button {
   font-size: 20px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  display: inline-block;
+  animation: tc-flash 450ms ease;
+}
+.ticker-card .tc-caret { font-size: 13px; font-weight: 800; line-height: 1; }
+.ticker-card .tc-caret.is-up { color: #e23b3b; }
+.ticker-card .tc-caret.is-down { color: var(--green); }
+@keyframes tc-flash {
+  0% { transform: scale(1.14); filter: brightness(1.6); }
+  100% { transform: scale(1); filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-card .tc-price { animation: none; }
 }
 .ticker-card .tc-was {
   color: #8aa2bb;

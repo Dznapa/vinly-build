@@ -1,14 +1,17 @@
 'use client';
 
-/* Ticker — CSS marquee of rare, limited bottles at FIXED prices (Branch B:
-   scarcity-driven, not live-moving). Each card anchors its discounted price to
-   MSRP with a loud % OFF + Bottles Left, a labeled quick-add, and a dismissable
-   first-visit orientation line. Cards are duplicated for a seamless loop; hover
-   pauses; chevrons nudge. */
+/* Ticker — CSS marquee of rare, limited bottles with LIVE pricing. Each wine's
+   price fluctuates between 30% and 70% off MSRP on a tick (as dynamic as the
+   SESH), with a ▲/▼ direction caret and a brief flash on change. Cards anchor the
+   live price to MSRP with a loud % OFF + Bottles Left, a labeled quick-add, and a
+   dismissable first-visit line. The whole tile is clickable to buy. Duplicated for
+   a seamless loop; hover pauses; chevrons nudge.
+
+   PROTOTYPE: the fluctuation is simulated client-side (no server price feed). */
 
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { TICKER, TICKER_HINT, tickerOffPct, type TickerWine } from '@/data/mock';
+import { TICKER, TICKER_HINT, type TickerWine } from '@/data/mock';
 import { useUserState } from '@/context/UserStateContext';
 import { useBillingGate } from '@/context/BillingGateContext';
 import { useQuickBuy } from './useQuickBuy';
@@ -16,12 +19,26 @@ import BottlePlaceholder, { pickVariant } from './BottlePlaceholder';
 
 const HINT_KEY = 'vinly:tickerHint';
 const LOW_STOCK = 3;
+const LIVE_TICK_MS = 2800;
+const OFF_MIN = 0.3; // 30% off → price ceiling
+const OFF_MAX = 0.7; // 70% off → price floor
+const priceBounds = (msrp: number) => ({ min: msrp * (1 - OFF_MAX), max: msrp * (1 - OFF_MIN) });
+
+type LivePrice = { price: number; dir: number };
 
 export function Ticker({ sticky = true }: { sticky?: boolean }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const [paused, setPaused] = useState(false);
   const [hintShown, setHintShown] = useState(false);
+  const [live, setLive] = useState<Record<string, LivePrice>>(() => {
+    const m: Record<string, LivePrice> = {};
+    for (const w of TICKER) {
+      const { min, max } = priceBounds(w.msrp);
+      m[w.id] = { price: Math.min(max, Math.max(min, w.price)), dir: 0 };
+    }
+    return m;
+  });
   const { userState } = useUserState();
   const { openGate } = useBillingGate();
   const { open: openQuickBuy, popover } = useQuickBuy('ticker');
@@ -35,12 +52,33 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
     setHintShown(false);
   };
 
+  // Live price feed (mock): random-walk each wine within 30–70% off MSRP.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setLive((prev) => {
+        const next: Record<string, LivePrice> = {};
+        for (const w of TICKER) {
+          const { min, max } = priceBounds(w.msrp);
+          const cur = prev[w.id]?.price ?? w.price;
+          const step = (Math.random() - 0.5) * (max - min) * 0.22;
+          let np = cur + step;
+          if (np < min) np = min;
+          else if (np > max) np = max;
+          next[w.id] = { price: np, dir: np > cur + 0.01 ? 1 : np < cur - 0.01 ? -1 : 0 };
+        }
+        return next;
+      });
+    }, LIVE_TICK_MS);
+    return () => window.clearInterval(id);
+  }, []);
+
   // Buy action — fired by clicking anywhere on the card OR the + button.
   const buy = (w: TickerWine) => {
     dismissHint();
     // Not billing-verified → billing gate popup, not the buy flow.
     if (userState !== 'sesh_qualified') { openGate(); return; }
-    openQuickBuy({ id: w.id, name: w.name, region: w.region, price: w.price, image: w.image, msrp: w.msrp });
+    const price = Math.round(live[w.id]?.price ?? w.price);
+    openQuickBuy({ id: w.id, name: w.name, region: w.region, price, image: w.image, msrp: w.msrp });
   };
 
   // Chevrons nudge a CSS variable that offsets the animated track.
@@ -51,8 +89,6 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
     }
   };
 
-  // Duplicate the list enough that the strip always overflows the viewport; an
-  // even count keeps the -50% keyframe recycling seamlessly.
   const cards = [...TICKER, ...TICKER, ...TICKER, ...TICKER];
 
   return (
@@ -77,7 +113,9 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
 
         <div className="slide-track" ref={trackRef}>
           {cards.map((w, i) => {
-            const off = tickerOffPct(w);
+            const lp = live[w.id] ?? { price: w.price, dir: 0 };
+            const price = Math.round(lp.price);
+            const off = w.msrp > 0 ? Math.round(((w.msrp - lp.price) / w.msrp) * 100) : null;
             const low = w.left <= LOW_STOCK;
             return (
               <div className="slide ticker-card" key={`${w.id}-${i}`} onClick={() => buy(w)}>
@@ -90,8 +128,13 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
                   <div className="tc-name">{w.name}</div>
                   <div className="tc-sub">{w.region} · {w.sub}</div>
                   <div className="tc-pricerow">
-                    <span className="tc-price">${w.price.toFixed(0)}</span>
-                    {w.msrp > w.price && <span className="tc-was">was ${w.msrp.toFixed(0)}</span>}
+                    <span className="tc-price" key={price}>${price}</span>
+                    {lp.dir !== 0 && (
+                      <span className={`tc-caret ${lp.dir > 0 ? 'is-up' : 'is-down'}`} aria-hidden>
+                        {lp.dir > 0 ? '▲' : '▼'}
+                      </span>
+                    )}
+                    {w.msrp > price && <span className="tc-was">was ${w.msrp.toFixed(0)}</span>}
                     {off !== null && <span className="tc-off">{off}% OFF</span>}
                   </div>
                   <div className="tc-foot">
