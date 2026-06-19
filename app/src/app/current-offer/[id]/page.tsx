@@ -523,6 +523,11 @@ function LayoutTerminal(p: SharedProps) {
             <Bottle offer={offer} size="lg" />
           </div>
           <h2 className="sesh-term-right-title">{offer.title}</h2>
+          {offer.appellation && (
+            <div className="sesh-term-right-appellation">
+              <i className="fa-solid fa-location-dot" aria-hidden /> {offer.appellation}
+            </div>
+          )}
           <div className="sesh-term-right-sub">{offer.volume}</div>
           <BuyButton {...p} full />
         </aside>

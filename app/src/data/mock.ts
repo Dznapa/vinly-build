@@ -311,6 +311,7 @@ export type SeshOffer = {
   description: string;
   offerDuration: string;
   inventoryPct: number;
+  appellation?: string; // e.g. "Paso Robles"
   nextSeshHint?: string; // editable per-drop teaser for the closed-recap "next SESH" block
 };
 
@@ -321,6 +322,7 @@ export const SESH_OFFERS: SeshOffer[] = [
     title: 'JUSTIN ISOSCELES | 2021',
     ticker: '$JUIS',
     volume: '750mL',
+    appellation: 'Paso Robles',
     livePrice: 43.37,
     msrp: 85,
     street: 60,
