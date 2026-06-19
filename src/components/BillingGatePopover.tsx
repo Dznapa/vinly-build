@@ -40,7 +40,7 @@ const SHIP_COPY = {
   kicker: 'STEP 1 OF 2',
   title: 'Where do the bottles go?',
   sub: "We ship to most of the country. A couple of states still think it's 1920 — we'll flag it if yours is one.",
-  cta: 'CONTINUE TO PAYMENT',
+  cta: 'ADD A CARD',
   trust: "No charge here. You're just getting on the floor.",
 };
 const PAY_COPY = {
