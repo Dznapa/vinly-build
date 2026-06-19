@@ -263,7 +263,7 @@ export default function ShopPage() {
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search wines… (press / )"
+              placeholder="Search wines…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
