@@ -9,6 +9,8 @@
    the profile server-side via Klaviyo. */
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUserState } from '@/context/UserStateContext';
 import type { SeshRecap } from '@/data/mock';
 
 const NOTIFY_KEY = 'vinly:seshNotify';
@@ -64,6 +66,11 @@ function NextSeshHint() {
 export function SeshClosedRecap({ recap, onClose }: { recap: SeshRecap; onClose: () => void }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [subscribed, setSubscribed] = useState(false);
+  const { userState } = useUserState();
+  const router = useRouter();
+  // Anonymous visitors can't be "notified" — there's no account to notify. Send
+  // them through sign-up first; signed-in users get the (mock) notify opt-in.
+  const needsSignup = userState === 'anonymous';
 
   useEffect(() => {
     try { if (window.localStorage.getItem(NOTIFY_KEY)) setSubscribed(true); } catch { /* ignore */ }
@@ -86,7 +93,13 @@ export function SeshClosedRecap({ recap, onClose }: { recap: SeshRecap; onClose:
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const notify = () => {
+  const handleCta = () => {
+    if (needsSignup) {
+      // No account yet → route into the sign-up flow instead of opting in.
+      onClose();
+      router.push('/register_details');
+      return;
+    }
     if (subscribed) return;
     // MOCK Klaviyo opt-in — real subscribe must run server-side via Klaviyo.
     try { window.localStorage.setItem(NOTIFY_KEY, '1'); } catch { /* ignore */ }
@@ -157,14 +170,19 @@ export function SeshClosedRecap({ recap, onClose }: { recap: SeshRecap; onClose:
         <div className="recap-ctas">
           <button
             type="button"
-            className={`recap-btn${subscribed ? ' is-confirmed' : ''}`}
-            onClick={notify}
-            disabled={subscribed}
+            className={`recap-btn${subscribed && !needsSignup ? ' is-confirmed' : ''}`}
+            onClick={handleCta}
+            disabled={subscribed && !needsSignup}
           >
-            {subscribed
-              ? <><i className="fa-solid fa-check" aria-hidden /> YOU’RE ON THE LIST</>
-              : <>NOTIFY ME WHEN IT OPENS&nbsp;&nbsp;→</>}
+            {needsSignup
+              ? <><i className="fa-solid fa-user-plus" aria-hidden /> SIGN UP TO GET NOTIFIED&nbsp;&nbsp;→</>
+              : subscribed
+                ? <><i className="fa-solid fa-check" aria-hidden /> YOU’RE ON THE LIST</>
+                : <>NOTIFY ME WHEN IT OPENS&nbsp;&nbsp;→</>}
           </button>
+          {needsSignup && (
+            <p className="recap-cta-note">Create your account to get the next-drop alert.</p>
+          )}
         </div>
 
         <div className="recap-foot">

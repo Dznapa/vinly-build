@@ -13,6 +13,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
+import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile, cardBrand as detectBrand } from '@/context/ProfileContext';
 import styles from './billing.module.css';
 
@@ -67,6 +68,7 @@ export default function BillingPage() {
   const router = useRouter();
   const { items, subtotal, shipping, count, clear } = useCart();
   const { addresses, cards, addAddress, addCard, placeOrder } = useProfile();
+  const { endWindow: endShipWindow } = useShippingWindow();
 
   // ----- Saved address / card selection -----
   const [selectedAddressId, setSelectedAddressId] = useState<string>(() =>
@@ -174,6 +176,9 @@ export default function BillingPage() {
     });
 
     clear();
+    // Checking out fulfills the order, so the free-shipping window is over —
+    // terminate the timer/badge so it doesn't keep running post-checkout.
+    endShipWindow();
     router.push(`/checkout/summary?orderId=${id}`);
   };
 

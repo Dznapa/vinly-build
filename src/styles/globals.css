@@ -4937,6 +4937,7 @@ body.prices-locked .chart-tip {
 }
 .recap-btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
 .recap-btn.is-confirmed { background: rgba(14, 173, 37, 0.16); color: var(--green); box-shadow: 0 0 0 1px rgba(14, 173, 37, 0.4) inset; cursor: default; }
+.recap-cta-note { margin: 10px 0 0; text-align: center; color: #8aa2bb; font-size: 12.5px; }
 .recap-foot { border-top: 1px solid rgba(99, 162, 222, 0.18); padding: 13px; text-align: center; }
 .recap-foot i { font-size: 12px; color: #8aa2bb; }
 .recap-byline { color: #c7d5e6; font-weight: 600; font-style: normal; }
