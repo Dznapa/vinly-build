@@ -4286,6 +4286,17 @@ body.prices-locked .chart-tip {
 /* SESH buy button in locked (view-pricing) state — centered, no price shown. */
 .sesh-buy--view { justify-content: center; gap: 10px; }
 
+/* SESH buy button when the floor is closed — sold out, no price, no action. */
+.sesh-buy--soldout {
+  justify-content: center;
+  gap: 10px;
+  background: #1b2c44;
+  color: #8aa2bb;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.sesh-buy--soldout:hover { filter: none; transform: none; }
+
 /* Welcome-to-Vinly wizard — lighter backdrop than the billing gate. */
 .welcome-overlay {
   position: fixed;

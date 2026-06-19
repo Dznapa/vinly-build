@@ -220,7 +220,15 @@ function Desc({ offer, readMore, setReadMore }: Pick<SharedProps, 'offer' | 'rea
 }
 
 function BuyButton(p: SharedProps & { full?: boolean }) {
-  const { isGated, livePrice, openBuy, openBillingGate, full } = p;
+  const { isGated, livePrice, openBuy, openBillingGate, floorClosed, full } = p;
+  // Floor closed (sold out) → no price, no buy action.
+  if (floorClosed) {
+    return (
+      <button type="button" className={`sesh-buy sesh-buy--soldout${full ? ' sesh-buy--full' : ''}`} disabled>
+        <i className="fa-solid fa-circle-xmark" aria-hidden /> <span>SOLD OUT</span>
+      </button>
+    );
+  }
   // Non-qualified: pricing is locked, so the CTA invites them to unlock it and
   // routes to the billing wizard instead of showing a price / buy flow.
   if (isGated) {
