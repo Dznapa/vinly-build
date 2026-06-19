@@ -223,6 +223,43 @@ function Desc({ offer, readMore, setReadMore }: Pick<SharedProps, 'offer' | 'rea
   );
 }
 
+function fmtHMS(total: number): string {
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+// Live "how long this wine has been on offer" counter, shown under the chart.
+// Counts up from a per-offer opened timestamp (seeded once, persisted). When the
+// floor closes it freezes to offer.offerDuration — the exact value the recap's
+// "SOLD OUT IN" shows — so the chart timer and the recap always agree.
+function OfferDuration({ offer, floorClosed }: { offer: SharedProps['offer']; floorClosed: boolean }) {
+  const [sec, setSec] = useState<number | null>(null);
+  useEffect(() => {
+    const key = `vinly:offerOpened:${offer.id}`;
+    let opened: number;
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (raw) { opened = Number(raw); }
+      else { opened = Date.now(); window.localStorage.setItem(key, String(opened)); }
+    } catch { opened = Date.now(); }
+    const tick = () => setSec(Math.max(0, Math.floor((Date.now() - opened) / 1000)));
+    tick();
+    if (floorClosed) return; // frozen once the floor closes
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [offer.id, floorClosed]);
+
+  const text = floorClosed ? offer.offerDuration : sec === null ? '—:—:—' : fmtHMS(sec);
+  return (
+    <div className="sesh-offer-duration">
+      Offer Duration: <b>{text}</b>
+    </div>
+  );
+}
+
 // Mobile-only sticky floating buy bar — mirrors BuyButton's three states.
 // (CSS hides it on desktop; rendered only on the SESH offer page.)
 function FloatingBuy(p: SharedProps) {
@@ -556,6 +593,7 @@ function LayoutTerminal(p: SharedProps) {
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />
+          <OfferDuration offer={offer} floorClosed={p.floorClosed} />
           <InventoryBar percentRemaining={p.invPct} variant="dark" />
           {/* Stage-aware live promo card; replaces the gauge microline (hidden via CSS
               on .sesh-page) while live, and self-hides at close so the closing-bell

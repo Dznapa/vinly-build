@@ -1332,6 +1332,18 @@ button {
 }
 .sesh-tf:hover { color: #fff; }
 .sesh-tf.is-active { background: rgba(255, 255, 255, 0.08); color: #fff; }
+/* "Offer Duration" readout under the chart — counts up live, freezes to the
+   recap's SOLD OUT IN value when the floor closes. */
+.sesh-offer-duration {
+  margin-top: 8px;
+  text-align: right;
+  color: var(--green);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.6px;
+}
+.sesh-offer-duration b { font-weight: 800; font-variant-numeric: tabular-nums; }
 
 .sesh-buy {
   width: 100%;
