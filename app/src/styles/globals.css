@@ -1640,10 +1640,12 @@ button {
 
 /* =================== V4 — TERMINAL =================== */
 .sesh-term-headerbar {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 18px; align-items: center;
-  padding: 14px 20px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 16px 20px;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px; color: #fff;
@@ -1652,9 +1654,15 @@ button {
 .sesh-term-sym {
   color: var(--cyan);
   font-family: 'League Spartan', sans-serif;
-  font-weight: 800; font-size: 18px; letter-spacing: 1px;
+  font-weight: 800; font-size: 22px; letter-spacing: 1px;
 }
-.sesh-term-title { color: #cfe0ef; font-family: 'League Spartan', sans-serif; font-weight: 600; }
+.sesh-term-title {
+  color: #fff;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
 .sesh-term-headerprice {
   display: inline-flex; align-items: baseline; gap: 12px;
   font-family: 'League Spartan', sans-serif;
