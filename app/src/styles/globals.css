@@ -1460,17 +1460,41 @@ button {
 
 .sesh-statrow {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 11px 0; border-top: 1px solid rgba(255, 255, 255, 0.06);
   color: #cfe0ef; font-size: 14px;
+  position: relative;
 }
 .sesh-statrow:first-of-type { border-top: 0; }
-.sesh-statrow > span:first-child { color: #8aa2bb; }
-.sesh-statrow-val { font-family: 'League Spartan', sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; color: #fff; }
-.sesh-statrow-val.is-good { color: var(--green); }
+.sesh-statrow > span:first-child { color: #cfe0ef; font-weight: 500; }
+.sesh-statrow-val {
+  font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 600; font-variant-numeric: tabular-nums;
+  font-size: 16px; letter-spacing: -0.2px; color: #fff; text-align: right;
+}
+.sesh-statrow-val.is-good { color: var(--green); animation: sesh-statrow-flash 450ms ease; }
 .sesh-statrow-val.is-strike {
-  color: #cfe0ef;
+  color: #8aa2bb; font-weight: 500;
   text-decoration: line-through;
-  text-decoration-color: rgba(226, 59, 59, 0.6);
+  text-decoration-color: rgba(143, 163, 188, 0.55);
+}
+.sesh-statrow-pts { font-size: 12px; color: #8aa2bb; font-weight: 600; margin-left: 3px; }
+/* KEY rows (Off MSRP, You Save) — subtle table-row emphasis: wash + accent + nudge. */
+.sesh-statrow.is-key { background: rgba(14, 173, 37, 0.07); }
+.sesh-statrow.is-key::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--green); }
+.sesh-statrow.is-key > span:first-child { color: #fff; font-weight: 600; }
+.sesh-statrow.is-key .sesh-statrow-val { font-size: 19px; font-weight: 700; }
+@keyframes sesh-statrow-flash {
+  0% { filter: brightness(1.8); transform: scale(1.06); }
+  100% { filter: none; transform: scale(1); }
+}
+/* KEY STATS header with LIVE indicator. */
+.sesh-term-left-head { display: flex; align-items: center; justify-content: space-between; }
+.sesh-term-live { display: inline-flex; align-items: center; gap: 6px; font-family: 'League Spartan', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.4px; color: var(--green); }
+.sesh-term-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 7px var(--green); animation: sesh-term-live-pulse 1.6s ease-in-out infinite; }
+@keyframes sesh-term-live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) {
+  .sesh-statrow-val.is-good { animation: none; }
+  .sesh-term-live-dot { animation: none; }
 }
 
 /* =================== V1 — SPLIT =================== */

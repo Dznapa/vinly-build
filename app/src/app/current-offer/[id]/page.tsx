@@ -7,7 +7,7 @@
    tuned so panels puzzle together at matching heights. */
 
 import { useRouter } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { PageChrome } from '@/components/PageChrome';
 import PriceChart, { type Timeframe } from '@/components/PriceChart';
 import InventoryBar from '@/components/InventoryBar';
@@ -495,13 +495,18 @@ function LayoutTerminal(p: SharedProps) {
 
       <div className="sesh-term-grid">
         <aside className="panel sesh-term-left">
-          <h3>KEY STATS</h3>
-          <StatRow label="MSRP" value={`$${offer.msrp.toFixed(2)}`} strike />
-          <StatRow label="Street" value={`$${offer.street.toFixed(2)}`} strike />
-          <StatRow label="Off MSRP" value={`${offMsrpPct.toFixed(2)}%`} good />
-          <StatRow label="Off Street" value={`${offStreetPct.toFixed(2)}%`} good />
-          <StatRow label="You Save" value={`$${savings.toFixed(2)}`} good />
-          <StatRow label="Highest Critic Rating" value={`${topRating(offer.ratings)} pts`} />
+          <div className="sesh-term-left-head">
+            <h3>KEY STATS</h3>
+            {!p.floorClosed && (
+              <span className="sesh-term-live"><span className="sesh-term-live-dot" aria-hidden /> LIVE</span>
+            )}
+          </div>
+          {offer.msrp > 0 && <StatRow label="MSRP" value={`$${offer.msrp.toFixed(2)}`} strike />}
+          {offer.street > 0 && <StatRow label="Street" value={`$${offer.street.toFixed(2)}`} strike />}
+          {offer.msrp > 0 && <StatRow label="Off MSRP" value={`${offMsrpPct.toFixed(2)}%`} good keyRow flashKey={offMsrpPct.toFixed(2)} />}
+          {offer.street > 0 && <StatRow label="Off Street" value={`${offStreetPct.toFixed(2)}%`} good flashKey={offStreetPct.toFixed(2)} />}
+          {offer.msrp > 0 && <StatRow label="You Save" value={`$${savings.toFixed(2)}`} good keyRow flashKey={savings.toFixed(2)} />}
+          <StatRow label="Highest Critic Rating" value={<>{topRating(offer.ratings)}<span className="sesh-statrow-pts">pts</span></>} />
         </aside>
 
         <div className="panel sesh-term-chart">
@@ -613,11 +618,13 @@ function StatPair({ label, value, strike, good }: { label: string; value: string
     </div>
   );
 }
-function StatRow({ label, value, strike, good }: { label: string; value: string; strike?: boolean; good?: boolean }) {
+function StatRow({ label, value, strike, good, keyRow, flashKey }: {
+  label: string; value: ReactNode; strike?: boolean; good?: boolean; keyRow?: boolean; flashKey?: string | number;
+}) {
   return (
-    <div className="sesh-statrow">
+    <div className={`sesh-statrow${keyRow ? ' is-key' : ''}`}>
       <span>{label}</span>
-      <span className={`sesh-statrow-val${strike ? ' is-strike' : ''}${good ? ' is-good' : ''}`}>{value}</span>
+      <span key={flashKey} className={`sesh-statrow-val${strike ? ' is-strike' : ''}${good ? ' is-good' : ''}`}>{value}</span>
     </div>
   );
 }
