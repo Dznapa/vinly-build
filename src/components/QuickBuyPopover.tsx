@@ -44,7 +44,9 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
   const open = wine !== null;
   const isLocked = lockedAt !== null && !expired;
-  const cancelLimitReached = cancelCount >= CANCEL_LIMIT;
+  // Ticker reservations can be cancelled unlimited times; only SESH caps it at 2.
+  const isTicker = source === 'ticker';
+  const cancelLimitReached = !isTicker && cancelCount >= CANCEL_LIMIT;
 
   const lastWineIdRef = useRef<string | null>(null);
   useEffect(() => {
@@ -272,7 +274,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
             </span>
           ) : (
             <span>
-              <i className="fa-solid fa-lock" aria-hidden /> 15-min price lock · max 2 cancellations · no charge until you confirm
+              <i className="fa-solid fa-lock" aria-hidden /> 15-min price lock · {isTicker ? '' : 'max 2 cancellations · '}no charge until you confirm
             </span>
           )}
         </div>
