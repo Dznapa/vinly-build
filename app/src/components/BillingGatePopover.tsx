@@ -20,12 +20,9 @@ import { useUserState } from '@/context/UserStateContext';
 const COPY = {
   eyebrow: 'SESH ACCESS',
   headline: "There's a live price. You just can't see it yet.",
-  body:
-    'Shop and Spotlight prices are yours to browse. But the SESH and the Ticker run on ' +
-    "live pricing — and that number stays behind the glass until you're SESH-qualified. " +
-    'Add a billing method, the price goes live, and you can lock bottles the moment you like the number.',
+  body: "Drop in a card and the number goes live. Then lock bottles the second it's right.",
   cta: 'UNLOCK LIVE PRICING',
-  trust: "Adding billing costs nothing. You're only charged when you lock a bottle.",
+  trust: "Costs nothing to unlock. You're only charged when you lock a bottle.",
   footer: 'Viewer mode · Shop & Spotlight visible · SESH & Ticker locked',
 };
 // Alternate copy — swap fields into COPY above to use.
