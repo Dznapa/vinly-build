@@ -384,10 +384,5 @@
   }
 }
 
-/* Pricing locked until SESH-qualified (see PriceLock / body.prices-locked). */
-:global(body.prices-locked) .tilePrice,
-:global(body.prices-locked) .tileMsrp {
-  filter: blur(7px);
-  user-select: none;
-  pointer-events: none;
-}
+/* Spotlight is fixed-price commerce — pricing stays visible (only the live
+   SESH/ticker pricing is gated). */

@@ -4074,10 +4074,9 @@ body { padding-bottom: 56px; }
    PRICE LOCK + WELCOME WIZARD (homepage redesign)
    ================================================================= */
 
-/* Non-SESH-qualified users see ALL pricing blurred until they add billing.
+/* Only LIVE pricing (the SESH + ticker) is gated for non-qualified users.
+   Shop and Winemaker Spotlight are fixed-price commerce and stay visible.
    <PriceLock> toggles body.prices-locked. */
-body.prices-locked .price,
-body.prices-locked .msrp,
 body.prices-locked .sesh-pricebadge-num,
 body.prices-locked .sesh-pricebadge-delta,
 body.prices-locked .sesh-term-headerprice > span:first-child,
