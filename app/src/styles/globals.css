@@ -1045,6 +1045,32 @@ button {
 }
 .vinly-gauge--light .vinly-gauge-micro { color: #8a93a0; }
 
+/* Fun sign-off shown in the open space once the floor is CLOSED. */
+.vinly-gauge-closeblurb {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(242, 106, 53, 0.08);
+  box-shadow: inset 3px 0 0 var(--orange);
+  animation: vinly-gauge-closeblurb-in 320ms ease;
+}
+@keyframes vinly-gauge-closeblurb-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.vinly-gauge-closeblurb-head {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 15px; letter-spacing: 0.5px;
+  color: #fff; margin-bottom: 6px;
+}
+.vinly-gauge-closeblurb-head i { color: var(--orange); }
+.vinly-gauge-closeblurb p { margin: 0; color: #c7d5e6; font-size: 13px; line-height: 1.55; }
+.vinly-gauge-closeblurb b { color: var(--orange); font-weight: 800; }
+@media (prefers-reduced-motion: reduce) {
+  .vinly-gauge-closeblurb { animation: none; }
+}
+
 /* ============================================================
    (legacy InventoryBar classes — left only as placeholders)
    ============================================================ */

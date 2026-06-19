@@ -85,6 +85,18 @@ export default function InventoryBar({
         <span>FULL</span>
       </div>
       <div className="vinly-gauge-micro">{stage.micro}</div>
+      {pct <= 0 && (
+        <div className="vinly-gauge-closeblurb">
+          <div className="vinly-gauge-closeblurb-head">
+            <i className="fa-solid fa-bell" aria-hidden /> That&apos;s the closing bell.
+          </div>
+          <p>
+            Every bottle found a buyer — and your hesitation found a teachable moment. Fresh drop
+            tomorrow at <b>11:00 AM PT</b>. Set an alarm, show up sharp, and let someone else do the
+            blinking this time.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
