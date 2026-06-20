@@ -219,14 +219,14 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                 type="button"
                 aria-label="Decrease quantity"
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
-                disabled={isLocked || qty <= 1}
+                disabled={qty <= 1}
               >−</button>
               <span>{qty}</span>
               <button
                 type="button"
                 aria-label="Increase quantity"
                 onClick={() => setQty((q) => Math.min(6, q + 1))}
-                disabled={isLocked || qty >= 6}
+                disabled={qty >= 6}
               >+</button>
             </div>
             <span className="qbp-modal-qty-hint">Max 6 per reservation</span>
