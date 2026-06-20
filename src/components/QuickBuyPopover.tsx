@@ -47,6 +47,10 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   // Ticker reservations can be cancelled unlimited times; only SESH caps it at 2.
   const isTicker = source === 'ticker';
   const cancelLimitReached = !isTicker && cancelCount >= CANCEL_LIMIT;
+  // SESH must be exited via the (capped) "Cancel reservation" button or by purchasing —
+  // no X / Esc / backdrop dismiss while it's locked (those would bypass the cap).
+  // Ticker can always be dismissed.
+  const canDismiss = isTicker || !isLocked;
 
   const lastWineIdRef = useRef<string | null>(null);
   useEffect(() => {
@@ -80,12 +84,11 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
   useEffect(() => {
     if (!open) return;
-    // Single-step popups can always be dismissed (Esc/backdrop just close the window;
-    // they don't count as a formal "Cancel reservation").
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    // Esc dismisses only when allowed (Ticker, or SESH that isn't locked).
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && canDismiss) onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open, canDismiss, onClose]);
 
   const addToCart = useCallback((quantity: number) => {
     if (!wine) return;
@@ -122,8 +125,8 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   }, [wine, qty, addToCart]);
 
   const handleBackdropClick = useCallback(() => {
-    onClose();
-  }, [onClose]);
+    if (canDismiss) onClose();
+  }, [canDismiss, onClose]);
 
   const savings = useMemo(() => {
     if (!wine || wine.msrp === undefined) return 0;
@@ -153,14 +156,16 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
           <div className="qbp-modal-kicker">
             <i className="fa-solid fa-bolt" aria-hidden /> {kicker}
           </div>
-          <button
-            type="button"
-            className="qbp-modal-close"
-            aria-label="Close"
-            onClick={onClose}
-          >
-            <i className="fa-solid fa-xmark" aria-hidden />
-          </button>
+          {canDismiss && (
+            <button
+              type="button"
+              className="qbp-modal-close"
+              aria-label="Close"
+              onClick={onClose}
+            >
+              <i className="fa-solid fa-xmark" aria-hidden />
+            </button>
+          )}
         </div>
 
         {/* LOCKED / EXPIRED banner */}

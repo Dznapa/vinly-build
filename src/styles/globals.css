@@ -4427,8 +4427,8 @@ body.prices-locked .sesh-buy-price {
   user-select: none;
   pointer-events: none;
 }
-/* Primary LIVE SESH PRICE: ~15% heavier blur than the other locked bits. */
-body.prices-locked .sesh-term-livehero-price { filter: blur(8px); }
+/* Primary LIVE SESH PRICE: heavier blur than the other locked bits. */
+body.prices-locked .sesh-term-livehero-price { filter: blur(10px); }
 /* The graph itself stays clear — non-qualified users watch the live line move.
    Only the price-revealing bits are blurred: y-axis values, the hover tooltip,
    the in-chart MSRP/Street labels, and the legend. */
