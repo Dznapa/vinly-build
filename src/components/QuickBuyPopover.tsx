@@ -53,6 +53,12 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   // Ticker can always be dismissed.
   const canDismiss = isTicker || !isLocked || cancelLimitReached;
 
+  // When a free-ship window is already running, the popup timer mirrors that corner
+  // countdown (the real deadline driving "load up more wines") instead of a fresh
+  // per-reservation lock. Goes red under 4 minutes.
+  const shownSeconds = shipWindow.active ? shipWindow.secondsLeft : secondsLeft;
+  const timerUrgent = shownSeconds < 240;
+
   const lastWineIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!wine) { lastWineIdRef.current = null; return; }
@@ -173,10 +179,10 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
         {/* LOCKED / EXPIRED banner */}
         {isLocked && !expired && (
-          <div className="qbp-modal-banner qbp-modal-banner--locked">
+          <div className={`qbp-modal-banner qbp-modal-banner--locked${timerUrgent ? ' qbp-modal-banner--urgent' : ''}`}>
             <i className="fa-solid fa-lock" aria-hidden />
             <span>Locked In — </span>
-            <b>{formatMMSS(secondsLeft)}</b>
+            <b>{formatMMSS(shownSeconds)}</b>
             <span>&nbsp;left to confirm</span>
           </div>
         )}

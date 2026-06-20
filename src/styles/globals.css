@@ -3914,6 +3914,13 @@ button {
   color: var(--green);
 }
 .qbp-modal-banner--locked b { font-variant-numeric: tabular-nums; }
+/* Under 4 minutes left → red urgency (mirrors the corner free-ship window). */
+.qbp-modal-banner--urgent {
+  background: rgba(226, 59, 59, 0.14);
+  border-color: rgba(226, 59, 59, 0.42);
+  color: #ff6b5e;
+}
+.qbp-modal-banner--urgent b { color: #ff6b5e; }
 .qbp-modal-banner--expired {
   background: rgba(226, 59, 59, 0.12);
   border-color: rgba(226, 59, 59, 0.3);
