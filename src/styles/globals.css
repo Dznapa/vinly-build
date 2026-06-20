@@ -4356,6 +4356,14 @@ button {
 
 .sqf-secure { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #8aa2bb; margin: 4px 0; }
 .sqf-secure i { color: var(--green); }
+/* Account-creation note under the final qualify button (muted, alongside the trust line). */
+.sqf-account-note { margin: 2px 0 0; text-align: center; color: #8aa2bb; font-size: 12px; line-height: 1.4; }
+/* Final qualify CTA: full label on desktop, shorter fallback on small screens. */
+.sqf-cta-short { display: none; }
+@media (max-width: 480px) {
+  .sqf-cta-full { display: none; }
+  .sqf-cta-short { display: inline; }
+}
 
 .sqf-actions { display: flex; gap: 12px; padding: 6px 0 12px; }
 .sqf-actions .qbp-modal-primary { flex: 1; }

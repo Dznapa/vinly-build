@@ -47,7 +47,11 @@ const PAY_COPY = {
   kicker: 'STEP 2 OF 2',
   title: 'Put a card on the floor.',
   sub: 'This is what unlocks live pricing. Stored, not charged — the card only runs when you lock a bottle.',
-  cta: COPY.cta,
+  // Final qualify button — full label + a shorter mobile fallback. (Decoupled from
+  // the intro CTA so only this button changes.)
+  cta: 'GET SESH-QUALIFIED · UNLOCK LIVE PRICING',
+  ctaShort: 'GET SESH-QUALIFIED →',
+  account: 'This creates your Vinly account and gets you SESH-qualified.',
   trust: 'Adding billing costs nothing. You’re only charged when you lock a bottle.',
   secure: 'Encrypted and handled by our payment processor. Vinly never sees your card.',
 };
@@ -237,9 +241,18 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
                   <div className="sqf-secure"><i className="fa-solid fa-lock" aria-hidden /> {PAY_COPY.secure}</div>
 
                   <p className="qbp-gate-trust"><b>Adding billing costs nothing.</b> You&apos;re only charged when you lock a bottle.</p>
+                  <p className="sqf-account-note">{PAY_COPY.account}</p>
                   <div className="qbp-modal-actions sqf-actions">
                     <button type="button" className="sqf-back" onClick={() => setView('shipping')}>← Back</button>
-                    <button type="submit" className="qbp-modal-primary"><i className="fa-solid fa-credit-card" aria-hidden /> {PAY_COPY.cta}</button>
+                    <button
+                      type="submit"
+                      className="qbp-modal-primary"
+                      aria-label="Get SESH-qualified and unlock live pricing"
+                    >
+                      <i className="fa-solid fa-credit-card" aria-hidden />
+                      <span className="sqf-cta-full">{PAY_COPY.cta}</span>
+                      <span className="sqf-cta-short">{PAY_COPY.ctaShort}</span>
+                    </button>
                   </div>
                 </form>
               </>
