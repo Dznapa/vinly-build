@@ -4124,6 +4124,12 @@ button {
   box-shadow: 0 14px 32px rgba(242, 106, 53, 0.32);
   transition: filter 120ms ease, transform 80ms ease;
 }
+.qbp-modal-primary:disabled {
+  background: #1b2c44;
+  color: #8aa2bb;
+  box-shadow: none;
+  cursor: not-allowed;
+}
 .qbp-modal-primary:hover { filter: brightness(1.06); }
 .qbp-modal-primary:active { transform: translateY(1px); }
 .qbp-modal-primary-total {

@@ -51,7 +51,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   // SESH must be exited via the (capped) "Cancel reservation" button or by purchasing —
   // no X / Esc / backdrop dismiss while it's locked (those would bypass the cap).
   // Ticker can always be dismissed.
-  const canDismiss = isTicker || !isLocked;
+  const canDismiss = isTicker || !isLocked || cancelLimitReached;
 
   const lastWineIdRef = useRef<string | null>(null);
   useEffect(() => {
@@ -93,6 +93,8 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
   const addToCart = useCallback((quantity: number) => {
     if (!wine) return;
+    // Hitting the SESH cancellation limit forfeits the wine — block the purchase.
+    if (cancelLimitReached) return;
     // Carry a full price/name snapshot so the bottle is a real, visible, charged
     // cart line regardless of which catalog its id lives in.
     const added = addItem(
@@ -102,7 +104,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     onClose();
     // A SESH or Ticker commit opens (or extends) the free-shipping window.
     if (added && (source === 'sesh' || source === 'ticker')) shipWindow.open();
-  }, [wine, addItem, onClose, source, shipWindow]);
+  }, [wine, cancelLimitReached, addItem, onClose, source, shipWindow]);
 
   const handleLockIn = useCallback(() => {
     if (!wine) return;
@@ -267,7 +269,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                     aria-hidden
                   />{' '}
                   {cancelLimitReached
-                    ? 'No cancels left — purchase now to keep this wine.'
+                    ? "Both cancels used — you've forfeited this wine for this SESH."
                     : cancelsLeft === 1
                       ? 'Last cancel — cancel again and you forfeit this wine.'
                       : `${cancelsLeft} cancels left · your 2nd forfeits this wine.`}
@@ -285,9 +287,16 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                 type="button"
                 className="qbp-modal-primary"
                 onClick={() => addToCart(qty)}
+                disabled={cancelLimitReached}
               >
-                <i className="fa-solid fa-check" aria-hidden /> LOCK IT IN & PURCHASE
-                <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span>
+                {cancelLimitReached ? (
+                  <><i className="fa-solid fa-ban" aria-hidden /> WINE FORFEITED</>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-check" aria-hidden /> LOCK IT IN & PURCHASE
+                    <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span>
+                  </>
+                )}
               </button>
             </>
           )}
