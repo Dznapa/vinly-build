@@ -118,6 +118,16 @@ export function ShippingWindowModal() {
   const filled = Math.min(FREE_AT, w.bottles);
   const free = w.bottles >= FREE_AT;
   const danger = w.secondsLeft <= 120;
+  // Staged urgency for the floating badge (PRESENTATION ONLY — same countdown):
+  // steady > 2:00 · red ≤ 2:00 (matches the modal's red clock) · soft breath ≤ 1:00 ·
+  // per-second tick ≤ 0:30 · done at 0. Calm, not a strobe.
+  const sec = w.secondsLeft;
+  const stage =
+    sec <= 0 ? 'done'
+      : sec <= 30 ? 'tick'
+        : sec <= 60 ? 'soft'
+          : sec <= 120 ? 'red'
+            : 'steady';
 
   // MINIMIZED — floating timer badge, timer still running.
   if (w.minimized) {
@@ -147,14 +157,20 @@ export function ShippingWindowModal() {
         )}
         <button
           type="button"
-          className={`ship-badge${free ? ' is-free' : ''}${danger ? ' is-danger' : ''}`}
+          className={`ship-badge${free ? ' is-free' : ''} ship-stage-${stage}`}
           onClick={w.expand}
-          aria-label={`Free shipping window: ${mmss(w.secondsLeft)} left, ${filled} of 6 bottles${free ? ' — free shipping unlocked' : ''}. Expand.`}
+          aria-label={`Free-ship window: ${stage === 'done' ? 'charging now' : `${mmss(sec)} left`}, ${filled} of 6 bottles${free ? ' — free shipping unlocked' : ''}. Tap to expand.`}
         >
           <span className="ship-badge-dot" aria-hidden />
           <span className="ship-badge-main">
-            <span className="ship-badge-time">{mmss(w.secondsLeft)}</span>
-            <span className="ship-badge-label">{free ? 'FREE SHIPPING ✓' : `${filled}/6 · free-ship window`}</span>
+            {/* key remounts the digits each second in the tick stage so they pulse
+                once per tick (reads as time passing). */}
+            <span className="ship-badge-time" key={stage === 'tick' ? sec : 'time'}>
+              {stage === 'done' ? 'Charging…' : mmss(sec)}
+            </span>
+            <span className="ship-badge-label">
+              {stage === 'done' ? 'ORDER PLACED' : free ? 'FREE SHIPPING ✓' : `${filled}/6 · free-ship window`}
+            </span>
           </span>
         </button>
       </>
