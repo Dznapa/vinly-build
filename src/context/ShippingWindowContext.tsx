@@ -131,9 +131,10 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   const open = useCallback(() => {
     setFinalized(null);
     setMinimized(false);
-    // Each add restarts the 15-min window, so the corner badge matches the fresh
-    // 15:00 reservation/price-lock the user just saw in the quick-buy modal.
-    setEndTs(Date.now() + WINDOW_MS);
+    // Only the FIRST add starts the 15-min window. Later adds happen WITHIN that
+    // same countdown — they never reset it — so there's real time pressure to add
+    // more wines before the card auto-charges.
+    setEndTs((cur) => (cur && cur > Date.now() ? cur : Date.now() + WINDOW_MS));
   }, []);
   const minimize = useCallback(() => setMinimized(true), []);
   const expand = useCallback(() => setMinimized(false), []);
