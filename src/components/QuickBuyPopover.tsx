@@ -17,6 +17,8 @@ import { useCart } from '@/context/CartContext';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useBillingGate } from '@/context/BillingGateContext';
+import { useToast } from '@/components/ToastProvider';
+import { useCancellations } from '@/context/CancellationContext';
 
 export type QuickBuyWine = {
   id: string;
@@ -39,12 +41,20 @@ const ORDER_MICROCOPY = 'Card runs when the 15-minute window closes — no furth
 const EXIT_LABEL = 'Not now';
 const NO_CARD_CTA = 'Add a card to order';
 const placeOrderLabel = (last4: string) => `Place Order · Card ••${last4}`;
+// Post-purchase (SESH) — celebration + a quiet, SEPARATE cancellation note.
+const POST_BUY_PRIMARY = "You're in. That bottle's locked, the SESH is still open — keep trading.";
+const postBuyNote = (remaining: number) =>
+  remaining > 0
+    ? `${remaining} price-lock cancellation${remaining === 1 ? '' : 's'} remaining if you change your mind.`
+    : 'Price locks are final now — but buy all you want.';
 
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
   const shipWindow = useShippingWindow();
   const { cards } = useProfile();
   const { openGate } = useBillingGate();
+  const { push: toast } = useToast();
+  const { remaining } = useCancellations();
   const [qty, setQty] = useState<number>(1);
 
   const open = wine !== null;
@@ -74,12 +84,17 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   const addToCart = useCallback((quantity: number) => {
     if (!wine) return;
     const added = addItem(
-      { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true },
+      { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true, source },
       quantity,
     );
     onClose();
-    if (added) shipWindow.open();
-  }, [wine, addItem, onClose, shipWindow]);
+    if (!added) return;
+    shipWindow.open();
+    // Post-purchase: celebrate (buying stays open) + a quiet SESH cancellation note.
+    if (source === 'sesh') {
+      toast({ kind: 'success', message: POST_BUY_PRIMARY, sub: postBuyNote(remaining), duration: 5000 });
+    }
+  }, [wine, addItem, onClose, shipWindow, source, toast, remaining]);
 
   // No card on file → send them to the qualification / add-card flow instead.
   const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);

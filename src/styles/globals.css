@@ -101,9 +101,15 @@ button {
   font-weight: 600;
   animation: vinly-toast-in 220ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
 }
+.vinly-toast { align-items: flex-start; }
+.vinly-toast-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vinly-toast-msg { font-weight: 700; line-height: 1.35; }
+.vinly-toast-sub { font-size: 12.5px; font-weight: 500; color: #6b7280; line-height: 1.35; }
+@media (prefers-reduced-motion: reduce) { .vinly-toast { animation: none; } }
 .vinly-toast i {
   font-size: 18px;
   flex: 0 0 auto;
+  margin-top: 1px;
 }
 .vinly-toast--success i { color: var(--green); }
 .vinly-toast--info i    { color: var(--cyan); }

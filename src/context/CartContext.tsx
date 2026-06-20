@@ -33,6 +33,7 @@ export type CartItem = {
   msrp?: number;
   meta?: string; // secondary descriptor line (maker / region) for the cart table
   locked?: boolean; // true for SESH/Ticker quick-buy reservations — qty can't be changed
+  source?: 'sesh' | 'ticker' | 'shop'; // where it was added (SESH locks are cancel-capped)
 };
 
 /** Everything needed to add a line — the per-instrument caller supplies the snapshot. */
@@ -113,6 +114,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 msrp: e.msrp,
                 meta: e.meta,
                 locked: e.locked === true,
+                source: e.source,
               });
             } else {
               // Legacy shape ({wineId, qty}) — resolve via SHOP or drop the ghost.

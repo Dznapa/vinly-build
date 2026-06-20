@@ -19,6 +19,10 @@ type Toast = {
   id: number;
   kind: ToastKind;
   message: string;
+  /** Optional muted second line (e.g. the post-purchase cancellation note). */
+  sub?: string;
+  /** Auto-dismiss ms (default 2600). */
+  duration?: number;
 };
 
 type Ctx = {
@@ -37,7 +41,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => [...prev, { ...t, id }]);
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((x) => x.id !== id));
-    }, 2600);
+    }, t.duration ?? 2600);
   }, []);
 
   return (
@@ -56,7 +60,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               }
               aria-hidden
             />
-            <span>{t.message}</span>
+            <span className="vinly-toast-text">
+              <span className="vinly-toast-msg">{t.message}</span>
+              {t.sub && <span className="vinly-toast-sub">{t.sub}</span>}
+            </span>
           </div>
         ))}
       </div>
