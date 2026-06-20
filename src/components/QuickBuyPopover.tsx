@@ -36,7 +36,10 @@ export type QuickBuyPopoverProps = {
 };
 
 // Editable copy.
-const PRICE_HOLD_COPY = 'Your price is locked for 15 seconds.';
+const PRICE_LOCK_SECONDS = 15;
+const priceLockLabel = (s: number) => `Price locked · ${s}s to order`;
+const PRICE_LOCK_EXPIRED = 'Price lock expired — re-lock to keep this price.';
+const RELOCK_LABEL = `Re-lock price (${PRICE_LOCK_SECONDS}s)`;
 const ORDER_MICROCOPY = 'Card runs when the 15-minute window closes — no further confirmation.';
 const EXIT_LABEL = 'Not now';
 const NO_CARD_CTA = 'Add a card to order';
@@ -56,6 +59,9 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   const { push: toast } = useToast();
   const { remaining } = useCancellations();
   const [qty, setQty] = useState<number>(1);
+  const [lockExpiresAt, setLockExpiresAt] = useState<number>(0);
+  const [secondsLeft, setSecondsLeft] = useState<number>(PRICE_LOCK_SECONDS);
+  const [expired, setExpired] = useState<boolean>(false);
 
   const open = wine !== null;
 
@@ -68,8 +74,34 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   const lastWineIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!wine) { lastWineIdRef.current = null; return; }
-    if (lastWineIdRef.current !== wine.id) { lastWineIdRef.current = wine.id; setQty(1); }
+    if (lastWineIdRef.current !== wine.id) {
+      lastWineIdRef.current = wine.id;
+      setQty(1);
+      // Capture the price + start the 15-second hold the moment the popup opens.
+      setLockExpiresAt(Date.now() + PRICE_LOCK_SECONDS * 1000);
+      setSecondsLeft(PRICE_LOCK_SECONDS);
+      setExpired(false);
+    }
   }, [wine]);
+
+  // 15-SECOND price-lock countdown. At zero the lock expires and must be re-locked.
+  useEffect(() => {
+    if (!open || expired || lockExpiresAt === 0) return;
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((lockExpiresAt - Date.now()) / 1000));
+      setSecondsLeft(left);
+      if (left <= 0) setExpired(true);
+    };
+    tick();
+    const id = window.setInterval(tick, 250);
+    return () => window.clearInterval(id);
+  }, [open, expired, lockExpiresAt]);
+
+  const handleRelock = useCallback(() => {
+    setLockExpiresAt(Date.now() + PRICE_LOCK_SECONDS * 1000);
+    setSecondsLeft(PRICE_LOCK_SECONDS);
+    setExpired(false);
+  }, []);
 
   // Esc dismisses (harmless — never a cancellation).
   useEffect(() => {
@@ -82,7 +114,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   // EXECUTES THE ORDER — captures the held price, adds the locked line, and opens the
   // SEPARATE 15-min free-ship window. Charge/order behavior unchanged.
   const addToCart = useCallback((quantity: number) => {
-    if (!wine) return;
+    if (!wine || expired) return; // lock must be live to capture the held price
     const added = addItem(
       { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true, source },
       quantity,
@@ -94,7 +126,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     if (source === 'sesh') {
       toast({ kind: 'success', message: POST_BUY_PRIMARY, sub: postBuyNote(remaining), duration: 5000 });
     }
-  }, [wine, addItem, onClose, shipWindow, source, toast, remaining]);
+  }, [wine, expired, addItem, onClose, shipWindow, source, toast, remaining]);
 
   // No card on file → send them to the qualification / add-card flow instead.
   const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);
@@ -132,11 +164,21 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
           </div>
         </div>
 
-        {/* PRICE-HOLD reassurance (static 15-second hold — NOT a countdown). */}
-        <div className="qbp-modal-banner qbp-modal-banner--locked" role="note">
-          <i className="fa-solid fa-lock" aria-hidden />
-          <span>{PRICE_HOLD_COPY}</span>
-        </div>
+        {/* 15-SECOND price lock — live countdown; expires + must be re-locked at 0. */}
+        {expired ? (
+          <div className="qbp-modal-banner qbp-modal-banner--expired" role="alert">
+            <i className="fa-solid fa-triangle-exclamation" aria-hidden />
+            <span>{PRICE_LOCK_EXPIRED}</span>
+          </div>
+        ) : (
+          <div
+            className={`qbp-modal-banner qbp-modal-banner--locked${secondsLeft <= 5 ? ' qbp-modal-banner--urgent' : ''}`}
+            role="timer"
+          >
+            <i className="fa-solid fa-lock" aria-hidden />
+            <span>{priceLockLabel(secondsLeft)}</span>
+          </div>
+        )}
 
         {/* PRODUCT ROW */}
         <div className="qbp-modal-product">
@@ -204,7 +246,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
         </div>
 
         {/* ORDER SUMMARY — real locked values; makes the charge feel official. */}
-        {hasCard && (
+        {hasCard && !expired && (
           <div className="qbp-order-summary" role="group" aria-label="Order summary">
             <div className="qbp-os-row">
               <span className="qbp-os-name">{wine.name}</span>
@@ -227,7 +269,11 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
         {/* ACTIONS */}
         <div className="qbp-modal-actions">
-          {hasCard ? (
+          {expired ? (
+            <button type="button" className="qbp-modal-primary" onClick={handleRelock}>
+              <i className="fa-solid fa-rotate-right" aria-hidden /> {RELOCK_LABEL}
+            </button>
+          ) : hasCard ? (
             <>
               <button
                 type="button"
