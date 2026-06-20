@@ -140,11 +140,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, hydrated]);
 
   const addItem = useCallback((add: CartAdd, qty: number): boolean => {
-    // Billing gate: only SESH-qualified (billing-verified) users can add to
-    // cart anywhere in the app. Everyone else gets the billing wizard popup
-    // instead — and nothing is added. (This never fires during account
-    // creation / billing entry, since those flows don't call addItem.)
-    if (userState !== 'sesh_qualified') {
+    // Billing gate applies ONLY to live-price reservations (SESH / Ticker, flagged
+    // locked). Shop and Winemaker Spotlight are open commerce — anonymous and
+    // signed-in users can buy there freely. Non-qualified users attempting a
+    // SESH/Ticker lock get the billing wizard instead, and nothing is added.
+    if (add.locked && userState !== 'sesh_qualified') {
       openGate();
       return false;
     }
