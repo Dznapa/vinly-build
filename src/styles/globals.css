@@ -4112,6 +4112,43 @@ button {
 .qbp-cancel-status i { font-size: 11px; color: #8aa2bb; }
 .qbp-cancel-status.is-warn { color: #f2913d; }
 .qbp-cancel-status.is-warn i { color: #f2913d; }
+
+/* Compact order summary (order-execution feel) + Place-Order microcopy. */
+.qbp-order-summary {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.qbp-os-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: #cfe0ef;
+}
+.qbp-os-name {
+  font-weight: 700; color: #fff;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.qbp-os-qty { color: #8aa2bb; flex: 0 0 auto; }
+.qbp-os-label { color: #8aa2bb; }
+.qbp-os-val { font-variant-numeric: tabular-nums; color: #e7eef6; }
+.qbp-os-total .qbp-os-label,
+.qbp-os-total .qbp-os-val { color: #fff; font-weight: 800; font-size: 15px; }
+.qbp-os-pay { border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px; }
+.qbp-os-pay .qbp-os-val { color: var(--green); font-weight: 700; }
+.qbp-microcopy {
+  margin: 2px 0 0;
+  text-align: center;
+  color: #8aa2bb;
+  font-size: 12px;
+  line-height: 1.4;
+}
 .qbp-modal-primary {
   width: 100%;
   background: var(--orange);

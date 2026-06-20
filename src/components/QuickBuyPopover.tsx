@@ -1,14 +1,20 @@
 'use client';
 
-/* Quick-buy popover — premium, brokerage-styled modal.
-   Header: kicker + close. Body: bottle (on white card with radial-mask) +
-   wine info (name / volume / live price / MSRP strike / savings chip). Qty
-   stepper. Big orange action. Locked-in state: green countdown header,
-   CONFIRM + CANCEL controls. Expired state: red banner + BUY NOW recovery. */
+/* Quick-buy popover — premium, brokerage-styled ORDER-EXECUTION modal for SESH +
+   Ticker (one shared component). Opens already price-locked (single step). Shows a
+   compact order summary and a "Place Order · Card ••XXXX" primary that executes the
+   order (adds to cart + opens the 15-min free-ship window).
+
+   Dismissing the popup ("Not now" / Esc / backdrop) is HARMLESS — closing a buy form
+   you didn't place is NOT a cancellation and has no consequence. There is no
+   cancellation cap here. (The price-lock concept + the cart "Locked in" state live
+   elsewhere and are unchanged.) */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
+import { useProfile } from '@/context/ProfileContext';
+import { useBillingGate } from '@/context/BillingGateContext';
 
 export type QuickBuyWine = {
   id: string;
@@ -25,8 +31,13 @@ export type QuickBuyPopoverProps = {
   source: 'ticker' | 'sesh';
 };
 
-const CANCEL_LIMIT = 2;
 const LOCK_SECONDS = 15 * 60;
+
+// Editable copy.
+const ORDER_MICROCOPY = 'Card runs when the 15-minute window closes — no further confirmation.';
+const EXIT_LABEL = 'Not now';
+const NO_CARD_CTA = 'Add a card to order';
+const placeOrderLabel = (last4: string) => `Place Order · Card ••${last4}`;
 
 function formatMMSS(total: number): string {
   const s = Math.max(0, Math.floor(total));
@@ -36,26 +47,23 @@ function formatMMSS(total: number): string {
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
   const shipWindow = useShippingWindow();
+  const { cards } = useProfile();
+  const { openGate } = useBillingGate();
   const [qty, setQty] = useState<number>(1);
   const [lockedAt, setLockedAt] = useState<number | null>(null);
   const [secondsLeft, setSecondsLeft] = useState<number>(LOCK_SECONDS);
-  const [cancelCount, setCancelCount] = useState<number>(0);
   const [expired, setExpired] = useState<boolean>(false);
 
   const open = wine !== null;
   const isLocked = lockedAt !== null && !expired;
-  // Ticker reservations can be cancelled unlimited times; only SESH caps it at 2.
-  const isTicker = source === 'ticker';
-  const cancelLimitReached = !isTicker && cancelCount >= CANCEL_LIMIT;
-  const cancelsLeft = Math.max(0, CANCEL_LIMIT - cancelCount); // SESH: 2 → 1 → 0
-  // SESH must be exited via the (capped) "Cancel reservation" button or by purchasing —
-  // no X / Esc / backdrop dismiss while it's locked (those would bypass the cap).
-  // Ticker can always be dismissed.
-  const canDismiss = isTicker || !isLocked || cancelLimitReached;
+
+  // Payment method on file — default card (last-4 only; full card data never exists here).
+  const defaultCard = cards.find((c) => c.isDefault) ?? cards[0];
+  const last4 = defaultCard?.last4 ?? '';
+  const hasCard = !!defaultCard;
 
   // When a free-ship window is already running, the popup timer mirrors that corner
-  // countdown (the real deadline driving "load up more wines") instead of a fresh
-  // per-reservation lock. Goes red under 4 minutes.
+  // countdown (the real deadline driving "load up more wines"). Red under 4 minutes.
   const shownSeconds = shipWindow.active ? shipWindow.secondsLeft : secondsLeft;
   const timerUrgent = shownSeconds < 240;
 
@@ -64,17 +72,10 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     if (!wine) { lastWineIdRef.current = null; return; }
     if (lastWineIdRef.current !== wine.id) {
       lastWineIdRef.current = wine.id;
-      // Single-step flow for BOTH SESH and Ticker — open already "locked in"
-      // (timer running) so it's one popup, one click to purchase. SESH still caps
-      // cancellations at 2 (persisted per offer); Ticker is unlimited.
-      let cc = 0;
-      if (source === 'sesh') {
-        try { cc = Number(window.sessionStorage.getItem(`vinly:seshCancels:${wine.id}`)) || 0; } catch { /* ignore */ }
-      }
-      setQty(1); setLockedAt(Date.now()); setSecondsLeft(LOCK_SECONDS);
-      setCancelCount(cc); setExpired(false);
+      // Single-step: open already price-locked (timer running), one click to order.
+      setQty(1); setLockedAt(Date.now()); setSecondsLeft(LOCK_SECONDS); setExpired(false);
     }
-  }, [wine, source]);
+  }, [wine]);
 
   useEffect(() => {
     if (!isLocked || lockedAt === null) return;
@@ -89,53 +90,35 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     return () => window.clearInterval(id);
   }, [isLocked, lockedAt]);
 
+  // Esc dismisses (harmless — never a cancellation).
   useEffect(() => {
     if (!open) return;
-    // Esc dismisses only when allowed (Ticker, or SESH that isn't locked).
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && canDismiss) onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, canDismiss, onClose]);
+  }, [open, onClose]);
 
+  // EXECUTES THE ORDER — adds the locked line to the cart and opens the free-ship
+  // window. Charge/order behavior unchanged; only the surrounding UI changed.
   const addToCart = useCallback((quantity: number) => {
     if (!wine) return;
-    // Hitting the SESH cancellation limit forfeits the wine — block the purchase.
-    if (cancelLimitReached) return;
-    // Carry a full price/name snapshot so the bottle is a real, visible, charged
-    // cart line regardless of which catalog its id lives in.
     const added = addItem(
       { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true },
       quantity,
     );
     onClose();
-    // A SESH or Ticker commit opens (or extends) the free-shipping window.
     if (added && (source === 'sesh' || source === 'ticker')) shipWindow.open();
-  }, [wine, cancelLimitReached, addItem, onClose, source, shipWindow]);
-
-  const handleLockIn = useCallback(() => {
-    if (!wine) return;
-    setLockedAt(Date.now()); setSecondsLeft(LOCK_SECONDS); setExpired(false);
-  }, [wine]);
-
-  const handleCancelReservation = useCallback(() => {
-    if (cancelLimitReached) return;
-    // SESH cancellations count toward the 2-cap (persisted per offer); Ticker is
-    // unlimited. Either way, cancelling the reservation closes the popup.
-    if (!isTicker && wine) {
-      const next = cancelCount + 1;
-      setCancelCount(next);
-      try { window.sessionStorage.setItem(`vinly:seshCancels:${wine.id}`, String(next)); } catch { /* ignore */ }
-    }
-    onClose();
-  }, [cancelLimitReached, isTicker, wine, cancelCount, onClose]);
+  }, [wine, addItem, onClose, source, shipWindow]);
 
   const handleBuyNowExpired = useCallback(() => {
     if (!wine) return; addToCart(qty);
   }, [wine, qty, addToCart]);
 
-  const handleBackdropClick = useCallback(() => {
-    if (canDismiss) onClose();
-  }, [canDismiss, onClose]);
+  // No card on file → send them to the qualification / add-card flow instead.
+  const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);
+
+  // Backdrop click dismisses (harmless).
+  const handleBackdropClick = useCallback(() => { onClose(); }, [onClose]);
 
   const savings = useMemo(() => {
     if (!wine || wine.msrp === undefined) return 0;
@@ -160,21 +143,11 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
       onClick={handleBackdropClick}
     >
       <div className="qbp-modal" onClick={(e) => e.stopPropagation()}>
-        {/* HEADER */}
+        {/* HEADER (no X — exit via the explicit "Not now" button below) */}
         <div className="qbp-modal-head">
           <div className="qbp-modal-kicker">
             <i className="fa-solid fa-bolt" aria-hidden /> {kicker}
           </div>
-          {canDismiss && (
-            <button
-              type="button"
-              className="qbp-modal-close"
-              aria-label="Close"
-              onClick={onClose}
-            >
-              <i className="fa-solid fa-xmark" aria-hidden />
-            </button>
-          )}
         </div>
 
         {/* LOCKED / EXPIRED banner */}
@@ -258,69 +231,68 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
           </span>
         </div>
 
+        {/* ORDER SUMMARY — makes the charge feel official (real locked values). */}
+        {!expired && hasCard && (
+          <div className="qbp-order-summary" role="group" aria-label="Order summary">
+            <div className="qbp-os-row">
+              <span className="qbp-os-name">{wine.name}</span>
+              <span className="qbp-os-qty">Qty {qty}</span>
+            </div>
+            <div className="qbp-os-row">
+              <span className="qbp-os-label">Locked price</span>
+              <span className="qbp-os-val">${wine.price.toFixed(2)}{qty > 1 ? ` × ${qty}` : ''}</span>
+            </div>
+            <div className="qbp-os-row qbp-os-total">
+              <span className="qbp-os-label">Order total</span>
+              <span className="qbp-os-val">${lineTotal.toFixed(2)}</span>
+            </div>
+            <div className="qbp-os-row qbp-os-pay">
+              <span className="qbp-os-label">Paying with</span>
+              <span className="qbp-os-val">Card ••{last4}</span>
+            </div>
+          </div>
+        )}
+
         {/* ACTIONS */}
         <div className="qbp-modal-actions">
-          {!isLocked && !expired && (
-            <button type="button" className="qbp-modal-primary" onClick={handleLockIn}>
-              <i className="fa-solid fa-lock" aria-hidden /> LOCK IN PURCHASE
-              <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span>
+          {expired ? (
+            <button type="button" className="qbp-modal-primary" onClick={handleBuyNowExpired} disabled={!hasCard}>
+              {hasCard ? <>BUY NOW <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span></> : NO_CARD_CTA}
             </button>
-          )}
-          {isLocked && !expired && (
+          ) : hasCard ? (
             <>
-              {!isTicker && (
-                <p className={`qbp-cancel-status${cancelsLeft <= 1 ? ' is-warn' : ''}`}>
-                  <i
-                    className={`fa-solid ${cancelsLeft <= 1 ? 'fa-triangle-exclamation' : 'fa-circle-info'}`}
-                    aria-hidden
-                  />{' '}
-                  {cancelLimitReached
-                    ? "Both cancels used — you've forfeited this wine for this SESH."
-                    : cancelsLeft === 1
-                      ? 'Last cancel — cancel again and you forfeit this wine.'
-                      : `${cancelsLeft} cancels left · your 2nd forfeits this wine.`}
-                </p>
-              )}
-              <button
-                type="button"
-                className="qbp-modal-secondary"
-                onClick={handleCancelReservation}
-                disabled={cancelLimitReached}
-              >
-                Cancel reservation
-              </button>
               <button
                 type="button"
                 className="qbp-modal-primary"
                 onClick={() => addToCart(qty)}
-                disabled={cancelLimitReached}
+                aria-label={`${placeOrderLabel(last4)} — total $${lineTotal.toFixed(2)}`}
               >
-                {cancelLimitReached ? (
-                  <><i className="fa-solid fa-ban" aria-hidden /> WINE FORFEITED</>
-                ) : (
-                  <>
-                    <i className="fa-solid fa-check" aria-hidden /> LOCK IT IN & PURCHASE
-                    <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span>
-                  </>
-                )}
+                <i className="fa-solid fa-credit-card" aria-hidden /> {placeOrderLabel(last4)}
               </button>
+              <p className="qbp-microcopy">{ORDER_MICROCOPY}</p>
             </>
-          )}
-          {expired && (
-            <button type="button" className="qbp-modal-primary" onClick={handleBuyNowExpired}>
-              BUY NOW
-              <span className="qbp-modal-primary-total">${lineTotal.toFixed(2)}</span>
+          ) : (
+            <button type="button" className="qbp-modal-primary" onClick={handleAddCard}>
+              <i className="fa-solid fa-credit-card" aria-hidden /> {NO_CARD_CTA}
             </button>
           )}
+
+          {/* Explicit, harmless exit (replaces the top-corner X). */}
+          <button
+            type="button"
+            className="qbp-modal-secondary"
+            onClick={onClose}
+            aria-label="Close without ordering"
+          >
+            {EXIT_LABEL}
+          </button>
         </div>
 
         {/* FOOTER */}
         <div className="qbp-modal-foot">
-          {(
-            <span>
-              <i className="fa-solid fa-lock" aria-hidden /> 15-min price lock · no charge until you confirm
-            </span>
-          )}
+          <span>
+            <i className="fa-solid fa-lock" aria-hidden /> 15-min price lock · no charge until you confirm
+          </span>
         </div>
       </div>
     </div>
