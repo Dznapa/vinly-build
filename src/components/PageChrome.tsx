@@ -14,8 +14,12 @@ export function PageChrome({
 }) {
   return (
     <>
-      <Header />
-      {ticker && <Ticker />}
+      {/* Header + Ticker stick to the top together so the nav icons stay reachable
+          on scroll (no need to scroll all the way up). */}
+      <div className="site-chrome">
+        <Header />
+        {ticker && <Ticker sticky={false} />}
+      </div>
       {children}
       <Footer />
     </>

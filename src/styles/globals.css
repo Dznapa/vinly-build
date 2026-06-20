@@ -541,6 +541,15 @@ button {
   background: var(--navy);
 }
 
+/* Header + Ticker stick to the top together so the nav icons stay reachable on
+   scroll (the account dropdown's z-index sits above this). */
+.site-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--navy);
+}
+
 /* ---------- shop hero line ---------- */
 .shop-hero {
   text-align: center;
@@ -4432,11 +4441,12 @@ body.prices-locked .sesh-term-livehero-price { filter: blur(10px); }
 /* The graph itself stays clear — non-qualified users watch the live line move.
    Only the price-revealing bits are blurred: y-axis values, the hover tooltip,
    the in-chart MSRP/Street labels, and the legend. */
+body.prices-locked .recharts-yAxis text,
 body.prices-locked .recharts-yAxis .recharts-cartesian-axis-tick-value,
 body.prices-locked .recharts-reference-line text,
 body.prices-locked .chart-legend-item,
 body.prices-locked .chart-tip {
-  filter: blur(5px);
+  filter: blur(6px);
   -webkit-user-select: none;
   user-select: none;
 }
