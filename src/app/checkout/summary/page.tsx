@@ -192,8 +192,8 @@ function OrderSummaryInner() {
             <Link href="/shop" className="btn-skip">
               KEEP SHOPPING
             </Link>
-            <Link href="/profile" className="btn-billing">
-              VIEW PROFILE
+            <Link href="/profile/orders" className="btn-billing">
+              VIEW ORDER HISTORY
             </Link>
           </div>
         </section>
