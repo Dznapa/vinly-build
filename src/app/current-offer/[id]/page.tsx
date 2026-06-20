@@ -589,7 +589,7 @@ function LayoutTerminal(p: SharedProps) {
             <span className="sesh-term-livehero-delta">▼ {offMsrpPct.toFixed(2)}% off MSRP</span>
           </div>
           <div className="chart-wrap">
-            <PriceChart gated={false} frozen={p.floorClosed} msrp={offer.msrp} street={offer.street}
+            <PriceChart gated={false} blurAxis={p.isGated} frozen={p.floorClosed} msrp={offer.msrp} street={offer.street}
                         timeframe={timeframe} onPriceChange={handlePriceTick} />
           </div>
           <TFs timeframe={timeframe} setTimeframe={setTimeframe} />

@@ -26,6 +26,8 @@ export type Timeframe = '30 Sec' | '1 Min' | '5 Min' | '15 Min' | '30 Min' | 'Ho
 
 type Props = {
   gated: boolean;
+  /** Blur the Y-axis price-scale labels (non-qualified users can't read the scale). */
+  blurAxis?: boolean;
   /** When true, the live line freezes (stops ticking) but stays visible —
       used when the floor is closed (inventory depleted). */
   frozen?: boolean;
@@ -123,8 +125,34 @@ function RefPill({ viewBox, value }: { viewBox?: { x: number; y: number; width: 
   );
 }
 
+// Y-axis tick — rendered ourselves so we can blur the price scale reliably for
+// non-qualified users (a CSS filter on the Recharts SVG text didn't take).
+function YAxisTick(props: {
+  x?: number;
+  y?: number;
+  payload?: { value: number };
+  blur?: boolean;
+}) {
+  const { x = 0, y = 0, payload, blur } = props;
+  return (
+    <text
+      x={x}
+      y={y}
+      dy="0.355em"
+      textAnchor="end"
+      fill="#cfe0ef"
+      fontSize={11}
+      fontFamily="League Spartan"
+      style={blur ? { filter: 'blur(6px)' } : undefined}
+    >
+      ${payload?.value}
+    </text>
+  );
+}
+
 export default function PriceChart({
   gated,
+  blurAxis = false,
   frozen = false,
   msrp = 85,
   street = 60,
@@ -238,9 +266,8 @@ export default function PriceChart({
           <YAxis
             domain={yDomain}
             ticks={yTicks}
-            tickFormatter={(v) => `$${v}`}
             stroke="#cfe0ef"
-            tick={{ fill: '#cfe0ef', fontSize: 11, fontFamily: 'League Spartan' }}
+            tick={<YAxisTick blur={blurAxis} />}
             axisLine={false}
             tickLine={false}
             width={48}
