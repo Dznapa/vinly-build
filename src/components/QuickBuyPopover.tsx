@@ -47,6 +47,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   // Ticker reservations can be cancelled unlimited times; only SESH caps it at 2.
   const isTicker = source === 'ticker';
   const cancelLimitReached = !isTicker && cancelCount >= CANCEL_LIMIT;
+  const cancelsLeft = Math.max(0, CANCEL_LIMIT - cancelCount); // SESH: 2 → 1 → 0
   // SESH must be exited via the (capped) "Cancel reservation" button or by purchasing —
   // no X / Esc / backdrop dismiss while it's locked (those would bypass the cap).
   // Ticker can always be dismissed.
@@ -259,6 +260,19 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
           )}
           {isLocked && !expired && (
             <>
+              {!isTicker && (
+                <p className={`qbp-cancel-status${cancelsLeft <= 1 ? ' is-warn' : ''}`}>
+                  <i
+                    className={`fa-solid ${cancelsLeft <= 1 ? 'fa-triangle-exclamation' : 'fa-circle-info'}`}
+                    aria-hidden
+                  />{' '}
+                  {cancelLimitReached
+                    ? 'No cancels left — purchase now to keep this wine.'
+                    : cancelsLeft === 1
+                      ? 'Last cancel — cancel again and you forfeit this wine.'
+                      : `${cancelsLeft} cancels left · your 2nd forfeits this wine.`}
+                </p>
+              )}
               <button
                 type="button"
                 className="qbp-modal-secondary"
@@ -287,13 +301,9 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
         {/* FOOTER */}
         <div className="qbp-modal-foot">
-          {cancelLimitReached ? (
-            <span className="qbp-modal-foot-warn">
-              <i className="fa-solid fa-triangle-exclamation" aria-hidden /> Cancellation limit reached for this SESH
-            </span>
-          ) : (
+          {(
             <span>
-              <i className="fa-solid fa-lock" aria-hidden /> 15-min price lock · {isTicker ? '' : 'max 2 cancellations · '}no charge until you confirm
+              <i className="fa-solid fa-lock" aria-hidden /> 15-min price lock · no charge until you confirm
             </span>
           )}
         </div>
