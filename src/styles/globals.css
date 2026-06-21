@@ -106,6 +106,58 @@ button {
 .vinly-toast-msg { font-weight: 700; line-height: 1.35; }
 .vinly-toast-sub { font-size: 12.5px; font-weight: 500; color: #6b7280; line-height: 1.35; }
 @media (prefers-reduced-motion: reduce) { .vinly-toast { animation: none; } }
+
+/* ===== Post-purchase "Undo / cancel this fill" card (non-blocking, top-center) ===== */
+.ppu-card {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  background: var(--navy-deep);
+  border: 1px solid rgba(99, 162, 222, 0.5);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  color: #e7eef6;
+  font-family: 'Mulish', sans-serif;
+  animation: ppu-in 240ms cubic-bezier(0.18, 0.89, 0.32, 1.2);
+}
+@keyframes ppu-in { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.ppu-primary {
+  display: flex; align-items: center; gap: 9px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 15px; color: #fff;
+}
+.ppu-primary i { color: var(--green); flex: 0 0 auto; }
+.ppu-note { margin-top: 4px; color: #8aa2bb; font-size: 12.5px; line-height: 1.4; }
+.ppu-actions { display: flex; gap: 10px; margin-top: 12px; }
+.ppu-undo {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: transparent;
+  border: 1px solid rgba(226, 59, 59, 0.5);
+  color: #ff6b6b;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700; font-size: 12.5px; letter-spacing: 0.4px;
+  padding: 10px 12px; border-radius: 9px; cursor: pointer;
+  transition: background 120ms ease;
+}
+.ppu-undo:hover { background: rgba(226, 59, 59, 0.12); }
+.ppu-undo:focus-visible { outline: 2px solid #ff6b6b; outline-offset: 2px; }
+.ppu-timer { font-variant-numeric: tabular-nums; font-weight: 800; opacity: 0.9; }
+.ppu-done {
+  flex: 0 0 auto;
+  background: var(--orange); color: #fff; border: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 12.5px; letter-spacing: 0.4px;
+  padding: 10px 16px; border-radius: 9px; cursor: pointer;
+}
+.ppu-done:hover { filter: brightness(1.06); }
+.ppu-done--solo { flex: 1; }
+@media (prefers-reduced-motion: reduce) { .ppu-card { animation: none; } }
 .vinly-toast i {
   font-size: 18px;
   flex: 0 0 auto;

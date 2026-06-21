@@ -11,23 +11,16 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
-import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE, type CartItem } from '@/context/CartContext';
+import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE } from '@/context/CartContext';
 import { useToast } from '@/components/ToastProvider';
-import { useCancellations } from '@/context/CancellationContext';
 import BottlePlaceholder, { pickVariant } from '@/components/BottlePlaceholder';
 import styles from './cart.module.css';
 
 const TAX_RATE = 0.0825;
 
-// Editable cart-lock copy.
-const LOCKED_NOTE = 'Locked in. No action needed — it settles at close.';
-const LOCKED_NOTE_SESH = 'Locked in — settles at close.';
-const LOCKS_FINAL_NOTE = 'Price locks are final for this SESH — settles at close.';
-const CANCEL_LOCK_LABEL = 'Cancel this lock';
-const cancelLockMsg = (remainingAfter: number) =>
-  remainingAfter > 0
-    ? `Cancelled. ${remainingAfter} price-lock cancellation${remainingAfter === 1 ? '' : 's'} left.`
-    : "That's your last cancellation. Locks are final for the rest of this SESH — but you can keep buying.";
+// The cart is read-only for committed fills — cancellation lives in the post-purchase
+// undo window, not here.
+const CONFIRMED_NOTE = 'Confirmed purchase — settles at window close.';
 
 function clampQty(n: number) {
   if (Number.isNaN(n)) return 0;
@@ -40,7 +33,6 @@ export default function CustomerCartPage() {
   const router = useRouter();
   const { items, setQty, removeItem, count, subtotal, shipping } = useCart();
   const { push: toast } = useToast();
-  const { cancel, capReached } = useCancellations();
   const freeShip = count >= FREE_SHIP_THRESHOLD && count > 0;
   const tax = useMemo(() => Number((subtotal * TAX_RATE).toFixed(2)), [subtotal]);
   const grandTotal = useMemo(() => Number((subtotal + shipping + tax).toFixed(2)), [subtotal, shipping, tax]);
@@ -60,14 +52,6 @@ export default function CustomerCartPage() {
   const handleRemove = (wineId: string, name: string) => {
     removeItem(wineId);
     toast({ kind: 'info', message: `${name} removed from cart.` });
-  };
-
-  // Cancel a SESH price lock (back out before it commits) — consumes one of the 2
-  // per-SESH cancellations. Buying is never affected by this.
-  const handleCancelLock = (item: CartItem) => {
-    const remainingAfter = cancel();
-    removeItem(item.wineId);
-    toast({ kind: 'info', message: cancelLockMsg(remainingAfter) });
   };
 
   return (
@@ -114,28 +98,11 @@ export default function CustomerCartPage() {
                           750ml
                         </div>
                         {item.locked ? (
-                          item.source === 'sesh' && !capReached ? (
-                            // SESH lock — can be cancelled (backs out before commit),
-                            // consuming one of the 2 per-SESH cancellations.
-                            <>
-                              <span className={styles.lockedNote}>
-                                <i className="fa-solid fa-lock" aria-hidden /> {LOCKED_NOTE_SESH}
-                              </span>
-                              <button
-                                type="button"
-                                className={styles.cancelLockBtn}
-                                onClick={() => handleCancelLock(item)}
-                              >
-                                {CANCEL_LOCK_LABEL}
-                              </button>
-                            </>
-                          ) : (
-                            // Ticker lock, or SESH after the cap is reached — locks final.
-                            <span className={styles.lockedNote}>
-                              <i className="fa-solid fa-lock" aria-hidden />{' '}
-                              {item.source === 'sesh' ? LOCKS_FINAL_NOTE : LOCKED_NOTE}
-                            </span>
-                          )
+                          // Committed fill — read-only. Cancellation happens in the
+                          // post-purchase undo window, not here.
+                          <span className={styles.lockedNote}>
+                            <i className="fa-solid fa-circle-check" aria-hidden /> {CONFIRMED_NOTE}
+                          </span>
                         ) : (
                           <button
                             type="button"

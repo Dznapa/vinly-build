@@ -17,8 +17,7 @@ import { useCart } from '@/context/CartContext';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useBillingGate } from '@/context/BillingGateContext';
-import { useToast } from '@/components/ToastProvider';
-import { useCancellations } from '@/context/CancellationContext';
+import { usePostPurchase } from '@/context/PostPurchaseContext';
 
 export type QuickBuyWine = {
   id: string;
@@ -44,20 +43,13 @@ const ORDER_MICROCOPY = 'Card runs when the 15-minute window closes — no furth
 const EXIT_LABEL = 'Not now';
 const NO_CARD_CTA = 'Add a card to order';
 const placeOrderLabel = (last4: string) => `Place Order · Card ••${last4}`;
-// Post-purchase (SESH) — celebration + a quiet, SEPARATE cancellation note.
-const POST_BUY_PRIMARY = "You're in. That bottle's locked, the SESH is still open — keep trading.";
-const postBuyNote = (remaining: number) =>
-  remaining > 0
-    ? `${remaining} price-lock cancellation${remaining === 1 ? '' : 's'} remaining if you change your mind.`
-    : 'Price locks are final now — but buy all you want.';
 
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
   const shipWindow = useShippingWindow();
   const { cards } = useProfile();
   const { openGate } = useBillingGate();
-  const { push: toast } = useToast();
-  const { remaining } = useCancellations();
+  const { commit: commitFill } = usePostPurchase();
   const [qty, setQty] = useState<number>(1);
   const [lockExpiresAt, setLockExpiresAt] = useState<number>(0);
   const [secondsLeft, setSecondsLeft] = useState<number>(PRICE_LOCK_SECONDS);
@@ -122,11 +114,9 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     onClose();
     if (!added) return;
     shipWindow.open();
-    // Post-purchase: celebrate (buying stays open) + a quiet SESH cancellation note.
-    if (source === 'sesh') {
-      toast({ kind: 'success', message: POST_BUY_PRIMARY, sub: postBuyNote(remaining), duration: 5000 });
-    }
-  }, [wine, expired, addItem, onClose, shipWindow, source, toast, remaining]);
+    // Open the post-purchase Undo window (its own 30s timer) for this committed fill.
+    commitFill({ wineId: wine.id, name: wine.name, qty: quantity, source });
+  }, [wine, expired, addItem, onClose, shipWindow, source, commitFill]);
 
   // No card on file → send them to the qualification / add-card flow instead.
   const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);

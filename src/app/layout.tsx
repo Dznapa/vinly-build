@@ -12,6 +12,8 @@ import { WelcomeModal } from '@/components/WelcomeModal';
 import { ShippingWindowProvider } from '@/context/ShippingWindowContext';
 import { ShippingWindowModal } from '@/components/ShippingWindowModal';
 import { CancellationProvider } from '@/context/CancellationContext';
+import { PostPurchaseProvider } from '@/context/PostPurchaseContext';
+import { PostPurchaseUndoModal } from '@/components/PostPurchaseUndoModal';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -46,6 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <CartProvider>
                 <ShippingWindowProvider>
                   <CancellationProvider>
+                  <PostPurchaseProvider>
                   <ToastProvider>
                     {/* Prototype/user-state bar sits above the header, in-flow. */}
                     <DevToolbar />
@@ -54,7 +57,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     <PriceLock />
                     <WelcomeModal />
                     <ShippingWindowModal />
+                    <PostPurchaseUndoModal />
                   </ToastProvider>
+                  </PostPurchaseProvider>
                   </CancellationProvider>
                 </ShippingWindowProvider>
               </CartProvider>
