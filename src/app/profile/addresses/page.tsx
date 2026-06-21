@@ -139,7 +139,7 @@ export default function AddressesPage() {
       <main className="wrap">
         <ProfileBack />
         <div className="sesh-title">
-          <span className="tag">PROFILE</span> Addresses
+          <span className="tag">SHIPPING</span> Addresses
         </div>
 
         <section className={styles.list}>
