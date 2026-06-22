@@ -3685,10 +3685,29 @@ button {
   .detail-grid {
     grid-template-columns: 120px 1fr;
   }
-  .header-center,
-  .header-cta-group {
+  .header-center {
     display: none;
   }
+  /* State-aware top CTAs reflow onto their own full-width row below the
+     logo + icons (they must stay visible/reachable on mobile, not vanish). */
+  .site-header .wrap {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+  .logo { order: 1; }
+  .header-icons { order: 2; }
+  .header-cta-group {
+    order: 3;
+    flex-basis: 100%;
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+  }
+  .header-cta {
+    padding: 11px 16px; /* larger tap target on mobile */
+    min-height: 44px;
+  }
+  .header-cta--link { padding: 11px 8px; }
   .foot-links {
     gap: 30px;
   }
