@@ -190,6 +190,15 @@
   line-height: 1.3;
 }
 .lockedNote i { font-size: 10px; }
+/* Source label on adjustable (Shop/Winemaker Spotlight) lines — sits above Remove. */
+.sourceNote {
+  display: block;
+  margin-bottom: 4px;
+  color: #9aa3ad;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
 /* SESH "Cancel this lock" — backs out a price lock (consumes a cancellation). */
 .cancelLockBtn {
   display: inline-block;

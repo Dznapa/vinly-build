@@ -18,9 +18,16 @@ import styles from './cart.module.css';
 
 const TAX_RATE = 0.0825;
 
-// The cart is read-only for committed fills — cancellation lives in the post-purchase
-// undo window, not here.
-const CONFIRMED_NOTE = 'Confirmed purchase — settles at window close.';
+// Per-line source label (editable). Committed SESH/Ticker lines are read-only and get
+// the "— settles at window close." tail; adjustable Shop/Spotlight lines do not.
+// Falls back to the adjustable "Shop purchase" for legacy items with no source.
+const SOURCE_LABEL: Record<string, string> = {
+  sesh: 'SESH purchase — settles at window close.',
+  ticker: 'Ticker purchase — settles at window close.',
+  shop: 'Shop purchase',
+  spotlight: 'Winemaker Spotlight purchase',
+};
+const sourceLabel = (source?: string) => SOURCE_LABEL[source ?? 'shop'] ?? 'Shop purchase';
 
 function clampQty(n: number) {
   if (Number.isNaN(n)) return 0;
@@ -98,19 +105,22 @@ export default function CustomerCartPage() {
                           750ml
                         </div>
                         {item.locked ? (
-                          // Committed fill — read-only. Cancellation happens in the
-                          // post-purchase undo window, not here.
+                          // Committed fill (SESH/Ticker) — read-only, settles at window close.
                           <span className={styles.lockedNote}>
-                            <i className="fa-solid fa-circle-check" aria-hidden /> {CONFIRMED_NOTE}
+                            <i className="fa-solid fa-circle-check" aria-hidden /> {sourceLabel(item.source)}
                           </span>
                         ) : (
-                          <button
-                            type="button"
-                            className={styles.removeBtn}
-                            onClick={() => handleRemove(item.wineId, item.name)}
-                          >
-                            Remove
-                          </button>
+                          // Adjustable (Shop/Winemaker Spotlight) — source label + Remove.
+                          <>
+                            <span className={styles.sourceNote}>{sourceLabel(item.source)}</span>
+                            <button
+                              type="button"
+                              className={styles.removeBtn}
+                              onClick={() => handleRemove(item.wineId, item.name)}
+                            >
+                              Remove
+                            </button>
+                          </>
                         )}
                       </div>
                       <div className={styles.colQty}>

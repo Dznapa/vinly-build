@@ -33,7 +33,7 @@ export type CartItem = {
   msrp?: number;
   meta?: string; // secondary descriptor line (maker / region) for the cart table
   locked?: boolean; // true for SESH/Ticker quick-buy reservations — qty can't be changed
-  source?: 'sesh' | 'ticker' | 'shop'; // where it was added (SESH locks are cancel-capped)
+  source?: 'sesh' | 'ticker' | 'shop' | 'spotlight'; // which site section it was added from
 };
 
 /** Everything needed to add a line — the per-instrument caller supplies the snapshot. */
