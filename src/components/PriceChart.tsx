@@ -125,8 +125,14 @@ function RefPill({ viewBox, value }: { viewBox?: { x: number; y: number; width: 
   );
 }
 
-// Y-axis tick — rendered ourselves so we can blur the price scale reliably for
+// Masked Y-axis label for unqualified users — non-numeric so the live price
+// can't be read off the scale (and no number reaches the accessibility tree).
+const AXIS_MASK = '•••';
+
+// Y-axis tick — rendered ourselves so we control the price scale for
 // non-qualified users (a CSS filter on the Recharts SVG text didn't take).
+// When `blur` (gated), we REPLACE the dollar value with a non-numeric marker
+// rather than blurring a still-legible number.
 function YAxisTick(props: {
   x?: number;
   y?: number;
@@ -143,9 +149,9 @@ function YAxisTick(props: {
       fill="#cfe0ef"
       fontSize={11}
       fontFamily="League Spartan"
-      style={blur ? { filter: 'blur(6px)' } : undefined}
+      aria-hidden={blur ? true : undefined}
     >
-      ${payload?.value}
+      {blur ? AXIS_MASK : `$${payload?.value}`}
     </text>
   );
 }
@@ -282,7 +288,14 @@ export default function PriceChart({
               const live = Number(props.payload[props.payload.length - 1].value);
               return (
                 <div className="chart-tip">
-                  <div className="chart-tip-row is-live"><span>Live</span><b>${live.toFixed(2)}</b></div>
+                  {/* Live value is the qualification payoff — never put the number in
+                      the DOM for gated users (would leak via hover + screen readers). */}
+                  <div className="chart-tip-row is-live">
+                    <span>Live</span>
+                    {blurAxis
+                      ? <b className="chart-tip-locked"><i className="fa-solid fa-lock" aria-hidden /> Locked</b>
+                      : <b>${live.toFixed(2)}</b>}
+                  </div>
                   <div className="chart-tip-row"><span>MSRP</span><b>${msrp.toFixed(2)}</b></div>
                   <div className="chart-tip-row"><span>Street</span><b>${street.toFixed(2)}</b></div>
                 </div>

@@ -4568,14 +4568,13 @@ body.prices-locked .sesh-buy-price {
 }
 /* Primary LIVE SESH PRICE: heavier blur than the other locked bits. */
 body.prices-locked .sesh-term-livehero-price { filter: blur(10px); }
-/* The graph itself stays clear — non-qualified users watch the live line move.
-   Only the price-revealing bits are blurred: y-axis values, the hover tooltip,
-   the in-chart MSRP/Street labels, and the legend. */
-body.prices-locked .recharts-yAxis text,
-body.prices-locked .recharts-yAxis .recharts-cartesian-axis-tick-value,
-body.prices-locked .recharts-reference-line text,
-body.prices-locked .chart-legend-item,
-body.prices-locked .chart-tip {
+/* The graph stays clear — non-qualified users watch the live line move and sit
+   well below the public MSRP/Street reference lines. The live PRICE is masked at
+   its sources in PriceChart (blurAxis): the y-axis numbers become non-numeric
+   markers and the tooltip's Live row reads "Locked" — so the exact number can't
+   be read off the scale or via hover, and nothing leaks to screen readers.
+   MSRP/Street reference labels stay legible (both are public). */
+body.prices-locked .chart-legend-item {
   filter: blur(6px);
   -webkit-user-select: none;
   user-select: none;
@@ -4779,6 +4778,9 @@ body.prices-locked .chart-tip {
 .chart-tip-row b { color: #fff; font-variant-numeric: tabular-nums; font-weight: 700; }
 .chart-tip-row.is-live span { color: #fff; }
 .chart-tip-row.is-live b { color: var(--green); }
+/* Masked Live value for unqualified users — muted, clearly gated (not a number). */
+.chart-tip-locked { color: #8aa2bb !important; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+.chart-tip-locked i { color: var(--orange); font-size: 11px; }
 
 /* =================================================================
    FREE-SHIPPING WINDOW MODAL (SESH / Ticker post-purchase)
