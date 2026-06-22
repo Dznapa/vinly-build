@@ -4555,9 +4555,10 @@ body.prices-locked .sesh-pricebadge-num,
 body.prices-locked .sesh-pricebadge-delta,
 body.prices-locked .sesh-term-livehero-price,
 body.prices-locked .sesh-term-livehero-delta,
-body.prices-locked .sesh-statrow-val.is-strike,
+/* MSRP & Street (.is-strike) are PUBLIC reference prices — stay visible for
+   unqualified users to show the wine's pedigree. Only the deal math (.is-good:
+   Off MSRP, Off Street, You Save) is the qualification payoff, so it stays blurred. */
 body.prices-locked .sesh-statrow-val.is-good,
-body.prices-locked .sesh-statpair-value.is-strike,
 body.prices-locked .sesh-statpair-value.is-good,
 body.prices-locked .sesh-buy-price {
   filter: blur(7px);
