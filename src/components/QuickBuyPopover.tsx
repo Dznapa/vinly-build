@@ -58,6 +58,8 @@ const SESH_STATUS_ACTIVE = (n: number) =>
 const SESH_STATUS_CAP = SESH_LOCKED_COPY;
 const SESH_EXPIRED_REMAIN = (n: number) =>
   n <= 0 ? SESH_LOCKED_COPY : '1 cancellation left.';
+// Lock-rules summary line shown below "Not now" on the SESH popup (editable).
+const SESH_LOCK_RULES = '15-min price lock · max 2 cancellations · no charge until you confirm';
 const BTN_EXPIRED_PRIMARY = 'Price Lock Expired — Return to SESH';
 const BTN_EXPIRED_SECONDARY = 'Not now — Return to SESH';
 const seshCancelMsg = (after: number) =>
@@ -409,6 +411,11 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
               >
                 {EXIT_LABEL}
               </button>
+              {isSesh && (
+                <p className="qbp-lockrules">
+                  <i className="fa-solid fa-lock" aria-hidden /> {SESH_LOCK_RULES}
+                </p>
+              )}
             </>
           )}
         </div>

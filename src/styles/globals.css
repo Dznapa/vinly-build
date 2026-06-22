@@ -4022,6 +4022,16 @@ button {
   line-height: 1.45;
 }
 
+/* Lock-rules summary line below "Not now" on the SESH popup. */
+.qbp-lockrules {
+  margin: 8px 0 0;
+  text-align: center;
+  color: #8aa2bb;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.qbp-lockrules i { color: var(--orange); margin-right: 5px; }
+
 /* SESH expired-state buttons turn BLACK — both just return to the SESH. */
 .qbp-modal-primary--ended,
 .qbp-modal-secondary--ended {
