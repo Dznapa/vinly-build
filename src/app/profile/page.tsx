@@ -318,7 +318,7 @@ export default function ProfilePage() {
                       fontSize: 14,
                     }}
                   >
-                    View all
+                    See details
                   </Link>
                 </div>
               </>
