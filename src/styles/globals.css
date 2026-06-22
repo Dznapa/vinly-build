@@ -4673,6 +4673,30 @@ body.prices-locked .chart-legend-item {
 }
 .sesh-buy--soldout:hover { filter: none; transform: none; }
 
+/* Locked out of buying this SESH (2 cancellations used). Disabled, black, with a
+   clear message beneath — never a buy action that then fails. */
+.sesh-buy-locked { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.sesh-buy-locked--full { width: 100%; }
+.sesh-buy--lockedout {
+  justify-content: center;
+  gap: 10px;
+  background: #0b0f17;
+  color: #cfd8e3;
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  cursor: not-allowed;
+}
+.sesh-buy--lockedout:hover { filter: none; transform: none; }
+.sesh-buy-locked-msg {
+  margin: 0;
+  color: #8aa2bb;
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: center;
+}
+
 /* Mobile-only sticky floating BUY bar on the SESH offer page (desktop is fine
    without it, so it's hidden ≥601px). Mirrors the inline BuyButton states. */
 .sesh-fab { display: none; }
@@ -4706,6 +4730,21 @@ body.prices-locked .chart-legend-item {
   .sesh-fab-btn.is-gated { background: #D4541C; }
   .sesh-fab-btn.is-soldout { background: #1b2c44; color: #8aa2bb; cursor: not-allowed; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35); }
   .sesh-fab-price { font-variant-numeric: tabular-nums; font-size: 18px; }
+  /* Locked out of buying this SESH — informational, no buy action. */
+  .sesh-fab-lockwrap {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 13px 16px;
+    border-radius: 14px;
+    background: #0b0f17;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #cfd8e3;
+    font-family: 'League Spartan', sans-serif;
+    font-weight: 700; font-size: 12.5px; line-height: 1.3;
+    text-align: center;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+  }
+  .sesh-fab-lockwrap i { color: var(--orange); flex: none; }
   /* keep page content clear of the floating bar */
   .sesh-page { padding-bottom: 92px; }
 }

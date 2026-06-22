@@ -50,17 +50,20 @@ const NO_CARD_CTA = 'Add a card to order';
 const placeOrderLabel = (last4: string) => `Place Order · Card ••${last4}`;
 
 // SESH cancellation-aware status + messaging (driven by the single 2-per-SESH counter).
+// After 2 cancellations the user is LOCKED OUT of buying this SESH (resets next drop).
+export const SESH_LOCKED_COPY =
+  "You've used both cancellations. Buying is locked for this SESH — back at the next drop.";
 const SESH_STATUS_ACTIVE = (n: number) =>
   `Price locked · ${SESH_LOCK_SECONDS}s to confirm. Letting it expire or tapping "Not now" uses a cancellation · ${n} left`;
-const SESH_STATUS_CAP = 'Cancellation limit reached — fills are final until the next SESH. You can still buy.';
+const SESH_STATUS_CAP = SESH_LOCKED_COPY;
 const SESH_EXPIRED_REMAIN = (n: number) =>
-  n <= 0 ? SESH_STATUS_CAP : n === 1 ? 'One price lock remains.' : `${n} cancellations left.`;
+  n <= 0 ? SESH_LOCKED_COPY : '1 cancellation left.';
 const BTN_EXPIRED_PRIMARY = 'Price Lock Expired — Return to SESH';
 const BTN_EXPIRED_SECONDARY = 'Not now — Return to SESH';
 const seshCancelMsg = (after: number) =>
   after >= 1
     ? 'Cancelled. 1 cancellation left.'
-    : "That's your last cancellation. Fills are final until the next SESH — but you can keep buying.";
+    : "That's your second cancellation — buying is locked for the rest of this SESH. Back at the next drop.";
 
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
@@ -157,6 +160,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   // SEPARATE 15-min free-ship window. NOT a cancellation. Charge/order behavior unchanged.
   const addToCart = useCallback((quantity: number) => {
     if (!wine || expired) return; // lock must be live to capture the held price
+    if (isSesh && capReached) return; // locked out of buying this SESH (2 cancellations)
     const added = addItem(
       { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true, source },
       quantity,
@@ -164,7 +168,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     onClose();
     if (!added) return;
     shipWindow.open();
-  }, [wine, expired, addItem, onClose, shipWindow, source]);
+  }, [wine, expired, isSesh, capReached, addItem, onClose, shipWindow, source]);
 
   // No card on file → send them to the qualification / add-card flow instead.
   const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);
@@ -377,6 +381,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                     type="button"
                     className="qbp-modal-primary"
                     onClick={() => addToCart(qty)}
+                    disabled={isSesh && capReached}
                     aria-label={`${placeOrderLabel(last4)} — total $${lineTotal.toFixed(2)}`}
                   >
                     <i className="fa-solid fa-credit-card" aria-hidden /> {placeOrderLabel(last4)}

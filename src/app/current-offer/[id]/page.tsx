@@ -14,8 +14,10 @@ import InventoryBar from '@/components/InventoryBar';
 import SeshLiveCard from '@/components/SeshLiveCard';
 import BottlePlaceholder from '@/components/BottlePlaceholder';
 import { useQuickBuy } from '@/components/useQuickBuy';
+import { SESH_LOCKED_COPY } from '@/components/QuickBuyPopover';
 import { useQuickBuyRegistry } from '@/context/QuickBuyContext';
 import { useBillingGate } from '@/context/BillingGateContext';
+import { useCancellations } from '@/context/CancellationContext';
 import { getSeshOffer, getSeshRecap, type SeshOffer } from '@/data/mock';
 import { SeshClosedRecap } from '@/components/SeshClosedRecap';
 import { useUserState } from '@/context/UserStateContext';
@@ -62,6 +64,9 @@ function CurrentOfferInner({ id }: { id: string }) {
   const { userState } = useUserState();
   // Not SESH-qualified → can view everything but must add billing to buy.
   const isGated = userState !== 'sesh_qualified';
+  // 2 cancellations this SESH → locked out of buying this drop (resets next SESH).
+  const { capReached, hydrated: cancelHydrated } = useCancellations();
+  const lockedOut = cancelHydrated && capReached;
   // Everyone now sees live prices + chart on the SESH (viewer mode); only the
   // buy action is gated, via the billing popup below.
   const stateClass = 'qualified';
@@ -116,7 +121,7 @@ function CurrentOfferInner({ id }: { id: string }) {
   };
 
   const shared: SharedProps = {
-    offer, isGated, signedInUnqualified: userState === 'signed_in', isAnonymous: userState === 'anonymous', timeframe, setTimeframe, readMore, setReadMore,
+    offer, isGated, signedInUnqualified: userState === 'signed_in', isAnonymous: userState === 'anonymous', lockedOut, timeframe, setTimeframe, readMore, setReadMore,
     livePrice, offMsrpPct, offStreetPct, savings,
     initialBottles, totalBottles, invPct, floorClosed,
     handlePriceTick, openBuy, openBillingGate,
@@ -153,6 +158,7 @@ type SharedProps = {
   isGated: boolean;
   signedInUnqualified: boolean; // signed in but NOT SESH-qualified → show unlock messaging
   isAnonymous: boolean; // not signed in → anonymous unlock messaging (create-account → qualify)
+  lockedOut: boolean; // 2 SESH cancellations used → buying locked for this drop
   timeframe: Timeframe;
   setTimeframe: (t: Timeframe) => void;
   readMore: boolean;
@@ -286,13 +292,23 @@ function OfferDuration({ offer, floorClosed }: { offer: SharedProps['offer']; fl
 // Mobile-only sticky floating buy bar — mirrors BuyButton's three states.
 // (CSS hides it on desktop; rendered only on the SESH offer page.)
 function FloatingBuy(p: SharedProps) {
-  const { isGated, livePrice, openBuy, openBillingGate, floorClosed } = p;
+  const { isGated, livePrice, openBuy, openBillingGate, floorClosed, lockedOut } = p;
   if (floorClosed) {
     return (
       <div className="sesh-fab">
         <button type="button" className="sesh-fab-btn is-soldout" disabled>
           <i className="fa-solid fa-circle-xmark" aria-hidden /> <span>SOLD OUT</span>
         </button>
+      </div>
+    );
+  }
+  // Qualified buyer who used both cancellations → buying locked for this SESH.
+  if (!isGated && lockedOut) {
+    return (
+      <div className="sesh-fab sesh-fab--locked">
+        <div className="sesh-fab-lockwrap" role="status">
+          <i className="fa-solid fa-lock" aria-hidden /> <span>{SESH_LOCKED_COPY}</span>
+        </div>
       </div>
     );
   }
@@ -316,13 +332,30 @@ function FloatingBuy(p: SharedProps) {
 }
 
 function BuyButton(p: SharedProps & { full?: boolean }) {
-  const { isGated, livePrice, openBuy, openBillingGate, floorClosed, full } = p;
+  const { isGated, livePrice, openBuy, openBillingGate, floorClosed, lockedOut, full } = p;
   // Floor closed (sold out) → no price, no buy action.
   if (floorClosed) {
     return (
       <button type="button" className={`sesh-buy sesh-buy--soldout${full ? ' sesh-buy--full' : ''}`} disabled>
         <i className="fa-solid fa-circle-xmark" aria-hidden /> <span>SOLD OUT</span>
       </button>
+    );
+  }
+  // Qualified buyer who used both cancellations → buying locked for this SESH.
+  // Up-front locked state (disabled), not a buy action that then fails.
+  if (!isGated && lockedOut) {
+    return (
+      <div className={`sesh-buy-locked${full ? ' sesh-buy-locked--full' : ''}`}>
+        <button
+          type="button"
+          className={`sesh-buy sesh-buy--lockedout${full ? ' sesh-buy--full' : ''}`}
+          disabled
+          aria-label={SESH_LOCKED_COPY}
+        >
+          <i className="fa-solid fa-lock" aria-hidden /> <span>BUYING LOCKED</span>
+        </button>
+        <p className="sesh-buy-locked-msg">{SESH_LOCKED_COPY}</p>
+      </div>
     );
   }
   // Non-qualified: pricing is locked, so the CTA invites them to unlock it and
