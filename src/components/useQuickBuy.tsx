@@ -17,7 +17,11 @@ export function useQuickBuy(source: Source) {
     <QuickBuyPopover wine={wine} onClose={close} source={source} />
   );
 
-  return { open, close, popover } as const;
+  // True while the quick-buy popup is open — single source for any UI that must
+  // step aside while it owns the screen (e.g. the mobile floating Buy Now button).
+  const isOpen = wine !== null;
+
+  return { open, close, popover, isOpen } as const;
 }
 
 export default useQuickBuy;

@@ -83,7 +83,7 @@ function CurrentOfferInner({ id }: { id: string }) {
 
   const { openGate: openBillingGate } = useBillingGate();
 
-  const { open: openQuickBuy, popover } = useQuickBuy('sesh');
+  const { open: openQuickBuy, popover, isOpen: quickBuyOpen } = useQuickBuy('sesh');
   const openBuy = () =>
     openQuickBuy({
       id: offer.id,
@@ -121,8 +121,12 @@ function CurrentOfferInner({ id }: { id: string }) {
         {variant === 'v4' && <LayoutTerminal {...shared} />}
         {variant === 'v5' && <LayoutStack {...shared} />}
 
-        {/* Mobile-only sticky buy bar (hidden on desktop via CSS). */}
-        <FloatingBuy {...shared} />
+        {/* Mobile-only sticky buy bar (hidden on desktop via CSS). While the
+            quick-buy popup is open it owns the screen — drop the floating button
+            entirely (not just visually) so it can't overlap the popup's "Not now"
+            exit or sit in the tab/screen-reader order. Desktop is unaffected
+            (the bar is CSS-hidden there regardless). */}
+        {!quickBuyOpen && <FloatingBuy {...shared} />}
 
         {popover}
         {floorClosed && !recapDismissed && (
