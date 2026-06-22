@@ -4775,6 +4775,66 @@ body.prices-locked .chart-legend-item {
   .welcome-lede { font-size: 22px; }
 }
 
+/* Welcome-back line for known/qualified users — a light, non-blocking pill that
+   floats top-center. It never covers a CTA: the wrapper passes clicks through and
+   only the pill itself is interactive. Self-dismisses (see component). */
+.welcome-back-wrap {
+  position: fixed;
+  top: 14px;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px;
+  pointer-events: none; /* let the floor underneath stay clickable */
+}
+.welcome-back {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(92vw, 520px);
+  background: rgba(14, 38, 71, 0.96);
+  border: 1px solid rgba(99, 162, 222, 0.5);
+  border-radius: 999px;
+  padding: 10px 12px 10px 16px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4);
+  color: #eaf2fb;
+  font-family: 'Mulish', sans-serif;
+  font-size: 14px;
+  line-height: 1.3;
+  animation: welcome-back-in 220ms ease both;
+}
+.welcome-back-ic { color: var(--orange); font-size: 14px; flex: none; }
+.welcome-back-text { font-weight: 600; }
+.welcome-back-close {
+  flex: none;
+  background: transparent;
+  border: 0;
+  color: #8aa2bb;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 4px 4px;
+  margin-left: 2px;
+  border-radius: 6px;
+  transition: color 120ms ease;
+}
+.welcome-back-close:hover { color: #fff; }
+.welcome-back-close:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+@keyframes welcome-back-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Static for reduced-motion users — no slide/fade. */
+@media (prefers-reduced-motion: reduce) {
+  .welcome-back { animation: none; }
+}
+@media (max-width: 600px) {
+  .welcome-back { font-size: 13px; max-width: 94vw; }
+}
+
 /* Price-chart hover tooltip — accurate live price at the cursor + MSRP + Street. */
 .chart-tip {
   background: #0e2647;

@@ -1,13 +1,25 @@
 'use client';
 
-/* Welcome-to-Vinly wizard — shows on every full page load / refresh (it lives in
-   the persistent layout, so it re-appears on hard reload / URL refresh but not on
-   in-app navigation). Lighter backdrop than the billing gate. */
+/* Welcome-to-Vinly wizard — the first-time onboarding explainer. It auto-shows on
+   full page load / refresh ONLY for anonymous (not-known) users; known/signed-in/
+   SESH-qualified users skip it and get the rotating welcome-back line instead
+   (WelcomeBackLine). It lives in the persistent layout, so it re-appears on hard
+   reload / URL refresh but not on in-app navigation. The same explainer stays
+   re-openable on demand via the existing learn-more entry point. */
 
 import { useEffect, useState } from 'react';
+import { useUserState } from '@/context/UserStateContext';
 
 export function WelcomeModal() {
-  const [open, setOpen] = useState(true);
+  const { userState, hydrated } = useUserState();
+  const [open, setOpen] = useState(false);
+
+  // Auto-open only for anonymous (not-known) users, and only once state has
+  // hydrated from storage — so known/qualified users never see the onboarding
+  // wall, and we avoid an SSR/hydration flash.
+  useEffect(() => {
+    if (hydrated && userState === 'anonymous') setOpen(true);
+  }, [hydrated, userState]);
 
   useEffect(() => {
     if (!open) return;

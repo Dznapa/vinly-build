@@ -9,6 +9,7 @@ import { ScrollToTop } from '@/components/ScrollToTop';
 import { DevToolbar } from '@/components/DevToolbar';
 import { PriceLock } from '@/components/PriceLock';
 import { WelcomeModal } from '@/components/WelcomeModal';
+import { WelcomeBackLine } from '@/components/WelcomeBackLine';
 import { ShippingWindowProvider } from '@/context/ShippingWindowContext';
 import { ShippingWindowModal } from '@/components/ShippingWindowModal';
 import { CancellationProvider } from '@/context/CancellationContext';
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     <ScrollToTop />
                     <PriceLock />
                     <WelcomeModal />
+                    <WelcomeBackLine />
                     <ShippingWindowModal />
                     <PostPurchaseUndoModal />
                     </QuickBuyProvider>
