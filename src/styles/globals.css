@@ -5237,7 +5237,61 @@ body.prices-locked .chart-tip {
   gap: 2px;
   padding: 2px 0 14px;
   text-align: center;
+  position: relative;
 }
+
+/* Orienting line for signed-in, not-yet-qualified users (under the ticker header). */
+.sesh-orient {
+  margin: 6px 0 0;
+  text-align: center;
+  color: #cfe0ef;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Unlock prompt overlaid on the blurred LIVE SESH PRICE (signed-in, unqualified). */
+.sesh-unlock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  pointer-events: none; /* let the blurred price show through around the card */
+}
+.sesh-unlock-card {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  max-width: 92%;
+  text-align: center;
+  background: rgba(14, 38, 71, 0.78);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(99, 162, 222, 0.45);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+.sesh-unlock-title {
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 14px; letter-spacing: 0.3px; color: #fff;
+}
+.sesh-unlock-title i { color: var(--orange); }
+.sesh-unlock-sub { color: #cfe0ef; font-size: 12.5px; }
+.sesh-unlock-btn {
+  margin-top: 4px;
+  background: var(--orange); color: #fff; border: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800; font-size: 13px; letter-spacing: 0.5px;
+  padding: 9px 18px; border-radius: 9px; cursor: pointer;
+  transition: filter 120ms ease;
+}
+.sesh-unlock-btn:hover { filter: brightness(1.07); }
+.sesh-unlock-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .sesh-term-livehero-label {
   font-family: 'League Spartan', sans-serif;
   font-size: 11px;

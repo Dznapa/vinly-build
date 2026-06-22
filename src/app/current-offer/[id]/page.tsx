@@ -31,6 +31,12 @@ const VARIANTS: { id: VariantId; label: string; tag: string }[] = [
   { id: 'v5', label: 'Stack',     tag: 'Coinbase mobile card stack' },
 ];
 
+// Editable unlock messaging — shown only to signed-in, not-yet-SESH-qualified users.
+const SESH_ORIENT_COPY = "You're watching the floor. Get qualified to see live pricing and lock bottles.";
+const UNLOCK_TITLE = 'Live pricing is locked';
+const UNLOCK_SUB = 'Get SESH-qualified to watch it move.';
+const UNLOCK_CTA = 'Unlock Live Pricing →';
+
 export default function CurrentOfferPage({ params }: { params: { id: string } }) {
   return (
     <Suspense fallback={null}>
@@ -99,7 +105,7 @@ function CurrentOfferInner({ id }: { id: string }) {
   };
 
   const shared: SharedProps = {
-    offer, isGated, timeframe, setTimeframe, readMore, setReadMore,
+    offer, isGated, signedInUnqualified: userState === 'signed_in', timeframe, setTimeframe, readMore, setReadMore,
     livePrice, offMsrpPct, offStreetPct, savings,
     initialBottles, totalBottles, invPct, floorClosed,
     handlePriceTick, openBuy, openBillingGate,
@@ -130,6 +136,7 @@ function CurrentOfferInner({ id }: { id: string }) {
 type SharedProps = {
   offer: SeshOffer;
   isGated: boolean;
+  signedInUnqualified: boolean; // signed in but NOT SESH-qualified → show unlock messaging
   timeframe: Timeframe;
   setTimeframe: (t: Timeframe) => void;
   readMore: boolean;
@@ -557,7 +564,7 @@ function LayoutTicket(p: SharedProps) {
 /* =============== V4 — TERMINAL (3-col Bloomberg) =============== */
 
 function LayoutTerminal(p: SharedProps) {
-  const { offer, isGated, timeframe, setTimeframe, livePrice, offMsrpPct, offStreetPct, savings,
+  const { offer, isGated, signedInUnqualified, openBillingGate, timeframe, setTimeframe, livePrice, offMsrpPct, offStreetPct, savings,
     handlePriceTick, initialBottles, totalBottles, readMore, setReadMore } = p;
   return (
     <>
@@ -565,6 +572,9 @@ function LayoutTerminal(p: SharedProps) {
         <div className="sesh-term-sym">{offer.ticker ?? offer.id.toUpperCase()}</div>
         <div className="sesh-term-title">{offer.title}</div>
       </div>
+      {signedInUnqualified && (
+        <p className="sesh-orient">{SESH_ORIENT_COPY}</p>
+      )}
 
       <div className="sesh-term-grid">
         <aside className="panel sesh-term-left">
@@ -587,6 +597,22 @@ function LayoutTerminal(p: SharedProps) {
             <span className="sesh-term-livehero-label">LIVE SESH PRICE</span>
             <span className="sesh-term-livehero-price">${livePrice.toFixed(2)}</span>
             <span className="sesh-term-livehero-delta">▼ {offMsrpPct.toFixed(2)}% off MSRP</span>
+            {signedInUnqualified && (
+              <div className="sesh-unlock-overlay">
+                <div className="sesh-unlock-card">
+                  <div className="sesh-unlock-title"><i className="fa-solid fa-lock" aria-hidden /> {UNLOCK_TITLE}</div>
+                  <div className="sesh-unlock-sub">{UNLOCK_SUB}</div>
+                  <button
+                    type="button"
+                    className="sesh-unlock-btn"
+                    onClick={openBillingGate}
+                    aria-label="Unlock live pricing — get SESH-qualified"
+                  >
+                    {UNLOCK_CTA}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <div className="chart-wrap">
             <PriceChart gated={false} blurAxis={p.isGated} frozen={p.floorClosed} msrp={offer.msrp} street={offer.street}
