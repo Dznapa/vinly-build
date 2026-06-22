@@ -13,6 +13,7 @@ import { ShippingWindowProvider } from '@/context/ShippingWindowContext';
 import { ShippingWindowModal } from '@/components/ShippingWindowModal';
 import { CancellationProvider } from '@/context/CancellationContext';
 import { PostPurchaseProvider } from '@/context/PostPurchaseContext';
+import { QuickBuyProvider } from '@/context/QuickBuyContext';
 import { PostPurchaseUndoModal } from '@/components/PostPurchaseUndoModal';
 import '@/styles/globals.css';
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <CancellationProvider>
                   <PostPurchaseProvider>
                   <ToastProvider>
+                    <QuickBuyProvider>
                     {/* Prototype/user-state bar sits above the header, in-flow. */}
                     <DevToolbar />
                     {children}
@@ -58,6 +60,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     <WelcomeModal />
                     <ShippingWindowModal />
                     <PostPurchaseUndoModal />
+                    </QuickBuyProvider>
                   </ToastProvider>
                   </PostPurchaseProvider>
                   </CancellationProvider>

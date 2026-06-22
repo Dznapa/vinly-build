@@ -14,6 +14,7 @@ import InventoryBar from '@/components/InventoryBar';
 import SeshLiveCard from '@/components/SeshLiveCard';
 import BottlePlaceholder from '@/components/BottlePlaceholder';
 import { useQuickBuy } from '@/components/useQuickBuy';
+import { useQuickBuyRegistry } from '@/context/QuickBuyContext';
 import { useBillingGate } from '@/context/BillingGateContext';
 import { getSeshOffer, getSeshRecap, type SeshOffer } from '@/data/mock';
 import { SeshClosedRecap } from '@/components/SeshClosedRecap';
@@ -83,7 +84,10 @@ function CurrentOfferInner({ id }: { id: string }) {
 
   const { openGate: openBillingGate } = useBillingGate();
 
-  const { open: openQuickBuy, popover, isOpen: quickBuyOpen } = useQuickBuy('sesh');
+  const { open: openQuickBuy, popover } = useQuickBuy('sesh');
+  // Hide the mobile floating Buy Now whenever ANY quick-buy popup is open
+  // (this page's SESH popup OR the Ticker popup in the shared chrome).
+  const { anyOpen: anyQuickBuyOpen } = useQuickBuyRegistry();
   const openBuy = () =>
     openQuickBuy({
       id: offer.id,
@@ -126,7 +130,7 @@ function CurrentOfferInner({ id }: { id: string }) {
             entirely (not just visually) so it can't overlap the popup's "Not now"
             exit or sit in the tab/screen-reader order. Desktop is unaffected
             (the bar is CSS-hidden there regardless). */}
-        {!quickBuyOpen && <FloatingBuy {...shared} />}
+        {!anyQuickBuyOpen && <FloatingBuy {...shared} />}
 
         {popover}
         {floorClosed && !recapDismissed && (
