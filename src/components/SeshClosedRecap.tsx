@@ -15,6 +15,11 @@ import type { SeshRecap } from '@/data/mock';
 
 const NOTIFY_KEY = 'vinly:seshNotify';
 
+// Plain-language frame so a first-timer understands what this screen is — sits
+// under the wine name, above the SETTLED block. Editable.
+const RECAP_FRAME_HEADLINE = 'You missed this one.';
+const RECAP_FRAME_SUBLINE = "The SESH closed — here's how it settled. Next drop's already loading.";
+
 const money = (n: number) => `$${Math.round(n)}`;
 const isNum = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
 
@@ -128,6 +133,11 @@ export function SeshClosedRecap({ recap, onClose }: { recap: SeshRecap; onClose:
             <span className="recap-ticker">{recap.ticker}</span>
             <span className="recap-wine">{recap.wineName}</span>
           </div>
+        </div>
+
+        <div className="recap-frame">
+          <h2 className="recap-frame-headline">{RECAP_FRAME_HEADLINE}</h2>
+          <p className="recap-frame-sub">{RECAP_FRAME_SUBLINE}</p>
         </div>
 
         <div className="recap-hero">

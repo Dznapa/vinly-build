@@ -5211,6 +5211,27 @@ body.prices-locked .chart-legend-item {
   flex: 0 0 auto;
 }
 .recap-closed-dot { width: 7px; height: 7px; border-radius: 50%; background: #8aa2bb; }
+/* Plain-language frame between the wine name and the SETTLED block — orients a
+   first-timer without competing with the big settled number below it. */
+.recap-frame {
+  text-align: center;
+  padding: 20px 24px 2px;
+}
+.recap-frame-headline {
+  margin: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: 0.2px;
+  color: #fff;
+}
+.recap-frame-sub {
+  margin: 6px auto 0;
+  max-width: 34ch;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #c7d5e6;
+}
 .recap-hero { text-align: center; padding: 24px 24px 8px; }
 .recap-status {
   display: inline-flex;
@@ -5283,6 +5304,9 @@ body.prices-locked .chart-legend-item {
   .recap-settle { font-size: 46px; }
   .recap-v { font-size: 19px; }
   .recap-wine { max-width: 160px; }
+  .recap-frame { padding: 16px 18px 2px; }
+  .recap-frame-headline { font-size: 20px; }
+  .recap-frame-sub { font-size: 13px; }
 }
 
 /* Live-price beacon — pulsing radar ring + glowing core at the end of the chart line. */
