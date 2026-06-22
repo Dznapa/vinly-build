@@ -29,6 +29,12 @@ const SOURCE_LABEL: Record<string, string> = {
 };
 const sourceLabel = (source?: string) => SOURCE_LABEL[source ?? 'shop'] ?? 'Shop purchase';
 
+// Primary-CTA labels (editable). When the cart holds ONLY committed SESH/Ticker wines
+// (locked, settle at window close) there's nothing to check out, so we swap the billing
+// CTA for "Keep Shopping".
+const CTA_PROCEED = 'PROCEED TO BILLING & SHIPPING';
+const CTA_KEEP_SHOPPING = 'KEEP SHOPPING';
+
 function clampQty(n: number) {
   if (Number.isNaN(n)) return 0;
   if (n < 0) return 0;
@@ -45,6 +51,10 @@ export default function CustomerCartPage() {
   const grandTotal = useMemo(() => Number((subtotal + shipping + tax).toFixed(2)), [subtotal, shipping, tax]);
 
   const hasItems = items.length > 0;
+  // Adjustable = Shop/Winemaker Spotlight (not locked). Committed dynamic = SESH/Ticker
+  // (locked, settle at window close). Only show the billing CTA when there's something
+  // to actually check out; a cart of only committed wines reverts to "Keep Shopping".
+  const hasAdjustable = items.some((i) => !i.locked);
 
   // How much they're saving vs MSRP — computed across all cart items (snapshot).
   const savings = useMemo(
@@ -193,13 +203,20 @@ export default function CustomerCartPage() {
                   You&apos;re saving <b>${savings.toFixed(2)}</b> vs MSRP.
                 </div>
               )}
-              <button
-                type="button"
-                className={`btn-billing ${styles.checkoutBtn}`}
-                onClick={() => router.push('/checkout/billing')}
-              >
-                PROCEED TO BILLING &amp; SHIPPING
-              </button>
+              {hasAdjustable ? (
+                <button
+                  type="button"
+                  className={`btn-billing ${styles.checkoutBtn}`}
+                  onClick={() => router.push('/checkout/billing')}
+                >
+                  {CTA_PROCEED}
+                </button>
+              ) : (
+                // Only committed SESH/Ticker wines → already purchased, no checkout step.
+                <Link href="/shop" className={`btn-billing ${styles.checkoutBtn}`}>
+                  {CTA_KEEP_SHOPPING}
+                </Link>
+              )}
               <div className={styles.freeShipNote}>
                 {freeShip
                   ? '🎉 You unlocked FREE ground shipping!'
