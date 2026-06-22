@@ -45,7 +45,8 @@ const priceLockLabelSesh = (s: number) => `Price locked · ${s}s to confirm`;
 const PRICE_LOCK_EXPIRED = 'Price lock expired — re-lock to keep this price.'; // Ticker
 const RELOCK_LABEL = `Re-lock price (${TICKER_LOCK_SECONDS}s)`; // Ticker
 const ORDER_MICROCOPY = 'Card runs when the 15-minute window closes — no further confirmation.'; // Ticker
-const EXIT_LABEL = 'Not now';
+const EXIT_LABEL = 'Not now'; // Ticker active-state exit
+const SESH_EXIT_LABEL = 'Cancel / Return to Sesh'; // SESH active-state exit
 const NO_CARD_CTA = 'Add a card to order';
 const placeOrderLabel = (last4: string) => `Place Order · Card ••${last4}`;
 
@@ -54,7 +55,7 @@ const placeOrderLabel = (last4: string) => `Place Order · Card ••${last4}`;
 export const SESH_LOCKED_COPY =
   "You've used both cancellations. Buying is locked for this SESH — back at the next drop.";
 const SESH_STATUS_ACTIVE = (n: number) =>
-  `Price locked · ${SESH_LOCK_SECONDS}s to confirm. Letting it expire or tapping "Not now" uses a cancellation · ${n} left`;
+  `Price locked · ${SESH_LOCK_SECONDS}s to confirm. Letting it expire or tapping "Cancel" uses a cancellation · ${n} left`;
 const SESH_STATUS_CAP = SESH_LOCKED_COPY;
 const SESH_EXPIRED_REMAIN = (n: number) =>
   n <= 0 ? SESH_LOCKED_COPY : '1 cancellation left.';
@@ -411,7 +412,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                 onClick={handleCancelExit}
                 aria-label="Close without ordering"
               >
-                {EXIT_LABEL}
+                {isSesh ? SESH_EXIT_LABEL : EXIT_LABEL}
               </button>
               {isSesh && (
                 <p className="qbp-lockrules">
