@@ -17,7 +17,8 @@ import { useCart } from '@/context/CartContext';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useBillingGate } from '@/context/BillingGateContext';
-import { usePostPurchase } from '@/context/PostPurchaseContext';
+import { useCancellations } from '@/context/CancellationContext';
+import { useToast } from '@/components/ToastProvider';
 
 export type QuickBuyWine = {
   id: string;
@@ -35,24 +36,48 @@ export type QuickBuyPopoverProps = {
 };
 
 // Editable copy.
-const PRICE_LOCK_SECONDS = 15;
-const priceLockLabel = (s: number) => `Price locked · ${s}s to order`;
-const PRICE_LOCK_EXPIRED = 'Price lock expired — re-lock to keep this price.';
-const RELOCK_LABEL = `Re-lock price (${PRICE_LOCK_SECONDS}s)`;
-const ORDER_MICROCOPY = 'Card runs when the 15-minute window closes — no further confirmation.';
+// SESH runs a 20s price lock where exits/expiry cost a cancellation; Ticker keeps
+// the original 15s "re-lock" behavior (exits harmless).
+const SESH_LOCK_SECONDS = 20;
+const TICKER_LOCK_SECONDS = 15;
+const priceLockLabelTicker = (s: number) => `Price locked · ${s}s to order`;
+const priceLockLabelSesh = (s: number) => `Price locked · ${s}s to confirm`;
+const PRICE_LOCK_EXPIRED = 'Price lock expired — re-lock to keep this price.'; // Ticker
+const RELOCK_LABEL = `Re-lock price (${TICKER_LOCK_SECONDS}s)`; // Ticker
+const ORDER_MICROCOPY = 'Card runs when the 15-minute window closes — no further confirmation.'; // Ticker
 const EXIT_LABEL = 'Not now';
 const NO_CARD_CTA = 'Add a card to order';
 const placeOrderLabel = (last4: string) => `Place Order · Card ••${last4}`;
+
+// SESH cancellation-aware status + messaging (driven by the single 2-per-SESH counter).
+const SESH_STATUS_ACTIVE = (n: number) =>
+  `Price locked · ${SESH_LOCK_SECONDS}s to confirm. Letting it expire or tapping "Not now" uses a cancellation · ${n} left`;
+const SESH_STATUS_CAP = 'Cancellation limit reached — fills are final until the next SESH. You can still buy.';
+const SESH_EXPIRED_REMAIN = (n: number) =>
+  n <= 0 ? SESH_STATUS_CAP : n === 1 ? 'One price lock remains.' : `${n} cancellations left.`;
+const BTN_EXPIRED_PRIMARY = 'Price Lock Expired — Return to SESH';
+const BTN_EXPIRED_SECONDARY = 'Not now — Return to SESH';
+const seshCancelMsg = (after: number) =>
+  after >= 1
+    ? 'Cancelled. 1 cancellation left.'
+    : "That's your last cancellation. Fills are final until the next SESH — but you can keep buying.";
 
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
   const shipWindow = useShippingWindow();
   const { cards } = useProfile();
   const { openGate } = useBillingGate();
-  const { commit: commitFill } = usePostPurchase();
+  // Single SESH cancellation counter (2 per SESH). On SESH, "Not now"/Esc/backdrop and
+  // timer-expiry each consume one (when remaining > 0); committed buys never do.
+  const { cancel, remaining, capReached, hydrated } = useCancellations();
+  const { push: toast } = useToast();
+
+  const isSesh = source === 'sesh';
+  const LOCK_SECONDS = isSesh ? SESH_LOCK_SECONDS : TICKER_LOCK_SECONDS;
+
   const [qty, setQty] = useState<number>(1);
   const [lockExpiresAt, setLockExpiresAt] = useState<number>(0);
-  const [secondsLeft, setSecondsLeft] = useState<number>(PRICE_LOCK_SECONDS);
+  const [secondsLeft, setSecondsLeft] = useState<number>(LOCK_SECONDS);
   const [expired, setExpired] = useState<boolean>(false);
 
   const open = wine !== null;
@@ -64,19 +89,21 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
   // Reset quantity when a new wine opens.
   const lastWineIdRef = useRef<string | null>(null);
+  const expiryCountedRef = useRef<boolean>(false); // SESH: expiry consumes one cancellation, once
   useEffect(() => {
     if (!wine) { lastWineIdRef.current = null; return; }
     if (lastWineIdRef.current !== wine.id) {
       lastWineIdRef.current = wine.id;
       setQty(1);
-      // Capture the price + start the 15-second hold the moment the popup opens.
-      setLockExpiresAt(Date.now() + PRICE_LOCK_SECONDS * 1000);
-      setSecondsLeft(PRICE_LOCK_SECONDS);
+      // Capture the price + start the price-lock hold the moment the popup opens.
+      setLockExpiresAt(Date.now() + LOCK_SECONDS * 1000);
+      setSecondsLeft(LOCK_SECONDS);
       setExpired(false);
+      expiryCountedRef.current = false;
     }
-  }, [wine]);
+  }, [wine, LOCK_SECONDS]);
 
-  // 15-SECOND price-lock countdown. At zero the lock expires and must be re-locked.
+  // Price-lock countdown. At zero the lock expires.
   useEffect(() => {
     if (!open || expired || lockExpiresAt === 0) return;
     const tick = () => {
@@ -89,22 +116,45 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     return () => window.clearInterval(id);
   }, [open, expired, lockExpiresAt]);
 
+  // SESH only: letting the clock run out counts as a cancellation (rule #3) — exactly
+  // like "Not now". Fires once when the lock expires; uncounted once at cap.
+  useEffect(() => {
+    if (!expired || !isSesh || expiryCountedRef.current) return;
+    expiryCountedRef.current = true;
+    if (!capReached) {
+      const after = cancel();
+      toast({ kind: 'info', message: seshCancelMsg(after) });
+    }
+  }, [expired, isSesh, capReached, cancel, toast]);
+
+  // Ticker only: re-lock the price for another window (unchanged behavior).
   const handleRelock = useCallback(() => {
-    setLockExpiresAt(Date.now() + PRICE_LOCK_SECONDS * 1000);
-    setSecondsLeft(PRICE_LOCK_SECONDS);
+    setLockExpiresAt(Date.now() + TICKER_LOCK_SECONDS * 1000);
+    setSecondsLeft(TICKER_LOCK_SECONDS);
     setExpired(false);
   }, []);
 
-  // Esc dismisses (harmless — never a cancellation).
+  // Cancellation-aware exit for "Not now" / Esc / backdrop.
+  // SESH + active + below cap → consume a cancellation; SESH at cap or already expired
+  // → exit uncounted; Ticker → always harmless. Always returns to the floor.
+  const handleCancelExit = useCallback(() => {
+    if (isSesh && !expired && !capReached) {
+      const after = cancel();
+      toast({ kind: 'info', message: seshCancelMsg(after) });
+    }
+    onClose();
+  }, [isSesh, expired, capReached, cancel, toast, onClose]);
+
+  // Esc dismisses — same as "Not now".
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleCancelExit(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open, handleCancelExit]);
 
   // EXECUTES THE ORDER — captures the held price, adds the locked line, and opens the
-  // SEPARATE 15-min free-ship window. Charge/order behavior unchanged.
+  // SEPARATE 15-min free-ship window. NOT a cancellation. Charge/order behavior unchanged.
   const addToCart = useCallback((quantity: number) => {
     if (!wine || expired) return; // lock must be live to capture the held price
     const added = addItem(
@@ -114,15 +164,13 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     onClose();
     if (!added) return;
     shipWindow.open();
-    // Open the post-purchase Undo window (its own 30s timer) for this committed fill.
-    commitFill({ wineId: wine.id, name: wine.name, qty: quantity, source });
-  }, [wine, expired, addItem, onClose, shipWindow, source, commitFill]);
+  }, [wine, expired, addItem, onClose, shipWindow, source]);
 
   // No card on file → send them to the qualification / add-card flow instead.
   const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);
 
-  // Backdrop click dismisses (harmless).
-  const handleBackdropClick = useCallback(() => { onClose(); }, [onClose]);
+  // Backdrop click dismisses — same as "Not now".
+  const handleBackdropClick = useCallback(() => { handleCancelExit(); }, [handleCancelExit]);
 
   const savings = useMemo(() => {
     if (!wine || wine.msrp === undefined) return 0;
@@ -154,19 +202,26 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
           </div>
         </div>
 
-        {/* 15-SECOND price lock — live countdown; expires + must be re-locked at 0. */}
+        {/* PRICE LOCK banner — live countdown. SESH: 20s, flashes the whole time, and
+            expiry shows the remaining-cancellation count. Ticker: 15s, re-lockable. */}
         {expired ? (
           <div className="qbp-modal-banner qbp-modal-banner--expired" role="alert">
             <i className="fa-solid fa-triangle-exclamation" aria-hidden />
-            <span>{PRICE_LOCK_EXPIRED}</span>
+            <span>
+              {isSesh
+                ? (hydrated ? SESH_EXPIRED_REMAIN(remaining) : 'Price lock expired.')
+                : PRICE_LOCK_EXPIRED}
+            </span>
           </div>
         ) : (
           <div
-            className={`qbp-modal-banner qbp-modal-banner--locked${secondsLeft <= 5 ? ' qbp-modal-banner--urgent' : ''}`}
+            className={`qbp-modal-banner qbp-modal-banner--locked${secondsLeft <= 5 ? ' qbp-modal-banner--urgent' : ''}${isSesh ? ' qbp-modal-banner--flash' : ''}`}
             role="timer"
+            aria-live="polite"
+            aria-atomic="true"
           >
             <i className="fa-solid fa-lock" aria-hidden />
-            <span>{priceLockLabel(secondsLeft)}</span>
+            <span>{isSesh ? priceLockLabelSesh(secondsLeft) : priceLockLabelTicker(secondsLeft)}</span>
           </div>
         )}
 
@@ -278,37 +333,79 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
         {/* ACTIONS */}
         <div className="qbp-modal-actions">
-          {expired ? (
-            <button type="button" className="qbp-modal-primary" onClick={handleRelock}>
-              <i className="fa-solid fa-rotate-right" aria-hidden /> {RELOCK_LABEL}
-            </button>
-          ) : hasCard ? (
+          {expired && isSesh ? (
+            // SESH expired: both buttons turn BLACK and just return to the SESH. The
+            // cancellation was already consumed the moment the lock expired.
             <>
               <button
                 type="button"
-                className="qbp-modal-primary"
-                onClick={() => addToCart(qty)}
-                aria-label={`${placeOrderLabel(last4)} — total $${lineTotal.toFixed(2)}`}
+                className="qbp-modal-primary qbp-modal-primary--ended"
+                onClick={onClose}
+                aria-label={BTN_EXPIRED_PRIMARY}
               >
-                <i className="fa-solid fa-credit-card" aria-hidden /> {placeOrderLabel(last4)}
+                {BTN_EXPIRED_PRIMARY}
               </button>
-              <p className="qbp-microcopy">{ORDER_MICROCOPY}</p>
+              <button
+                type="button"
+                className="qbp-modal-secondary qbp-modal-secondary--ended"
+                onClick={onClose}
+                aria-label={BTN_EXPIRED_SECONDARY}
+              >
+                {BTN_EXPIRED_SECONDARY}
+              </button>
+            </>
+          ) : expired ? (
+            // Ticker expired: re-lock (unchanged) + harmless exit.
+            <>
+              <button type="button" className="qbp-modal-primary" onClick={handleRelock}>
+                <i className="fa-solid fa-rotate-right" aria-hidden /> {RELOCK_LABEL}
+              </button>
+              <button
+                type="button"
+                className="qbp-modal-secondary"
+                onClick={handleCancelExit}
+                aria-label="Close without ordering"
+              >
+                {EXIT_LABEL}
+              </button>
             </>
           ) : (
-            <button type="button" className="qbp-modal-primary" onClick={handleAddCard}>
-              <i className="fa-solid fa-credit-card" aria-hidden /> {NO_CARD_CTA}
-            </button>
-          )}
+            <>
+              {hasCard ? (
+                <>
+                  <button
+                    type="button"
+                    className="qbp-modal-primary"
+                    onClick={() => addToCart(qty)}
+                    aria-label={`${placeOrderLabel(last4)} — total $${lineTotal.toFixed(2)}`}
+                  >
+                    <i className="fa-solid fa-credit-card" aria-hidden /> {placeOrderLabel(last4)}
+                  </button>
+                  {isSesh ? (
+                    <p className="qbp-status" role="note">
+                      {capReached ? SESH_STATUS_CAP : SESH_STATUS_ACTIVE(remaining)}
+                    </p>
+                  ) : (
+                    <p className="qbp-microcopy">{ORDER_MICROCOPY}</p>
+                  )}
+                </>
+              ) : (
+                <button type="button" className="qbp-modal-primary" onClick={handleAddCard}>
+                  <i className="fa-solid fa-credit-card" aria-hidden /> {NO_CARD_CTA}
+                </button>
+              )}
 
-          {/* Explicit, harmless exit (no top-corner X). */}
-          <button
-            type="button"
-            className="qbp-modal-secondary"
-            onClick={onClose}
-            aria-label="Close without ordering"
-          >
-            {EXIT_LABEL}
-          </button>
+              {/* Explicit exit (no top-corner X). On SESH this consumes a cancellation. */}
+              <button
+                type="button"
+                className="qbp-modal-secondary"
+                onClick={handleCancelExit}
+                aria-label="Close without ordering"
+              >
+                {EXIT_LABEL}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

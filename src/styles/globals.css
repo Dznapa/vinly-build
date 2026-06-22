@@ -4004,6 +4004,45 @@ button {
   color: #e23b3b;
 }
 
+/* SESH price-lock banner flashes the whole 20s countdown (until the user acts or it
+   expires). The countdown number still updates without the flash for reduced-motion. */
+@keyframes qbp-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.42; }
+}
+.qbp-modal-banner--flash { animation: qbp-flash 0.9s ease-in-out infinite; }
+
+/* SESH bottom status line — the cancellation rule + remaining count (replaces the
+   Ticker-only "card runs at window close" microcopy on SESH). */
+.qbp-status {
+  margin: 2px 0 0;
+  text-align: center;
+  color: #8aa2bb;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* SESH expired-state buttons turn BLACK — both just return to the SESH. */
+.qbp-modal-primary--ended,
+.qbp-modal-secondary--ended {
+  background: #0b0f17;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: none;
+}
+.qbp-modal-primary--ended:hover,
+.qbp-modal-secondary--ended:hover { filter: brightness(1.25); }
+.qbp-modal-primary--ended:focus-visible,
+.qbp-modal-secondary--ended:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Respect reduced motion: no flashing timer / pop / fade — the countdown number
+   still updates so the urgency is conveyed without animation. */
+@media (prefers-reduced-motion: reduce) {
+  .qbp-modal-banner--flash { animation: none; }
+  .qbp-overlay { animation: none; }
+  .qbp-modal { animation: none; }
+}
+
 .qbp-modal-product {
   display: grid;
   grid-template-columns: 96px minmax(0, 1fr);
