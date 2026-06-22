@@ -59,7 +59,9 @@ const SESH_STATUS_CAP = SESH_LOCKED_COPY;
 const SESH_EXPIRED_REMAIN = (n: number) =>
   n <= 0 ? SESH_LOCKED_COPY : '1 cancellation left.';
 // Lock-rules summary line shown below "Not now" on the SESH popup (editable).
-const SESH_LOCK_RULES = '15-min price lock · max 2 cancellations · no charge until you confirm';
+// The 15 min is the post-lock-in window to add more wines before the card is charged
+// (NOT a price lock — the price lock is the 20s timer above).
+const SESH_LOCK_RULES = 'Max 2 cancellations · after you lock in, 15 min to add more wines before your card is charged';
 const BTN_EXPIRED_PRIMARY = 'Price Lock Expired — Return to SESH';
 const BTN_EXPIRED_SECONDARY = 'Not now — Return to SESH';
 const seshCancelMsg = (after: number) =>
