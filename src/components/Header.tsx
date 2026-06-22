@@ -14,6 +14,11 @@ import { useCart } from '@/context/CartContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useBillingGate } from '@/context/BillingGateContext';
 
+// Top-of-page CTA labels (editable). Which ones render is gated on user state below.
+const CTA_LEARN_MORE = 'Learn More About Vinly';
+const CTA_CREATE_ACCOUNT = 'Create An Account';
+const CTA_GET_QUALIFIED = 'Get SESH Qualified';
+
 export function Header() {
   const { userState } = useUserState();
   const { count: cartCount } = useCart();
@@ -21,7 +26,13 @@ export function Header() {
   const { openGate } = useBillingGate();
   const router = useRouter();
   const pathname = usePathname();
-  const showCenter = userState === 'anonymous';
+
+  // CTAs adapt to auth + qualification state (single source: userState).
+  //   anonymous       → Learn More · Create An Account · Get SESH Qualified
+  //   signed_in        → Learn More · Get SESH Qualified  (account already exists)
+  //   sesh_qualified  → Learn More                       (account + qualification done)
+  const showCreateAccount = userState === 'anonymous';
+  const showGetQualified = userState !== 'sesh_qualified';
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -69,24 +80,36 @@ export function Header() {
           <img src="/vinly-logo.png" alt="Vinly" className="logo-img" />
         </Link>
 
-        {showCenter && (
-          <div className="header-cta-group">
-            <a
-              href="https://vinly.wine"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="header-cta header-cta--link"
+        <div className="header-cta-group">
+          <a
+            href="https://vinly.wine"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="header-cta header-cta--link"
+            aria-label={`${CTA_LEARN_MORE} (opens in a new tab)`}
+          >
+            {CTA_LEARN_MORE}
+          </a>
+          {showCreateAccount && (
+            <Link
+              href="/register_details"
+              className="header-cta header-cta--blue"
+              aria-label={CTA_CREATE_ACCOUNT}
             >
-              Learn More About Vinly
-            </a>
-            <Link href="/register_details" className="header-cta header-cta--blue">
-              Create An Account
+              {CTA_CREATE_ACCOUNT}
             </Link>
-            <button type="button" className="header-cta header-cta--orange" onClick={openGate}>
-              Get SESH Qualified
+          )}
+          {showGetQualified && (
+            <button
+              type="button"
+              className="header-cta header-cta--orange"
+              onClick={openGate}
+              aria-label={CTA_GET_QUALIFIED}
+            >
+              {CTA_GET_QUALIFIED}
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         <nav className="header-icons" aria-label="Primary">
           <Link className="icon" href="/current-offer/justin-isosceles" title="SESH" aria-label="SESH">
