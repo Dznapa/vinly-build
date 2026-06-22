@@ -173,8 +173,27 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
         {/* PRODUCT ROW */}
         <div className="qbp-modal-product">
           <div className="qbp-modal-bottle">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={wine.image} alt={wine.name} />
+            {/* Some wines (esp. Ticker) ship without an image. Render the shared
+                /bottle.svg placeholder instead of a broken <img>, whose alt text
+                would otherwise overflow the box and collide with the wine name.
+                SESH always supplies a real image, so its rendering is unchanged. */}
+            {wine.image ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={wine.image}
+                alt={wine.name}
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (!img.src.endsWith('/bottle.svg')) {
+                    img.src = '/bottle.svg';
+                    img.classList.add('qbp-modal-bottle-fallback');
+                  }
+                }}
+              />
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src="/bottle.svg" alt="" className="qbp-modal-bottle-fallback" />
+            )}
           </div>
           <div className="qbp-modal-info">
             <div className="qbp-modal-name">{wine.name}</div>

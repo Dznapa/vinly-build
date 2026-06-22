@@ -4018,6 +4018,14 @@ button {
   align-items: center;
   justify-content: center;
   aspect-ratio: 1 / 1.55;
+  overflow: hidden; /* defense: nothing (even broken-image alt text) bleeds out of the box */
+}
+/* Placeholder bottle for wines without an image — muted so it reads as a stand-in. */
+.qbp-modal-bottle-fallback {
+  width: 70%;
+  opacity: 0.45;
+  -webkit-mask-image: none;
+          mask-image: none;
 }
 .qbp-modal-bottle img {
   display: block;
