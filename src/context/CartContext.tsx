@@ -25,6 +25,7 @@ import { useUserState } from '@/context/UserStateContext';
 import { useBillingGate } from '@/context/BillingGateContext';
 
 export type CartItem = {
+  lineId: string; // unique per cart line — keeps repeat SESH/Ticker fills discrete
   wineId: string;
   qty: number;
   name: string;
@@ -37,7 +38,7 @@ export type CartItem = {
 };
 
 /** Everything needed to add a line — the per-instrument caller supplies the snapshot. */
-export type CartAdd = Omit<CartItem, 'qty'>;
+export type CartAdd = Omit<CartItem, 'qty' | 'lineId'>;
 
 // Flat shipping under the free-shipping threshold (owner-confirmed $35).
 export const SHIPPING_RATE = 35.0;
@@ -47,8 +48,8 @@ type Ctx = {
   items: CartItem[];
   /** Returns true if added, false if blocked by the billing gate. */
   addItem: (add: CartAdd, qty: number) => boolean;
-  removeItem: (wineId: string) => void;
-  setQty: (wineId: string, qty: number) => void;
+  removeItem: (lineId: string) => void;
+  setQty: (lineId: string, qty: number) => void;
   clear: () => void;
   count: number;
   subtotal: number;
@@ -71,10 +72,16 @@ function clampQty(n: number) {
 // Migration helper: resolve a legacy (pre-snapshot) cart entry against the SHOP
 // catalog. Anything that doesn't resolve was an un-renderable ghost line and is
 // dropped — which clears the phantom free-shipping bottles from older carts.
-function snapshotFromShop(wineId: string): Omit<CartItem, 'wineId' | 'qty'> | null {
+function snapshotFromShop(wineId: string): Omit<CartItem, 'wineId' | 'qty' | 'lineId'> | null {
   const w = SHOP.find((s) => s.id === wineId);
   if (!w) return null;
   return { name: w.name, unitPrice: w.price, image: w.image, msrp: w.msrp, meta: w.maker };
+}
+
+// Unique cart-line id. Generated at add/hydrate time (client only), so repeat
+// SESH/Ticker fills of the same wine never collapse into one line.
+function makeLineId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -104,8 +111,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
             const q = clampQty(e.qty);
             if (q <= 0) continue;
             if (typeof e.name === 'string' && typeof e.unitPrice === 'number') {
-              // New, self-contained shape — keep the snapshot as-is.
+              // New, self-contained shape — keep the snapshot as-is (preserve the
+              // line id so persisted discrete fills stay discrete).
               valid.push({
+                lineId: typeof e.lineId === 'string' ? e.lineId : makeLineId(),
                 wineId: e.wineId,
                 qty: q,
                 name: e.name,
@@ -119,7 +128,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             } else {
               // Legacy shape ({wineId, qty}) — resolve via SHOP or drop the ghost.
               const snap = snapshotFromShop(e.wineId);
-              if (snap) valid.push({ wineId: e.wineId, qty: q, ...snap });
+              if (snap) valid.push({ lineId: makeLineId(), wineId: e.wineId, qty: q, ...snap });
             }
           }
           setItems(valid);
@@ -153,32 +162,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const qadd = clampQty(qty);
     if (qadd <= 0 || !add.wineId) return false;
     setItems((prev) => {
-      const existing = prev.find((i) => i.wineId === add.wineId);
+      // Committed SESH/Ticker fills are IMMUTABLE per fill — never merge or average.
+      // Each Place Order is its own line at its own captured price (a single fill may
+      // still be qty>1 at one price). This keeps order history per-fill accurate.
+      if (add.locked) {
+        return [...prev, { ...add, qty: qadd, locked: true, lineId: makeLineId() }];
+      }
+      // Adjustable (Shop / Winemaker Spotlight): true quantities of one SKU stack on a
+      // single line. Match the existing NON-locked line for this wine.
+      const existing = prev.find((i) => i.wineId === add.wineId && !i.locked);
       if (existing) {
         // Refresh the snapshot too (price may have moved since the first add).
-        // Once locked (SESH/Ticker reservation), stay locked.
         return prev.map((i) =>
-          i.wineId === add.wineId
-            ? { ...i, ...add, qty: clampQty(i.qty + qadd), locked: i.locked || add.locked }
+          i === existing
+            ? { ...i, ...add, qty: clampQty(i.qty + qadd), locked: false, lineId: i.lineId }
             : i,
         );
       }
-      return [...prev, { ...add, qty: qadd }];
+      return [...prev, { ...add, qty: qadd, lineId: makeLineId() }];
     });
     return true;
   }, [userState, openGate]);
 
-  const removeItem = useCallback((wineId: string) => {
-    setItems((prev) => prev.filter((i) => i.wineId !== wineId));
+  const removeItem = useCallback((lineId: string) => {
+    setItems((prev) => prev.filter((i) => i.lineId !== lineId));
   }, []);
 
-  // Adjusts an EXISTING line only (cart steppers). Never creates a line — adds
-  // must go through addItem so they always carry a snapshot.
-  const setQty = useCallback((wineId: string, qty: number) => {
+  // Adjusts an EXISTING line only (cart steppers, adjustable lines). Never creates a
+  // line — adds must go through addItem so they always carry a snapshot.
+  const setQty = useCallback((lineId: string, qty: number) => {
     const next = clampQty(qty);
     setItems((prev) => {
-      if (next <= 0) return prev.filter((i) => i.wineId !== wineId);
-      return prev.map((i) => (i.wineId === wineId ? { ...i, qty: next } : i));
+      if (next <= 0) return prev.filter((i) => i.lineId !== lineId);
+      return prev.map((i) => (i.lineId === lineId ? { ...i, qty: next } : i));
     });
   }, []);
 

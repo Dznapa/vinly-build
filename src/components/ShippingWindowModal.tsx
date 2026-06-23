@@ -228,9 +228,9 @@ export function ShippingWindowModal() {
           <button
             type="button"
             className="ship-btn ship-btn-ghost"
-            onClick={() => { w.endWindow(); router.push('/checkout/billing'); }}
+            onClick={() => { w.endWindow(); router.push('/customer-cart'); }}
           >
-            Skip it — check out now
+            Skip It - View Cart
           </button>
         </div>
 

@@ -120,12 +120,12 @@ function OrderSummaryInner() {
             <h2 className={styles.cardTitle}>Order Summary</h2>
 
             <ul className={styles.itemList}>
-              {order.lines.map((line) => {
+              {order.lines.map((line, i) => {
                 const wine = SHOP.find((w) => w.id === line.wineId);
                 const img = wine?.image ?? FALLBACK_BOTTLE;
                 const lineTotal = line.unitPrice * line.qty;
                 return (
-                  <li key={line.wineId} className={styles.itemRow}>
+                  <li key={`${line.wineId}-${i}`} className={styles.itemRow}>
                     <div className={styles.thumb}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={img} alt="" className={styles.thumbImg} loading="lazy" />

@@ -66,8 +66,8 @@ export default function CustomerCartPage() {
     [items],
   );
 
-  const handleRemove = (wineId: string, name: string) => {
-    removeItem(wineId);
+  const handleRemove = (lineId: string, name: string) => {
+    removeItem(lineId);
     toast({ kind: 'info', message: `${name} removed from cart.` });
   };
 
@@ -99,7 +99,7 @@ export default function CustomerCartPage() {
                   const lineTotal = item.unitPrice * item.qty;
                   const variant = pickVariant(item.name, item.meta ?? '');
                   return (
-                    <div className={styles.row} key={item.wineId}>
+                    <div className={styles.row} key={item.lineId}>
                       <div className={styles.colItem}>
                         {item.image ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
@@ -126,7 +126,7 @@ export default function CustomerCartPage() {
                             <button
                               type="button"
                               className={styles.removeBtn}
-                              onClick={() => handleRemove(item.wineId, item.name)}
+                              onClick={() => handleRemove(item.lineId, item.name)}
                             >
                               Remove
                             </button>
@@ -146,7 +146,7 @@ export default function CustomerCartPage() {
                             <button
                               type="button"
                               aria-label="Decrease quantity"
-                              onClick={() => setQty(item.wineId, clampQty(item.qty - 1))}
+                              onClick={() => setQty(item.lineId, clampQty(item.qty - 1))}
                             >
                               &minus;
                             </button>
@@ -154,7 +154,7 @@ export default function CustomerCartPage() {
                             <button
                               type="button"
                               aria-label="Increase quantity"
-                              onClick={() => setQty(item.wineId, clampQty(item.qty + 1))}
+                              onClick={() => setQty(item.lineId, clampQty(item.qty + 1))}
                             >
                               +
                             </button>
