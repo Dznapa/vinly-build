@@ -1958,6 +1958,9 @@ button {
   font-size: 12.5px;
   line-height: 1.4;
 }
+/* Sold-out variant — a touch warmer/brighter to read as encouragement, not an error. */
+.sesh-buy-note--soldout { color: #cfe0ef; }
+.sesh-buy-note--soldout i { color: var(--orange); margin-right: 4px; }
 .sesh-term-right-stage img {
   -webkit-mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);
           mask-image: radial-gradient(ellipse 70% 90% at center, #000 70%, transparent 100%);

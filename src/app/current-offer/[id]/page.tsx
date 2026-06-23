@@ -36,6 +36,8 @@ const VARIANTS: { id: VariantId; label: string; tag: string }[] = [
 
 // Note beside the Buy Now button — warns that locking a price costs one of two chances.
 const SESH_BUY_NOTE = 'Lock in your price wisely — you only get two chances.';
+// Note under SOLD OUT — reassures there's another drop tomorrow.
+const SESH_SOLDOUT_NOTE = "Gone in a flash — that's the SESH. The next drop lands tomorrow. Be prompt, be excited, be ready.";
 
 // Editable unlock messaging — shown only to signed-in, not-yet-SESH-qualified users.
 const SESH_ORIENT_COPY = "You're watching the floor. Get qualified to see live pricing and lock bottles.";
@@ -720,6 +722,11 @@ function LayoutTerminal(p: SharedProps) {
           <BuyButton {...p} full />
           {!p.isGated && !p.floorClosed && !p.lockedOut && (
             <p className="sesh-buy-note">{SESH_BUY_NOTE}</p>
+          )}
+          {p.floorClosed && (
+            <p className="sesh-buy-note sesh-buy-note--soldout">
+              <i className="fa-solid fa-bolt" aria-hidden /> {SESH_SOLDOUT_NOTE}
+            </p>
           )}
         </aside>
       </div>
