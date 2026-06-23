@@ -34,6 +34,9 @@ const VARIANTS: { id: VariantId; label: string; tag: string }[] = [
   { id: 'v5', label: 'Stack',     tag: 'Coinbase mobile card stack' },
 ];
 
+// Note beside the Buy Now button — warns that locking a price costs one of two chances.
+const SESH_BUY_NOTE = 'Lock in your price wisely — you only get two chances.';
+
 // Editable unlock messaging — shown only to signed-in, not-yet-SESH-qualified users.
 const SESH_ORIENT_COPY = "You're watching the floor. Get qualified to see live pricing and lock bottles.";
 const UNLOCK_TITLE = 'Live pricing is locked';
@@ -715,6 +718,9 @@ function LayoutTerminal(p: SharedProps) {
           )}
           <div className="sesh-term-right-sub">{offer.volume}</div>
           <BuyButton {...p} full />
+          {!p.isGated && !p.floorClosed && !p.lockedOut && (
+            <p className="sesh-buy-note">{SESH_BUY_NOTE}</p>
+          )}
         </aside>
       </div>
 
