@@ -44,6 +44,16 @@ export type CartAdd = Omit<CartItem, 'qty' | 'lineId'>;
 export const SHIPPING_RATE = 35.0;
 export const FREE_SHIP_THRESHOLD = 6;
 
+/* SINGLE SOURCE OF TRUTH for shipping. Shipping is assessed exactly ONCE per order,
+   at window close (or manual checkout), against the FINAL cart-wide bottle count across
+   ALL instruments (SESH + Ticker + Shop + Winemaker Spotlight): 6+ = free, under 6 =
+   flat $35, empty = $0. There is no per-charge / per-instrument shipping and no refund —
+   every assessment path must call this so the rule can never drift. */
+export function assessShipping(bottleCount: number): number {
+  if (bottleCount <= 0) return 0;
+  return bottleCount >= FREE_SHIP_THRESHOLD ? 0 : SHIPPING_RATE;
+}
+
 type Ctx = {
   items: CartItem[];
   /** Returns true if added, false if blocked by the billing gate. */
@@ -209,7 +219,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       bottles += item.qty;
       sub += item.unitPrice * item.qty;
     }
-    const ship = bottles >= FREE_SHIP_THRESHOLD ? 0 : bottles > 0 ? SHIPPING_RATE : 0;
+    const ship = assessShipping(bottles);
     return {
       count: bottles,
       subtotal: sub,

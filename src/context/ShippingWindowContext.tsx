@@ -20,14 +20,12 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { useCart } from '@/context/CartContext';
+import { useCart, assessShipping, FREE_SHIP_THRESHOLD } from '@/context/CartContext';
 import { useProfile } from '@/context/ProfileContext';
 
 const STORAGE_KEY = 'vinly:shipWindow';
 const WINDOW_MS = 15 * 60 * 1000;
 const TAX_RATE = 0.0825;
-const FREE_AT = 6;
-const FLAT_SHIP = 35;
 
 type Finalized = { orderId: string; total: number; shipping: number; freeShip: boolean };
 
@@ -90,8 +88,10 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     const lines = c.items.map((i) => ({
       wineId: i.wineId, qty: i.qty, unitPrice: i.unitPrice, name: i.name,
     }));
-    const freeShip = c.count >= FREE_AT;
-    const shipping = freeShip ? 0 : c.count > 0 ? FLAT_SHIP : 0;
+    // SINGLE-POINT shipping assessment: once, here at window close, against the FINAL
+    // cart-wide bottle count across all instruments (shared rule — never per-charge).
+    const shipping = assessShipping(c.count);
+    const freeShip = c.count >= FREE_SHIP_THRESHOLD;
     const subtotal = c.subtotal;
     const tax = Number((subtotal * TAX_RATE).toFixed(2));
     const total = Number((subtotal + shipping + tax).toFixed(2));

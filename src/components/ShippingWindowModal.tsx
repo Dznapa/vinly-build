@@ -10,8 +10,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
+import { FREE_SHIP_THRESHOLD } from '@/context/CartContext';
 
-const FREE_AT = 6;
+// Single source for the free-shipping threshold (display side).
+const FREE_AT = FREE_SHIP_THRESHOLD;
 
 // Editable headlines for the under-6 progress states. The >= 6 (free) headline is
 // left inline below and untouched. Plural/singular handled here; driven by the same
