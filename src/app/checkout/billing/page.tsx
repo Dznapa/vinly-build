@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
 import { splitOrderTotals, CHECKOUT_TAX_RATE } from '@/lib/cartTotals';
+import { SESH_COPY } from '@/lib/seshCopy';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile, cardBrand as detectBrand } from '@/context/ProfileContext';
 import styles from './billing.module.css';
@@ -299,11 +300,7 @@ export default function BillingPage() {
                     <i className="fa-solid fa-lock" aria-hidden /> Default
                   </span>
                 </div>
-                <p className={styles.lockedPayNote}>
-                  Your cart has locked SESH/Ticker reservations — they settle automatically
-                  on your default card when the window closes, so the payment method can&apos;t
-                  be changed here.
-                </p>
+                <p className={styles.lockedPayNote}>{SESH_COPY.paymentNote}</p>
               </>
             ) : cards.length > 0 ? (
               <>
@@ -423,10 +420,10 @@ export default function BillingPage() {
                   </section>
                 )}
 
-                {/* SETTLES AT WINDOW CLOSE — SESH/Ticker reservations, info only. */}
+                {/* ALREADY PURCHASED — SESH/Ticker reservations, info only. */}
                 {split.hasReserved && (
                   <section className={styles.group}>
-                    <div className={styles.groupHead}>Settles at window close · already reserved</div>
+                    <div className={styles.groupHead}>{SESH_COPY.groupHead}</div>
                     <div className={styles.itemList}>
                       {seshItems.map((i) => (
                         <div key={i.lineId} className={styles.item}>
@@ -435,7 +432,7 @@ export default function BillingPage() {
                             <div className={styles.itemMeta}>
                               {i.meta ? `${i.meta} · ` : ''}Qty {i.qty} ·{' '}
                               <span className={styles.reservedTag}>
-                                <i className="fa-solid fa-lock" aria-hidden /> Locked in
+                                <i className="fa-solid fa-circle-check" aria-hidden /> {SESH_COPY.badge}
                               </span>
                             </div>
                           </div>
@@ -445,14 +442,11 @@ export default function BillingPage() {
                     </div>
                     <div className={styles.rows}>
                       <div className={styles.row}>
-                        <span>Reserved subtotal ({split.reserved.bottles} bottle{split.reserved.bottles === 1 ? '' : 's'})</span>
+                        <span>{SESH_COPY.subtotalLabel} ({split.reserved.bottles} bottle{split.reserved.bottles === 1 ? '' : 's'})</span>
                         <span>{money(split.reserved.subtotal)}</span>
                       </div>
                     </div>
-                    <p className={styles.reservedNote}>
-                      Already reserved on your default card — tax &amp; shipping settle automatically
-                      when the SESH window closes. Not part of this charge.
-                    </p>
+                    <p className={styles.reservedNote}>{SESH_COPY.billingNote}</p>
                   </section>
                 )}
 
@@ -467,8 +461,7 @@ export default function BillingPage() {
                   </button>
                 ) : (
                   <div className={styles.allReserved} role="status">
-                    <i className="fa-solid fa-circle-check" aria-hidden /> Your reservations are set —
-                    they settle automatically when the window closes. Nothing to place now.
+                    <i className="fa-solid fa-circle-check" aria-hidden /> {SESH_COPY.allPurchasedConfirm}
                   </div>
                 )}
               </>

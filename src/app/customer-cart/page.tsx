@@ -12,18 +12,19 @@ import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE } from '@/context/CartContext';
+import { SESH_COPY } from '@/lib/seshCopy';
 import { useToast } from '@/components/ToastProvider';
 import BottlePlaceholder, { pickVariant } from '@/components/BottlePlaceholder';
 import styles from './cart.module.css';
 
 const TAX_RATE = 0.0825;
 
-// Per-line source label (editable). Committed SESH/Ticker lines are read-only and get
-// the "— settles at window close." tail; adjustable Shop/Spotlight lines do not.
-// Falls back to the adjustable "Shop purchase" for legacy items with no source.
+// Per-line source label. SESH/Ticker lines are already-purchased reservations (lead with
+// "Already purchased", settlement as fine print — see SESH_COPY); adjustable Shop/Spotlight
+// lines show their section. Falls back to "Shop purchase" for legacy items with no source.
 const SOURCE_LABEL: Record<string, string> = {
-  sesh: 'SESH purchase — settles at window close.',
-  ticker: 'Ticker purchase — settles at window close.',
+  sesh: SESH_COPY.lineNote,
+  ticker: SESH_COPY.lineNote,
   shop: 'Shop purchase',
   spotlight: 'Winemaker Spotlight purchase',
 };
@@ -138,7 +139,7 @@ export default function CustomerCartPage() {
                           <div className={styles.lockedQty}>
                             <span className={styles.lockedQtyNum}>{item.qty}</span>
                             <span className={styles.lockedTag}>
-                              <i className="fa-solid fa-lock" aria-hidden /> Locked in
+                              <i className="fa-solid fa-circle-check" aria-hidden /> {SESH_COPY.badge}
                             </span>
                           </div>
                         ) : (
