@@ -115,6 +115,49 @@
   padding: 16px;
 }
 
+/* Two-pool order summary: "Due now" (standard) vs "Settles at window close" (SESH). */
+.group {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+  margin-bottom: 6px;
+}
+.group:first-of-type { border-top: 0; padding-top: 0; }
+.groupHead {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 10px;
+}
+.reservedTag {
+  color: var(--orange);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.reservedTag i { font-size: 10px; margin-right: 3px; }
+.reservedNote {
+  margin: -8px 0 16px;
+  color: #777;
+  font-size: 12.5px;
+  font-style: italic;
+  line-height: 1.45;
+}
+.allReserved {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(46, 204, 64, 0.10);
+  border: 1px solid rgba(46, 204, 64, 0.30);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: #1f1f1f;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.allReserved i { color: var(--green); margin-top: 2px; flex: 0 0 auto; }
+
 .fieldRow {
   display: flex;
   gap: 16px;

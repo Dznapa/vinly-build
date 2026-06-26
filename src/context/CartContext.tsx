@@ -23,6 +23,10 @@ import {
 import { SHOP } from '@/data/mock';
 import { useUserState } from '@/context/UserStateContext';
 import { useBillingGate } from '@/context/BillingGateContext';
+// Shipping rule + constants live in the pure, testable helper. Re-exported below so
+// existing importers (`@/context/CartContext`) keep working unchanged.
+import { SHIPPING_RATE, FREE_SHIP_THRESHOLD, assessShipping } from '@/lib/cartTotals';
+export { SHIPPING_RATE, FREE_SHIP_THRESHOLD, assessShipping } from '@/lib/cartTotals';
 
 export type CartItem = {
   lineId: string; // unique per cart line — keeps repeat SESH/Ticker fills discrete
@@ -40,19 +44,6 @@ export type CartItem = {
 /** Everything needed to add a line — the per-instrument caller supplies the snapshot. */
 export type CartAdd = Omit<CartItem, 'qty' | 'lineId'>;
 
-// Flat shipping under the free-shipping threshold (owner-confirmed $35).
-export const SHIPPING_RATE = 35.0;
-export const FREE_SHIP_THRESHOLD = 6;
-
-/* SINGLE SOURCE OF TRUTH for shipping. Shipping is assessed exactly ONCE per order,
-   at window close (or manual checkout), against the FINAL cart-wide bottle count across
-   ALL instruments (SESH + Ticker + Shop + Winemaker Spotlight): 6+ = free, under 6 =
-   flat $35, empty = $0. There is no per-charge / per-instrument shipping and no refund —
-   every assessment path must call this so the rule can never drift. */
-export function assessShipping(bottleCount: number): number {
-  if (bottleCount <= 0) return 0;
-  return bottleCount >= FREE_SHIP_THRESHOLD ? 0 : SHIPPING_RATE;
-}
 
 type Ctx = {
   items: CartItem[];

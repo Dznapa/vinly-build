@@ -13,6 +13,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
+import { splitOrderTotals, CHECKOUT_TAX_RATE } from '@/lib/cartTotals';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile, cardBrand as detectBrand } from '@/context/ProfileContext';
 import styles from './billing.module.css';
@@ -24,9 +25,6 @@ const US_STATES = [
   'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
 ];
-
-// NEEDS REVIEW: TAX_RATE = 8.25% is a placeholder until owner confirms.
-const TAX_RATE = 0.0825;
 
 const NEW_ADDR_ID = '__new__';
 const NEW_CARD_ID = '__new__';
@@ -66,9 +64,16 @@ function defaultOrFirstId<T extends { id: string; isDefault: boolean }>(
 
 export default function BillingPage() {
   const router = useRouter();
-  const { items, subtotal, shipping, count, clear } = useCart();
+  const { items, removeItem, clear } = useCart();
   const { addresses, cards, addAddress, addCard, placeOrder } = useProfile();
   const { endWindow: endShipWindow } = useShippingWindow();
+
+  // Split the cart into the two pools. STANDARD items are charged now by Place Order;
+  // SESH/Ticker (locked) reservations are already paid and settle at window close, so
+  // they are EXCLUDED from the charged amount (shown for information only).
+  const standardItems = items.filter((i) => !i.locked);
+  const seshItems = items.filter((i) => i.locked);
+  const split = useMemo(() => splitOrderTotals(items, CHECKOUT_TAX_RATE), [items]);
 
   // ----- Saved address / card selection -----
   const [selectedAddressId, setSelectedAddressId] = useState<string>(() =>
@@ -97,15 +102,6 @@ export default function BillingPage() {
   const lockedCardId = defaultOrFirstId(cards);
   const lockedCard = cards.find((c) => c.id === lockedCardId);
 
-  // ----- Totals -----
-  const { tax, total } = useMemo(() => {
-    const t = subtotal * TAX_RATE;
-    return {
-      tax: t,
-      total: subtotal + shipping + t,
-    };
-  }, [subtotal, shipping]);
-
   const updateShipping =
     (k: keyof AddressFields) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -116,7 +112,9 @@ export default function BillingPage() {
   };
 
   const onPlaceOrder = () => {
-    if (items.length === 0) return;
+    // Place Order charges the STANDARD pool only. If there are no standard items
+    // there is nothing to place (SESH reservations settle on their own at close).
+    if (standardItems.length === 0) return;
 
     // 1) Resolve / create the shipping address.
     let shippingAddressId: string | undefined;
@@ -165,29 +163,34 @@ export default function BillingPage() {
       paymentCardId = selectedCardId;
     }
 
-    // 3) Build order lines from the cart's own price/name snapshot.
-    const lines = items.map((i) => ({
+    // 3) Build order lines from STANDARD items only (SESH/Ticker reservations are
+    //    excluded — they're already paid and settle at window close).
+    const lines = standardItems.map((i) => ({
       wineId: i.wineId,
       qty: i.qty,
       unitPrice: i.unitPrice,
       name: i.name,
     }));
 
-    // 4) Place the order, clear the cart, route to summary.
+    // 4) Place the order for the DUE-NOW (standard) totals only.
     const id = placeOrder({
       lines,
-      subtotal,
-      shipping,
-      tax,
-      total,
+      subtotal: split.dueNow.subtotal,
+      shipping: split.dueNow.shipping,
+      tax: split.dueNow.tax,
+      total: split.dueNow.total,
       shippingAddressId,
       paymentCardId,
     });
 
-    clear();
-    // Checking out fulfills the order, so the free-shipping window is over —
-    // terminate the timer/badge so it doesn't keep running post-checkout.
-    endShipWindow();
+    // 5) Remove ONLY the standard items just charged. Any SESH/Ticker reservations
+    //    stay in the cart so the shipping window keeps running and settles them at
+    //    close. End the window only if nothing reserved remains.
+    standardItems.forEach((i) => removeItem(i.lineId));
+    if (seshItems.length === 0) {
+      clear();
+      endShipWindow();
+    }
     router.push(`/checkout/summary?orderId=${id}`);
   };
 
@@ -370,60 +373,106 @@ export default function BillingPage() {
           <aside className={`panel detail-panel ${styles.summaryCard}`}>
             <h3 className={styles.summaryTitle}>CONSOLIDATED ORDER SUMMARY</h3>
 
-            <div className={styles.itemList}>
-              {items.length === 0 ? (
+            {items.length === 0 ? (
+              <div className={styles.itemList}>
                 <div className={styles.item}>
                   <div className={styles.itemName}>Your cart is empty.</div>
                 </div>
-              ) : (
-                items.map((i) => (
-                  <div key={i.wineId} className={styles.item}>
-                    <div className={styles.itemName}>
-                      {i.name}
-                      <div className={styles.itemMeta}>
-                        {i.meta ? `${i.meta} · ` : ''}Qty {i.qty}
+              </div>
+            ) : (
+              <>
+                {/* DUE NOW — standard (Shop / Winemaker Spotlight) items, charged now. */}
+                {split.hasStandard && (
+                  <section className={styles.group}>
+                    <div className={styles.groupHead}>Due now · Place Order</div>
+                    <div className={styles.itemList}>
+                      {standardItems.map((i) => (
+                        <div key={i.lineId} className={styles.item}>
+                          <div className={styles.itemName}>
+                            {i.name}
+                            <div className={styles.itemMeta}>
+                              {i.meta ? `${i.meta} · ` : ''}Qty {i.qty}
+                            </div>
+                          </div>
+                          <div className={styles.itemPrice}>{money(i.unitPrice * i.qty)}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className={styles.rows}>
+                      <div className={styles.row}>
+                        <span>Subtotal ({split.dueNow.bottles} bottle{split.dueNow.bottles === 1 ? '' : 's'})</span>
+                        <span>{money(split.dueNow.subtotal)}</span>
+                      </div>
+                      <div className={styles.row}>
+                        <span>Shipping</span>
+                        {split.dueNow.shipping === 0 ? (
+                          <span className={styles.rowFree}>FREE</span>
+                        ) : (
+                          <span>{money(split.dueNow.shipping)}</span>
+                        )}
+                      </div>
+                      <div className={styles.row}>
+                        <span>Tax (8.25%)</span>
+                        <span>{money(split.dueNow.tax)}</span>
                       </div>
                     </div>
-                    <div className={styles.itemPrice}>
-                      {money(i.unitPrice * i.qty)}
+                    <div className={styles.totalRow}>
+                      <span>Due now</span>
+                      <span>{money(split.dueNow.total)}</span>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className={styles.rows}>
-              <div className={styles.row}>
-                <span>Subtotal ({count} bottles)</span>
-                <span>{money(subtotal)}</span>
-              </div>
-              <div className={styles.row}>
-                <span>Shipping</span>
-                {shipping === 0 && count > 0 ? (
-                  <span className={styles.rowFree}>FREE</span>
-                ) : (
-                  <span>{money(shipping)}</span>
+                  </section>
                 )}
-              </div>
-              <div className={styles.row}>
-                <span>Tax (8.25%)</span>
-                <span>{money(tax)}</span>
-              </div>
-            </div>
 
-            <div className={styles.totalRow}>
-              <span>Total</span>
-              <span>{money(total)}</span>
-            </div>
+                {/* SETTLES AT WINDOW CLOSE — SESH/Ticker reservations, info only. */}
+                {split.hasReserved && (
+                  <section className={styles.group}>
+                    <div className={styles.groupHead}>Settles at window close · already reserved</div>
+                    <div className={styles.itemList}>
+                      {seshItems.map((i) => (
+                        <div key={i.lineId} className={styles.item}>
+                          <div className={styles.itemName}>
+                            {i.name}
+                            <div className={styles.itemMeta}>
+                              {i.meta ? `${i.meta} · ` : ''}Qty {i.qty} ·{' '}
+                              <span className={styles.reservedTag}>
+                                <i className="fa-solid fa-lock" aria-hidden /> Locked in
+                              </span>
+                            </div>
+                          </div>
+                          <div className={styles.itemPrice}>{money(i.unitPrice * i.qty)}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className={styles.rows}>
+                      <div className={styles.row}>
+                        <span>Reserved subtotal ({split.reserved.bottles} bottle{split.reserved.bottles === 1 ? '' : 's'})</span>
+                        <span>{money(split.reserved.subtotal)}</span>
+                      </div>
+                    </div>
+                    <p className={styles.reservedNote}>
+                      Already reserved on your default card — tax &amp; shipping settle automatically
+                      when the SESH window closes. Not part of this charge.
+                    </p>
+                  </section>
+                )}
 
-            <button
-              type="button"
-              className={`btn-billing ${styles.placeOrder}`}
-              onClick={onPlaceOrder}
-              disabled={items.length === 0}
-            >
-              PLACE ORDER
-            </button>
+                {split.hasStandard ? (
+                  <button
+                    type="button"
+                    className={`btn-billing ${styles.placeOrder}`}
+                    onClick={onPlaceOrder}
+                    disabled={standardItems.length === 0}
+                  >
+                    PLACE ORDER · {money(split.dueNow.total)}
+                  </button>
+                ) : (
+                  <div className={styles.allReserved} role="status">
+                    <i className="fa-solid fa-circle-check" aria-hidden /> Your reservations are set —
+                    they settle automatically when the window closes. Nothing to place now.
+                  </div>
+                )}
+              </>
+            )}
           </aside>
         </div>
       </main>
