@@ -106,7 +106,6 @@ type Ctx = ProfileBlob & {
   login: (email: string) => void;
   logout: () => void;
   signupAndLogin: (basics: Partial<ProfileBasics>) => void;
-  setQualified: () => void;
   // profile
   updateBasics: (patch: Partial<ProfileBasics>) => void;
   // addresses
@@ -225,9 +224,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     [setUserState],
   );
 
-  const setQualified = useCallback(() => {
-    setUserState('sesh_qualified');
-  }, [setUserState]);
+  // Qualification is NEVER granted outright. It is set only at the end of the
+  // shipping → payment gate flow (BillingGatePopover → setUserState), so a button
+  // click alone can't make a user SESH-qualified.
 
   // ---------- profile ----------
   const updateBasics = useCallback((patch: Partial<ProfileBasics>) => {
@@ -371,7 +370,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       signupAndLogin,
-      setQualified,
       updateBasics,
       addAddress,
       updateAddress,
@@ -391,7 +389,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       signupAndLogin,
-      setQualified,
       updateBasics,
       addAddress,
       updateAddress,

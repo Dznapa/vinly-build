@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useUserState } from '@/context/UserStateContext';
 import { useProfile } from '@/context/ProfileContext';
+import { useBillingGate } from '@/context/BillingGateContext';
 import styles from './profile.module.css';
 
 // Editable — rotating deadpan one-liners shown to SESH-qualified members.
@@ -106,9 +107,9 @@ export default function ProfilePage() {
     orders,
     prefs,
     updatePrefs,
-    setQualified,
     logout,
   } = useProfile();
+  const { openGate } = useBillingGate();
 
   const fullName =
     `${basics.firstName ?? ''} ${basics.lastName ?? ''}`.trim() ||
@@ -123,9 +124,13 @@ export default function ProfilePage() {
     router.push('/login');
   };
 
+  // Get SESH qualified routes through the real qualification flow (shipping →
+  // payment) rather than granting it outright. Qualification is only set after both
+  // steps complete inside the gate (BillingGatePopover → setUserState). On success
+  // the modal closes and the user stays on Profile, where the SESH STATUS card
+  // re-renders to the qualified state. Reuses the same gate the header/SESH page use.
   const onGetQualified = () => {
-    setQualified();
-    router.push('/current-offer/justin-isosceles');
+    openGate();
   };
 
   const onSignOut = () => {
