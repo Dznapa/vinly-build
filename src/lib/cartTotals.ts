@@ -22,6 +22,13 @@ export function assessShipping(bottleCount: number): number {
   return bottleCount >= FREE_SHIP_THRESHOLD ? 0 : SHIPPING_RATE;
 }
 
+/* Total bottles across a set of cart lines — the input to the free-shipping rule.
+   Used everywhere shipping is decided so the threshold counts the WHOLE cart
+   (standard "due now" + already-purchased SESH/Ticker), never one pool in isolation. */
+export function bottleCount(lines: TotalsLine[]): number {
+  return lines.reduce((n, l) => n + l.qty, 0);
+}
+
 const round2 = (n: number) => Number(n.toFixed(2));
 
 export type TotalsLine = { qty: number; unitPrice: number; locked?: boolean };
@@ -43,7 +50,12 @@ export type OrderSplit = {
   hasReserved: boolean;
 };
 
-function poolTotals(lines: TotalsLine[], taxRate: number, applyShippingAndTax: boolean): PoolTotals {
+function poolTotals(
+  lines: TotalsLine[],
+  taxRate: number,
+  applyShippingAndTax: boolean,
+  shippingBottleCount: number,
+): PoolTotals {
   let bottles = 0;
   let rawSubtotal = 0;
   for (const l of lines) {
@@ -51,10 +63,12 @@ function poolTotals(lines: TotalsLine[], taxRate: number, applyShippingAndTax: b
     rawSubtotal += l.unitPrice * l.qty;
   }
   const subtotal = round2(rawSubtotal);
-  // ASSUMPTION (confirm with owner): the free-shipping bottle threshold counts only
-  // the bottles in THIS pool — i.e. standard shipping is decided by standard bottles
-  // alone. SESH/Ticker bottles do not subsidize standard shipping (and vice-versa).
-  const shipping = applyShippingAndTax ? assessShipping(bottles) : 0;
+  // Free-shipping eligibility is decided by the WHOLE cart's bottle count
+  // (`shippingBottleCount`), not this pool alone — already-purchased SESH/Ticker
+  // bottles count toward the standard "due now" free-shipping threshold, matching
+  // the cart page and order confirmation. Shipping only applies when this pool
+  // actually has bottles to charge (an empty pool is never billed shipping).
+  const shipping = applyShippingAndTax && bottles > 0 ? assessShipping(shippingBottleCount) : 0;
   const tax = applyShippingAndTax ? round2(subtotal * taxRate) : 0;
   const total = round2(subtotal + shipping + tax);
   return { bottles, subtotal, shipping, tax, total };
@@ -69,9 +83,12 @@ function poolTotals(lines: TotalsLine[], taxRate: number, applyShippingAndTax: b
 export function splitOrderTotals(lines: TotalsLine[], taxRate: number = CHECKOUT_TAX_RATE): OrderSplit {
   const standard = lines.filter((l) => !l.locked);
   const reserved = lines.filter((l) => l.locked);
+  // Free shipping is decided against the FULL cart count (standard + reserved), so
+  // SESH/Ticker bottles help unlock free "due now" shipping just like on the cart page.
+  const totalBottles = bottleCount(lines);
   return {
-    dueNow: poolTotals(standard, taxRate, true),
-    reserved: poolTotals(reserved, taxRate, false),
+    dueNow: poolTotals(standard, taxRate, true, totalBottles),
+    reserved: poolTotals(reserved, taxRate, false, 0),
     hasStandard: standard.length > 0,
     hasReserved: reserved.length > 0,
   };

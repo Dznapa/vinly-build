@@ -66,10 +66,25 @@ describe('splitOrderTotals', () => {
     expect(s.reserved.total).toBe(93.94);
   });
 
-  it('standard shipping is decided by STANDARD bottles only (SESH bottles do not subsidize)', () => {
-    // 1 standard bottle + 5 SESH bottles = 6 total, but standard pool is under 6 → still $35.
-    const s = splitOrderTotals([standard(20), sesh(40, 5)]);
+  it('free shipping counts the WHOLE cart: 4 due-now + 2 SESH = 6 total → due-now shipping is FREE', () => {
+    // The reported bug: 4 standard bottles + 2 already-purchased SESH bottles = 6 total.
+    // Due-now shipping must be free (>=6 total), even though the standard pool alone is under 6.
+    const s = splitOrderTotals([standard(20, 4), sesh(40, 2)]);
+    expect(s.dueNow.bottles).toBe(4);
+    expect(s.dueNow.shipping).toBe(0); // free — 6 bottles across the whole cart
+    expect(s.dueNow.subtotal).toBe(80);
+    expect(s.dueNow.tax).toBe(round2(80 * CHECKOUT_TAX_RATE));
+    expect(s.dueNow.total).toBe(round2(80 + 80 * CHECKOUT_TAX_RATE)); // no shipping line
+    // SESH stays out of the charged total.
+    expect(s.reserved.bottles).toBe(2);
+    expect(s.reserved.subtotal).toBe(80);
+    expect(s.reserved.shipping).toBe(0);
+  });
+
+  it('under threshold across the whole cart still charges flat shipping', () => {
+    // 1 standard + 3 SESH = 4 total, under 6 → due-now shipping is the flat rate.
+    const s = splitOrderTotals([standard(20), sesh(40, 3)]);
     expect(s.dueNow.bottles).toBe(1);
-    expect(s.dueNow.shipping).toBe(SHIPPING_RATE); // not free — only 1 standard bottle
+    expect(s.dueNow.shipping).toBe(SHIPPING_RATE);
   });
 });
