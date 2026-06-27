@@ -13,7 +13,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
-import { splitOrderTotals, CHECKOUT_TAX_RATE } from '@/lib/cartTotals';
+import { splitOrderTotals, assessShipping, CHECKOUT_TAX_RATE } from '@/lib/cartTotals';
 import { SESH_COPY } from '@/lib/seshCopy';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile, cardBrand as detectBrand } from '@/context/ProfileContext';
@@ -65,7 +65,7 @@ function defaultOrFirstId<T extends { id: string; isDefault: boolean }>(
 
 export default function BillingPage() {
   const router = useRouter();
-  const { items, removeItem, clear } = useCart();
+  const { items, count, subtotal, clear } = useCart();
   const { addresses, cards, addAddress, addCard, placeOrder } = useProfile();
   const { endWindow: endShipWindow } = useShippingWindow();
 
@@ -164,34 +164,42 @@ export default function BillingPage() {
       paymentCardId = selectedCardId;
     }
 
-    // 3) Build order lines from STANDARD items only (SESH/Ticker reservations are
-    //    excluded — they're already paid and settle at window close).
-    const lines = standardItems.map((i) => ({
+    // 3) Build order lines from the ENTIRE cart. Placing the order closes out the
+    //    whole cart as one shipment: the standard items are charged now and the
+    //    already-purchased, price-locked SESH/Ticker items settle/ship WITH this
+    //    same order. They were already counted toward this order's free-shipping
+    //    threshold, so they must leave the cart and never re-count toward a new one.
+    const lines = items.map((i) => ({
       wineId: i.wineId,
       qty: i.qty,
       unitPrice: i.unitPrice,
       name: i.name,
     }));
 
-    // 4) Place the order for the DUE-NOW (standard) totals only.
+    // 4) Record one completed order for the full cart. Shipping is assessed ONCE
+    //    against the whole cart's bottle count via the shared helper — the same rule
+    //    the cart, the Due-now summary, and the timer-expiry settlement use (never
+    //    per-pool). The Due-now / Already-purchased SPLIT shown above is unchanged;
+    //    this is the settled order record.
+    const orderShipping = assessShipping(count);
+    const orderTax = Number((subtotal * CHECKOUT_TAX_RATE).toFixed(2));
+    const orderTotal = Number((subtotal + orderShipping + orderTax).toFixed(2));
     const id = placeOrder({
       lines,
-      subtotal: split.dueNow.subtotal,
-      shipping: split.dueNow.shipping,
-      tax: split.dueNow.tax,
-      total: split.dueNow.total,
+      subtotal,
+      shipping: orderShipping,
+      tax: orderTax,
+      total: orderTotal,
       shippingAddressId,
       paymentCardId,
     });
 
-    // 5) Remove ONLY the standard items just charged. Any SESH/Ticker reservations
-    //    stay in the cart so the shipping window keeps running and settles them at
-    //    close. End the window only if nothing reserved remains.
-    standardItems.forEach((i) => removeItem(i.lineId));
-    if (seshItems.length === 0) {
-      clear();
-      endShipWindow();
-    }
+    // 5) Close out the ENTIRE cart and CANCEL the pending 15-minute settlement
+    //    timer. The SESH/Ticker items just settled as part of this order, so the
+    //    window must not transmit them to the processor a second time on expiry.
+    //    (If the user never finalizes, the timer still settles them once on expiry.)
+    clear();
+    endShipWindow();
     router.push(`/checkout/summary?orderId=${id}`);
   };
 
