@@ -5514,6 +5514,78 @@ body.prices-locked .chart-legend-item {
   line-height: 1.45;
 }
 
+/* ===== Value-prop hero (top of the SESH page) — state-aware anchor + rotating
+   subline. Reuses the SESH dark panel chrome, --orange CTA, and --cyan accent. ===== */
+.sesh-vp {
+  min-height: 132px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #fff;
+}
+.sesh-vp-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 760px;
+}
+.sesh-vp-anchor {
+  margin: 0;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: 0.3px;
+  color: #fff;
+}
+/* Fixed-height slot so the rotating subline never shifts the layout. */
+.sesh-vp-subwrap {
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sesh-vp-sub {
+  margin: 0;
+  max-width: 90vw;
+  white-space: nowrap; /* keep each subline on one line */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #cfe0ef;
+  font-size: 15px;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity 480ms ease;
+}
+.sesh-vp-sub.is-shown { opacity: 1; }
+.sesh-vp-cta { margin-top: 2px; }
+.sesh-vp-jump {
+  margin-top: 2px;
+  color: var(--cyan);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  text-decoration: none;
+}
+.sesh-vp-jump:hover { text-decoration: underline; }
+.sesh-vp-jump:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
+
+@media (max-width: 640px) {
+  .sesh-vp-anchor { font-size: 23px; }
+  .sesh-vp-sub { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sesh-vp-sub { transition: none; opacity: 1; } /* first line only, no fade/rotation */
+}
+
 /* Unlock prompt overlaid on the blurred LIVE SESH PRICE (signed-in, unqualified). */
 .sesh-unlock-overlay {
   position: absolute;

@@ -12,6 +12,7 @@ import { PageChrome } from '@/components/PageChrome';
 import PriceChart, { type Timeframe } from '@/components/PriceChart';
 import InventoryBar from '@/components/InventoryBar';
 import SeshLiveCard from '@/components/SeshLiveCard';
+import SeshHero from '@/components/SeshHero';
 import BottlePlaceholder from '@/components/BottlePlaceholder';
 import { useQuickBuy } from '@/components/useQuickBuy';
 import { SESH_LOCKED_COPY } from '@/components/QuickBuyPopover';
@@ -622,6 +623,10 @@ function LayoutTerminal(p: SharedProps) {
     handlePriceTick, initialBottles, totalBottles, readMore, setReadMore } = p;
   return (
     <>
+      {/* Value-prop hero — what Vinly is, in the first few seconds. State-aware
+          anchor + rotating subline. Additive; sits above the existing board. */}
+      <SeshHero onGetQualified={openBillingGate} />
+
       <div className="sesh-term-headerbar">
         <div className="sesh-term-sym">{offer.ticker ?? offer.id.toUpperCase()}</div>
         <div className="sesh-term-title">{offer.title}</div>
@@ -633,7 +638,7 @@ function LayoutTerminal(p: SharedProps) {
         <p className="sesh-orient">{SESH_ANON_ORIENT_COPY}</p>
       )}
 
-      <div className="sesh-term-grid">
+      <div className="sesh-term-grid" id="sesh-board">
         <aside className="panel sesh-term-left">
           <div className="sesh-term-left-head">
             <h3>KEY STATS</h3>
