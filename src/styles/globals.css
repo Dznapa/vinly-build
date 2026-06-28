@@ -889,6 +889,16 @@ button {
   margin-bottom: 40px;
 }
 
+/* On desktop the 3-column terminal grid can let a squeezed/fixed track's content
+   spill past the centered .wrap, adding a horizontal scrollbar — which makes
+   margin:0 auto center the wrap to the scroll width instead of the viewport, so
+   every centered header (hero, $TICKER bar, orient line) drifts off-center. Clip
+   any horizontal overflow here so the page can't scroll sideways and the wrap
+   re-centers to the viewport. clip (not hidden) keeps position:sticky working; it
+   doesn't clip the fixed mobile buy bar / popovers. Mobile is single-column, so
+   there's nothing to clip there. */
+.sesh-page { overflow-x: clip; }
+
 /* New 2-row puzzle layout for the SESH page (replaces sesh-grid pairs). */
 .sesh-page .sesh-row {
   display: grid;
@@ -5554,7 +5564,7 @@ body.prices-locked .chart-legend-item {
 }
 .sesh-vp-sub {
   margin: 0;
-  max-width: 90vw;
+  max-width: 100%; /* stay within the hero (avoid vw — it includes the scrollbar gutter) */
   white-space: nowrap; /* keep each subline on one line */
   overflow: hidden;
   text-overflow: ellipsis;
