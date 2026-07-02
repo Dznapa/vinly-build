@@ -8,6 +8,7 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useProfile } from '@/context/ProfileContext';
+import { useBillingGate } from '@/context/BillingGateContext';
 
 const MONTHS = [
   'January',
@@ -47,6 +48,7 @@ function monthIndex(name: string | undefined): string {
 export default function RegisterDetailsPage() {
   const router = useRouter();
   const { signupAndLogin } = useProfile();
+  const { openGate } = useBillingGate();
 
   // controlled inputs
   const [firstName, setFirstName] = useState('');
@@ -88,6 +90,12 @@ export default function RegisterDetailsPage() {
     router.push('/profile');
   };
 
+  // "Add billing & shipping" = create the account AND go straight into the SESH
+  // qualification flow (BillingGatePopover: shipping → payment → qualified). NOT
+  // the /checkout/billing order-summary page. Land on the new member's profile
+  // with the gate open over it, so finishing the flow leaves them on their
+  // profile showing the qualified state. The gate provider is global (root
+  // layout), so its open state survives this navigation.
   const onAddBilling = () => {
     signupAndLogin({
       firstName,
@@ -96,7 +104,8 @@ export default function RegisterDetailsPage() {
       phone,
       birthDate: buildBirthDate(),
     });
-    router.push('/checkout/billing');
+    router.push('/profile');
+    openGate();
   };
 
   return (
