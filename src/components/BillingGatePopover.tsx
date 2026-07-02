@@ -15,6 +15,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useUserState } from '@/context/UserStateContext';
+import { useProfile } from '@/context/ProfileContext';
+
+// Profile stores birthDate as ISO yyyy-mm-dd; the gate's DOB field shows MM / DD / YYYY.
+function isoToMMDDYYYY(iso: string): string {
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? `${m[2]} / ${m[3]} / ${m[1]}` : '';
+}
 
 // ---- Editable copy — Direction 1 (active) ----
 const COPY = {
@@ -71,14 +78,39 @@ const STATES: { name: string; ok: boolean }[] = [
 type View = 'intro' | 'shipping' | 'payment';
 
 export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { setUserState } = useUserState();
+  const { userState, setUserState } = useUserState();
+  const { basics } = useProfile();
   const cardRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<View>('intro');
   const [stateIdx, setStateIdx] = useState('');
   const [sameAddr, setSameAddr] = useState(true);
 
-  // Start fresh at the intro each time the gate opens.
-  useEffect(() => { if (open) { setView('intro'); setStateIdx(''); setSameAddr(true); } }, [open]);
+  // Step-1 identity fields. Prefilled from the account when the visitor is already
+  // signed in (e.g. just signed up, or a member getting qualified) so they don't
+  // re-type name/email/DOB they already gave. Anonymous visitors (no account yet)
+  // start blank — never seeded with the Demo/User default profile. The address
+  // fields stay empty because they're genuinely new info.
+  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [dob, setDob] = useState('');
+
+  // Start fresh at the intro each time the gate opens; seed known identity fields.
+  // Reads userState/basics from the current render's closure (the effect only runs
+  // on the open→ transition, and by then a just-completed signup has flushed), so
+  // deps stay [open] to avoid resetting the view mid-flow if basics change.
+  useEffect(() => {
+    if (!open) return;
+    setView('intro');
+    setStateIdx('');
+    setSameAddr(true);
+    const signedIn = userState !== 'anonymous';
+    setEmail(signedIn ? (basics.email ?? '') : '');
+    setFirstName(signedIn ? (basics.firstName ?? '') : '');
+    setLastName(signedIn ? (basics.lastName ?? '') : '');
+    setDob(signedIn && basics.birthDate ? isoToMMDDYYYY(basics.birthDate) : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -172,10 +204,13 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
                 </div>
                 <form className="sqf-form" onSubmit={(e) => { e.preventDefault(); setView('payment'); }}>
                   <label className="sqf-fld"><span className="sqf-lbl">Email</span>
-                    <input className="sqf-input" type="email" placeholder="you@email.com" autoComplete="email" /></label>
+                    <input className="sqf-input" type="email" placeholder="you@email.com" autoComplete="email"
+                      value={email} onChange={(e) => setEmail(e.target.value)} /></label>
                   <div className="sqf-row">
-                    <label className="sqf-fld"><span className="sqf-lbl">First name</span><input className="sqf-input" placeholder="First" autoComplete="given-name" /></label>
-                    <label className="sqf-fld"><span className="sqf-lbl">Last name</span><input className="sqf-input" placeholder="Last" autoComplete="family-name" /></label>
+                    <label className="sqf-fld"><span className="sqf-lbl">First name</span><input className="sqf-input" placeholder="First" autoComplete="given-name"
+                      value={firstName} onChange={(e) => setFirstName(e.target.value)} /></label>
+                    <label className="sqf-fld"><span className="sqf-lbl">Last name</span><input className="sqf-input" placeholder="Last" autoComplete="family-name"
+                      value={lastName} onChange={(e) => setLastName(e.target.value)} /></label>
                   </div>
                   <label className="sqf-fld"><span className="sqf-lbl">Address</span><input className="sqf-input" placeholder="Street address" autoComplete="address-line1" /></label>
                   <label className="sqf-fld"><span className="sqf-lbl">Apt / Unit <em>(optional)</em></span><input className="sqf-input" placeholder="Apt, suite, etc." autoComplete="address-line2" /></label>
@@ -196,7 +231,8 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
                         ? <><i className="fa-solid fa-check" aria-hidden /> We ship there. You&apos;re good.</>
                         : <><i className="fa-solid fa-xmark" aria-hidden /> Can&apos;t ship wine to this state yet. Blame the lawmakers, not us.</>}
                   </div>
-                  <label className="sqf-fld"><span className="sqf-lbl">Date of birth</span><input className="sqf-input" placeholder="MM / DD / YYYY" inputMode="numeric" autoComplete="bday" /></label>
+                  <label className="sqf-fld"><span className="sqf-lbl">Date of birth</span><input className="sqf-input" placeholder="MM / DD / YYYY" inputMode="numeric" autoComplete="bday"
+                    value={dob} onChange={(e) => setDob(e.target.value)} /></label>
                   <div className="sqf-elig"><i className="fa-solid fa-wine-bottle" aria-hidden /> Wine&apos;s a 21+ game. We verify, the carrier checks ID at the door.</div>
 
                   <p className="qbp-gate-trust">{SHIP_COPY.trust}</p>
