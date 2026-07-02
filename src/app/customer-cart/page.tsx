@@ -12,12 +12,11 @@ import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE } from '@/context/CartContext';
+import { splitOrderTotals } from '@/lib/cartTotals';
 import { SESH_COPY } from '@/lib/seshCopy';
 import { useToast } from '@/components/ToastProvider';
 import BottlePlaceholder, { pickVariant } from '@/components/BottlePlaceholder';
 import styles from './cart.module.css';
-
-const TAX_RATE = 0.0825;
 
 // Per-line source label. SESH/Ticker lines are already-purchased reservations (lead with
 // "Already purchased", settlement as fine print — see SESH_COPY); adjustable Shop/Spotlight
@@ -45,25 +44,34 @@ function clampQty(n: number) {
 
 export default function CustomerCartPage() {
   const router = useRouter();
-  const { items, setQty, removeItem, count, subtotal, shipping } = useCart();
+  const { items, setQty, removeItem, count } = useCart();
   const { push: toast } = useToast();
-  const freeShip = count >= FREE_SHIP_THRESHOLD && count > 0;
-  const tax = useMemo(() => Number((subtotal * TAX_RATE).toFixed(2)), [subtotal]);
-  const grandTotal = useMemo(() => Number((subtotal + shipping + tax).toFixed(2)), [subtotal, shipping, tax]);
+
+  // The Order Summary shows only what's DUE NOW. SESH/Ticker quick-buys are already
+  // purchased (locked) and settle at window close, so they're excluded from
+  // subtotal / tax / total — same split the Billing & Shipping page uses. Free
+  // shipping is still assessed against the WHOLE cart's bottle count (already-
+  // purchased bottles help unlock it), which splitOrderTotals handles internally.
+  const split = useMemo(() => splitOrderTotals(items), [items]);
+  const { subtotal, shipping, tax, total: grandTotal } = split.dueNow;
+  const freeShip = shipping === 0 && subtotal > 0;
 
   const hasItems = items.length > 0;
   // Adjustable = Shop/Winemaker Spotlight (not locked). Committed dynamic = SESH/Ticker
   // (locked, settle at window close). Only show the billing CTA when there's something
   // to actually check out; a cart of only committed wines reverts to "Keep Shopping".
-  const hasAdjustable = items.some((i) => !i.locked);
+  const hasAdjustable = split.hasStandard;
 
-  // How much they're saving vs MSRP — computed across all cart items (snapshot).
+  // Savings vs MSRP — on the DUE-NOW (standard) items only, so it stays consistent
+  // with the due-now total shown beside it.
   const savings = useMemo(
     () =>
-      items.reduce(
-        (sum, item) => sum + (item.msrp ? Math.max(0, item.msrp - item.unitPrice) * item.qty : 0),
-        0,
-      ),
+      items
+        .filter((i) => !i.locked)
+        .reduce(
+          (sum, item) => sum + (item.msrp ? Math.max(0, item.msrp - item.unitPrice) * item.qty : 0),
+          0,
+        ),
     [items],
   );
 
@@ -196,9 +204,14 @@ export default function CustomerCartPage() {
                 <span>${tax.toFixed(2)}</span>
               </div>
               <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
-                <span>Total</span>
+                <span>{split.hasReserved ? 'Due now' : 'Total'}</span>
                 <span>${grandTotal.toFixed(2)}</span>
               </div>
+              {split.hasReserved && (
+                <div className={styles.reservedNote}>
+                  {split.reserved.bottles} already-purchased bottle{split.reserved.bottles === 1 ? '' : 's'} settle at window close — not part of this total.
+                </div>
+              )}
               {savings > 0 && (
                 <div className={styles.savedRow}>
                   You&apos;re saving <b>${savings.toFixed(2)}</b> vs MSRP.
@@ -218,11 +231,13 @@ export default function CustomerCartPage() {
                   {CTA_KEEP_SHOPPING}
                 </Link>
               )}
-              <div className={styles.freeShipNote}>
-                {freeShip
-                  ? '🎉 You unlocked FREE ground shipping!'
-                  : `Just ${FREE_SHIP_THRESHOLD - count} more bottle${FREE_SHIP_THRESHOLD - count === 1 ? '' : 's'} unlocks FREE shipping — otherwise it's a $${SHIPPING_RATE.toFixed(2)} flat rate.`}
-              </div>
+              {hasAdjustable && (
+                <div className={styles.freeShipNote}>
+                  {freeShip
+                    ? '🎉 You unlocked FREE ground shipping!'
+                    : `Just ${FREE_SHIP_THRESHOLD - count} more bottle${FREE_SHIP_THRESHOLD - count === 1 ? '' : 's'} unlocks FREE shipping — otherwise it's a $${SHIPPING_RATE.toFixed(2)} flat rate.`}
+                </div>
+              )}
             </aside>
           )}
         </div>

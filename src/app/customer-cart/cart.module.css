@@ -286,6 +286,19 @@
   text-align: center;
 }
 
+/* Note that already-purchased SESH/Ticker items settle separately and aren't in
+   the due-now total. Muted, orange accent to match the "Already purchased" tag. */
+.reservedNote {
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(242, 106, 53, 0.08);
+  color: #b4531f;
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: center;
+}
+
 @media (max-width: 760px) {
   .tableHead,
   .row {
