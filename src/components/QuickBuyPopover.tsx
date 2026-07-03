@@ -13,6 +13,7 @@
    Dismissing the popup ("Not now" / Esc / backdrop) is harmless — never a cancellation. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { liveTickerPrice } from '@/lib/tickerPrice';
 import { useCart } from '@/context/CartContext';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile } from '@/context/ProfileContext';
@@ -24,7 +25,8 @@ export type QuickBuyWine = {
   id: string;
   name: string;
   region?: string;
-  price: number;
+  price: number; // live price captured the instant the popup opened
+  basePrice?: number; // Ticker: the wine's base price, so re-lock can re-sample the live price
   image: string;
   msrp?: number;
 };
@@ -87,6 +89,9 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   const [lockExpiresAt, setLockExpiresAt] = useState<number>(0);
   const [secondsLeft, setSecondsLeft] = useState<number>(LOCK_SECONDS);
   const [expired, setExpired] = useState<boolean>(false);
+  // The price actually held by the lock. Captured on open; on a Ticker re-lock it's
+  // re-sampled from the live market so the new lock reflects the drifted tile price.
+  const [lockedPrice, setLockedPrice] = useState<number>(wine?.price ?? 0);
 
   const open = wine !== null;
 
@@ -104,6 +109,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
       lastWineIdRef.current = wine.id;
       setQty(1);
       // Capture the price + start the price-lock hold the moment the popup opens.
+      setLockedPrice(wine.price);
       setLockExpiresAt(Date.now() + LOCK_SECONDS * 1000);
       setSecondsLeft(LOCK_SECONDS);
       setExpired(false);
@@ -135,12 +141,20 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     }
   }, [expired, isSesh, capReached, cancel, toast]);
 
-  // Ticker only: re-lock the price for another window (unchanged behavior).
+  // Ticker only: re-lock for another window AT THE CURRENT LIVE PRICE. The lock
+  // froze the old price; re-locking re-samples the same live-price function the
+  // ticker tile uses (by id + base + now), so it picks up wherever the market has
+  // drifted — not the stale locked value.
   const handleRelock = useCallback(() => {
+    if (wine) {
+      const fresh = liveTickerPrice(wine.basePrice ?? wine.price, wine.id, Date.now());
+      setLockedPrice(fresh);
+      toast({ kind: 'info', message: `Re-locked at $${fresh.toFixed(2)}.` });
+    }
     setLockExpiresAt(Date.now() + TICKER_LOCK_SECONDS * 1000);
     setSecondsLeft(TICKER_LOCK_SECONDS);
     setExpired(false);
-  }, []);
+  }, [wine, toast]);
 
   // Cancellation-aware exit for "Not now" / Esc / backdrop.
   // SESH + active + below cap → consume a cancellation; SESH at cap or already expired
@@ -167,13 +181,13 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     if (!wine || expired) return; // lock must be live to capture the held price
     if (isSesh && capReached) return; // locked out of buying this SESH (2 cancellations)
     const added = addItem(
-      { wineId: wine.id, name: wine.name, unitPrice: wine.price, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true, source },
+      { wineId: wine.id, name: wine.name, unitPrice: lockedPrice, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true, source },
       quantity,
     );
     onClose();
     if (!added) return;
     shipWindow.open();
-  }, [wine, expired, isSesh, capReached, addItem, onClose, shipWindow, source]);
+  }, [wine, expired, isSesh, capReached, addItem, lockedPrice, onClose, shipWindow, source]);
 
   // No card on file → send them to the qualification / add-card flow instead.
   const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);
@@ -183,13 +197,13 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
   const savings = useMemo(() => {
     if (!wine || wine.msrp === undefined) return 0;
-    return Math.max(0, wine.msrp - wine.price);
-  }, [wine]);
+    return Math.max(0, wine.msrp - lockedPrice);
+  }, [wine, lockedPrice]);
   const offMsrpPct = useMemo(() => {
     if (!wine || !wine.msrp) return 0;
-    return Math.max(0, (1 - wine.price / wine.msrp) * 100);
-  }, [wine]);
-  const lineTotal = useMemo(() => (wine ? wine.price * qty : 0), [wine, qty]);
+    return Math.max(0, (1 - lockedPrice / wine.msrp) * 100);
+  }, [wine, lockedPrice]);
+  const lineTotal = useMemo(() => (wine ? lockedPrice * qty : 0), [wine, lockedPrice, qty]);
 
   if (!wine) return null;
 
@@ -263,7 +277,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
             <div className="qbp-modal-name">{wine.name}</div>
             {wine.region && <div className="qbp-modal-region">{wine.region}</div>}
             <div className="qbp-modal-pricerow">
-              <div className="qbp-modal-price">${wine.price.toFixed(2)}</div>
+              <div className="qbp-modal-price">${lockedPrice.toFixed(2)}</div>
               {wine.msrp !== undefined && wine.msrp > 0 && (
                 <div className="qbp-modal-msrp">
                   <s>${wine.msrp.toFixed(2)}</s>
@@ -327,7 +341,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
             </div>
             <div className="qbp-os-row">
               <span className="qbp-os-label">Locked price</span>
-              <span className="qbp-os-val">${wine.price.toFixed(2)}{qty > 1 ? ` × ${qty}` : ''}</span>
+              <span className="qbp-os-val">${lockedPrice.toFixed(2)}{qty > 1 ? ` × ${qty}` : ''}</span>
             </div>
             <div className="qbp-os-row qbp-os-total">
               <span className="qbp-os-label">Order total</span>

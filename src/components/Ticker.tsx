@@ -8,8 +8,9 @@
    "was" anchor, no whole-card click, no orientation banner. */
 
 import Image from 'next/image';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TICKER, type TickerWine } from '@/data/mock';
+import { liveTickerPrice } from '@/lib/tickerPrice';
 import { useUserState } from '@/context/UserStateContext';
 import { useBillingGate } from '@/context/BillingGateContext';
 import { useQuickBuy } from './useQuickBuy';
@@ -23,10 +24,24 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
   const { openGate } = useBillingGate();
   const { open: openQuickBuy, popover } = useQuickBuy('ticker');
 
-  // The "+" quick-buy action (unchanged): billing gate for non-qualified users.
+  // Live prices drift after mount. `now` is null during SSR / first paint so we
+  // render the static base price (no hydration mismatch); a mount effect starts
+  // the clock and re-samples every few seconds. The CSS marquee is a transform, so
+  // re-rendering the numbers never disturbs the scroll.
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const id = window.setInterval(() => setNow(Date.now()), 4000);
+    return () => window.clearInterval(id);
+  }, []);
+  const priceOf = (w: TickerWine) => (now === null ? w.price : liveTickerPrice(w.price, w.id, now));
+
+  // The "+" quick-buy action: billing gate for non-qualified users. Captures the
+  // CURRENT live price (and carries the base) so a later re-lock can re-sample it.
   const buy = (w: TickerWine) => {
     if (userState !== 'sesh_qualified') { openGate(); return; }
-    openQuickBuy({ id: w.id, name: w.name, region: w.region, price: w.price, image: w.image, msrp: w.msrp });
+    const live = liveTickerPrice(w.price, w.id, Date.now());
+    openQuickBuy({ id: w.id, name: w.name, region: w.region, price: live, basePrice: w.price, image: w.image, msrp: w.msrp });
   };
 
   // Chevrons nudge a CSS variable that offsets the animated track.
@@ -51,7 +66,8 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
 
       <div className="slide-track" ref={trackRef}>
         {cards.map((w, i) => {
-          const pct = w.msrp > w.price ? ((w.msrp - w.price) / w.msrp) * 100 : null;
+          const live = priceOf(w);
+          const pct = w.msrp > live ? ((w.msrp - live) / w.msrp) * 100 : null;
           return (
             <div className="slide ticker-card" key={`${w.id}-${i}`}>
               {w.image ? (
@@ -66,7 +82,7 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
                   <div className="tc-var">{w.sub}</div>
                 </div>
                 <div className="tc-side">
-                  <span className="tc-price">${w.price.toFixed(2)}</span>
+                  <span className="tc-price">${live.toFixed(2)}</span>
                   {pct !== null && <span className="tc-off">({pct.toFixed(2)})% OFF</span>}
                   <span className="tc-foot">
                     <span className="tc-left">Bottles Left: <b>{w.left}</b></span>
