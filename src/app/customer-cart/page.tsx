@@ -8,13 +8,14 @@
    Tax row (8.25%) included in Order Summary — flag NEEDS REVIEW for the rate. */
 
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE } from '@/context/CartContext';
 import { useCartShipping } from '@/context/CartShippingContext';
 import { splitOrderTotals } from '@/lib/cartTotals';
 import { SESH_COPY } from '@/lib/seshCopy';
+import { SHOP, type ShopWine } from '@/data/mock';
 import { useToast } from '@/components/ToastProvider';
 import BottlePlaceholder, { pickVariant } from '@/components/BottlePlaceholder';
 import styles from './cart.module.css';
@@ -41,6 +42,125 @@ function clampQty(n: number) {
   if (n < 0) return 0;
   if (n > 99) return 99;
   return n;
+}
+
+// Editable heading for the below-cart quick-add section.
+const QUICK_ADD_HEADING = 'Add more wines now, click below';
+
+/* Pick up to n random in-stock shop wines, excluding anything already in the cart
+   (excludeIds) and preferring not to repeat the currently shown set (avoidIds). */
+function pickRandomWines(n: number, excludeIds: Set<string>, avoidIds: Set<string>): ShopWine[] {
+  const pool = SHOP.filter((w) => w.stock && !excludeIds.has(w.id));
+  const preferred = pool.filter((w) => !avoidIds.has(w.id));
+  const base = preferred.length >= n ? preferred : pool;
+  const arr = [...base];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, n);
+}
+
+// Compact quick-add tile — reuses the shop's bottle placeholder + btn-cart button
+// and the exact same add-to-cart call, so it behaves identically to a shop add.
+function QuickAddTile({ wine, onAdd }: { wine: ShopWine; onAdd: (w: ShopWine) => void }) {
+  const variant = wine.isPack ? 'pack' : pickVariant(wine.name, wine.maker);
+  const [added, setAdded] = useState(false);
+  const handleClick = () => {
+    onAdd(wine);
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1000);
+  };
+  return (
+    <div className={styles.quickTile}>
+      <div className={styles.quickTileImg}>
+        {wine.image ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src={wine.image} alt={wine.name} loading="lazy" />
+        ) : (
+          <BottlePlaceholder name={wine.name} variant={variant} width={70} height={150} />
+        )}
+      </div>
+      <div className={styles.quickTileName}>{wine.name}</div>
+      <div className={styles.quickTilePrice}>${wine.price.toFixed(2)}</div>
+      <button
+        type="button"
+        className={`btn-cart ${styles.quickTileBtn}${added ? ' is-added' : ''}`}
+        onClick={handleClick}
+        disabled={added}
+      >
+        {added ? 'ADDED ✓' : 'ADD'}
+      </button>
+    </div>
+  );
+}
+
+/* "Add more wines now" — three random shop tiles below the cart. Excludes anything
+   already in the cart; a refresh button reshuffles (preferring a fresh set). Adds go
+   through the SAME addItem(source:'shop') path — no special-casing. */
+function QuickAddSection() {
+  const { items, addItem, hydrated } = useCart();
+  const { push: toast } = useToast();
+  const cartIds = useMemo(() => new Set(items.map((i) => i.wineId)), [items]);
+  const [picks, setPicks] = useState<ShopWine[]>([]);
+  const [reshuffling, setReshuffling] = useState(false);
+
+  // Seed once the cart has hydrated, so we never seed a wine that's actually in the
+  // cart. Initial state is [] so SSR and first client render match (no hydration flash).
+  useEffect(() => {
+    if (!hydrated) return;
+    setPicks((prev) => (prev.length ? prev : pickRandomWines(3, cartIds, new Set())));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
+  const reshuffle = () => {
+    setReshuffling(true);
+    const avoid = new Set(picks.map((p) => p.id));
+    window.setTimeout(() => {
+      setPicks(pickRandomWines(3, cartIds, avoid));
+      setReshuffling(false);
+    }, 350);
+  };
+
+  const handleAdd = (w: ShopWine) => {
+    // Exact shop add: same snapshot + source, qty 1. Returns false only if blocked.
+    if (!addItem({ wineId: w.id, name: w.name, unitPrice: w.price, image: w.image, msrp: w.msrp, meta: w.maker, source: 'shop' }, 1)) return;
+    toast({ kind: 'success', message: `1 bottle of ${w.name} added to cart.` });
+    // Drop the added tile and backfill a fresh eligible one so three keep showing.
+    setPicks((prev) => {
+      const remaining = prev.filter((p) => p.id !== w.id);
+      const exclude = new Set<string>([...cartIds, w.id, ...remaining.map((p) => p.id)]);
+      const [extra] = pickRandomWines(1, exclude, new Set());
+      return extra ? [...remaining, extra] : remaining;
+    });
+  };
+
+  // Never show a wine that's in the cart, even if state lags a tick.
+  const shown = picks.filter((p) => !cartIds.has(p.id)).slice(0, 3);
+  const anyEligible = SHOP.some((w) => w.stock && !cartIds.has(w.id));
+  if (hydrated && !anyEligible) return null; // shop fully in cart → nothing to add
+
+  return (
+    <section className={styles.quickAdd} aria-label="Add more wines">
+      <div className={styles.quickAddHead}>
+        <h2 className={styles.quickAddTitle}>{QUICK_ADD_HEADING}</h2>
+        <button
+          type="button"
+          className={styles.reshuffle}
+          onClick={reshuffle}
+          disabled={reshuffling}
+          aria-label="Show a different set of wines"
+        >
+          <i className={`fa-solid fa-arrows-rotate${reshuffling ? ' fa-spin' : ''}`} aria-hidden /> Refresh
+        </button>
+      </div>
+      <div className={styles.quickAddGrid}>
+        {reshuffling
+          ? [0, 1, 2].map((i) => <div key={i} className={styles.quickTileSkeleton} aria-hidden />)
+          : shown.map((w) => <QuickAddTile key={w.id} wine={w} onAdd={handleAdd} />)}
+      </div>
+    </section>
+  );
 }
 
 export default function CustomerCartPage() {
@@ -178,12 +298,6 @@ export default function CustomerCartPage() {
                 })}
               </div>
             )}
-
-            <div className={styles.panelFoot}>
-              <Link href="/shop" className={`btn-skip ${styles.keepShopping}`}>
-                KEEP SHOPPING
-              </Link>
-            </div>
           </section>
 
           {hasItems && (
@@ -252,6 +366,9 @@ export default function CustomerCartPage() {
             </aside>
           )}
         </div>
+
+        {/* Below the cart: quick-add three random shop wines without leaving the page. */}
+        <QuickAddSection />
       </main>
     </PageChrome>
   );
