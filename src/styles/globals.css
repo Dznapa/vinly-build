@@ -5162,6 +5162,16 @@ body.prices-locked .chart-legend-item {
   color: #fff;
 }
 .ship-mech { font-size: 14.5px; line-height: 1.6; color: #c7d5e6; margin: 0; }
+/* Post-settlement "you still have shop wines to check out" note. */
+.ship-remaining {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: rgba(242, 106, 53, 0.12);
+  border: 1px solid rgba(242, 106, 53, 0.35);
+  color: #f2b48c;
+}
+.ship-remaining b { color: #fff; }
 .ship-mech b { color: #fff; }
 .ship-free { color: var(--green); }
 

@@ -85,28 +85,47 @@ export function ShippingWindowModal() {
     return () => window.clearTimeout(t);
   }, [unlockAlert]);
 
-  // FINALIZED — charge ran, show the outcome.
+  // FINALIZED — SESH/Ticker settled. If shop wines are still in the cart, prompt to
+  // complete them; otherwise just confirm the charge.
   if (w.finalized) {
     const f = w.finalized;
+    const remaining = f.remainingShop ?? 0;
+    const hasRemaining = remaining > 0;
     return (
-      <div className="ship-overlay" role="dialog" aria-modal="true" aria-label="Order confirmed">
+      <div className="ship-overlay" role="dialog" aria-modal="true" aria-label={hasRemaining ? 'Finish your order' : 'Order confirmed'}>
         <div className="ship-card ship-card--done" tabIndex={-1} ref={cardRef}>
           <div className="ship-done-ic"><i className="fa-solid fa-circle-check" aria-hidden /></div>
-          <h2 className="ship-hl">Window closed. Card ran.</h2>
+          <h2 className="ship-hl">{hasRemaining ? 'SESH/Ticker settled.' : 'Window closed. Card ran.'}</h2>
           <p className="ship-mech">
             Order <b>{f.orderId}</b> — <b>${f.total.toFixed(2)}</b> charged to your card on file.{' '}
             {f.freeShip
               ? <b className="ship-free">Shipping waived — 6+ bottles.</b>
               : <>Flat <b>$35</b> shipping applied (under 6 bottles).</>}
           </p>
+          {hasRemaining && (
+            <p className="ship-mech ship-remaining">
+              You still have <b>{remaining} wine{remaining === 1 ? '' : 's'}</b> in your cart that
+              need checking out. The SESH/Ticker items above have settled — complete the rest to place them.
+            </p>
+          )}
           <div className="ship-ctas">
-            <button
-              type="button"
-              className="ship-btn ship-btn-primary"
-              onClick={() => { w.dismiss(); router.push(`/checkout/summary?orderId=${f.orderId}`); }}
-            >
-              VIEW ORDER&nbsp;&nbsp;→
-            </button>
+            {hasRemaining ? (
+              <button
+                type="button"
+                className="ship-btn ship-btn-primary"
+                onClick={() => { w.dismiss(); router.push('/checkout/billing'); }}
+              >
+                COMPLETE YOUR ORDER&nbsp;&nbsp;→
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="ship-btn ship-btn-primary"
+                onClick={() => { w.dismiss(); router.push(`/checkout/summary?orderId=${f.orderId}`); }}
+              >
+                VIEW ORDER&nbsp;&nbsp;→
+              </button>
+            )}
             <button type="button" className="ship-btn ship-btn-ghost" onClick={w.dismiss}>Close</button>
           </div>
           <div className="ship-foot"><i>Instinct wins. Hesitation loses.</i></div>

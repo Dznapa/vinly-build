@@ -30,7 +30,14 @@ import { useCartShipping } from '@/context/CartShippingContext';
 const STORAGE_KEY = 'vinly:shipWindow';
 const WINDOW_MS = 15 * 60 * 1000;
 
-type Finalized = { orderId: string; total: number; shipping: number; freeShip: boolean };
+type Finalized = {
+  orderId: string;
+  total: number;
+  shipping: number;
+  freeShip: boolean;
+  /** Shop wines left in the cart that still need checkout after SESH/Ticker settled. */
+  remainingShop: number;
+};
 
 type Ctx = {
   active: boolean;
@@ -65,6 +72,12 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   profileRef.current = profile;
   const cartShipRef = useRef(cartShip);
   cartShipRef.current = cartShip;
+  // Latest endTs for event handlers (open) to read without stale closures.
+  const endTsRef = useRef<number | null>(null);
+  endTsRef.current = endTs;
+  // Guards a single settlement per window (the interval could tick again before the
+  // endTs=null state flush clears it).
+  const settlingRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -86,32 +99,36 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   }, [endTs, minimized, finalized, hydrated]);
 
-  // Mock auto-charge — mirrors /checkout/billing's placeOrder construction.
+  // Mock auto-charge at window close. Settles ONLY the already-purchased SESH/Ticker
+  // (locked) items; any shop wines stay in the cart for explicit checkout.
   const finalize = useCallback(() => {
+    if (settlingRef.current) return; // settle exactly once per window
+    settlingRef.current = true;
     const c = cartRef.current;
     const pr = profileRef.current;
-    // Charge from the cart's own snapshot — every line is priced, none dropped.
-    const lines = c.items.map((i) => ({
-      wineId: i.wineId, qty: i.qty, unitPrice: i.unitPrice, name: i.name,
-    }));
-    // SINGLE-POINT shipping assessment: once, here at window close, against the FINAL
-    // cart-wide bottle count across all instruments (shared rule — never per-charge).
-    const shipping = assessShipping(c.count);
-    const freeShip = c.count >= FREE_SHIP_THRESHOLD;
-    const subtotal = c.subtotal;
-    // Settle tax against the cart's LOCKED shipping address (single source of truth)
-    // using the shared resolver + calculation — so the window-close charge equals the
-    // tax-inclusive total previewed in the quick-buy panel and the standard checkout.
+    const lockedItems = c.items.filter((i) => i.locked);
+    const shopItems = c.items.filter((i) => !i.locked);
     const card = pr.cards.find((c2) => c2.isDefault) ?? pr.cards[0];
     const addr = cartShipRef.current.address ?? pr.addresses.find((a) => a.isDefault) ?? pr.addresses[0];
-    // AUTHORITATIVE settlement guard: never settle/charge to a disallowed destination,
-    // even if a client bypass forced one into the cart. (Disallowed states can't be
-    // selected/locked through the UI, so this is defense-in-depth.)
-    if (!isShippableState(addr?.state)) {
+    // Nothing already-purchased to settle, or a disallowed destination → just close the
+    // window (AUTHORITATIVE guard: never settle to a disallowed state).
+    if (lockedItems.length === 0 || !isShippableState(addr?.state)) {
       setEndTs(null);
       setMinimized(false);
       return;
     }
+    // Charge from the locked lines' own snapshots — every line is priced, none dropped.
+    const lines = lockedItems.map((i) => ({
+      wineId: i.wineId, qty: i.qty, unitPrice: i.unitPrice, name: i.name,
+    }));
+    // SINGLE-POINT shipping assessment: once, here at window close, against the FINAL
+    // cart-wide bottle count across all instruments (shared free-ship rule — SESH,
+    // Ticker & Market all count, even shop wines still awaiting checkout).
+    const shipping = assessShipping(c.count);
+    const freeShip = c.count >= FREE_SHIP_THRESHOLD;
+    const subtotal = Number(lockedItems.reduce((s, i) => s + i.unitPrice * i.qty, 0).toFixed(2));
+    // Settle tax against the cart's LOCKED shipping address (single source of truth)
+    // using the shared resolver + calculation — matches the quick-buy panel preview.
     const tax = taxAmount(subtotal, taxRateForState(addr?.state));
     const total = Number((subtotal + shipping + tax).toFixed(2));
     const orderId = pr.placeOrder({
@@ -123,10 +140,11 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
       shippingAddressId: addr?.id,
       paymentCardId: card?.id,
     });
-    c.clear();
+    // Remove ONLY the settled SESH/Ticker items; shop wines remain for checkout.
+    lockedItems.forEach((i) => c.removeItem(i.lineId));
     setEndTs(null);
     setMinimized(false);
-    setFinalized({ orderId, total, shipping, freeShip });
+    setFinalized({ orderId, total, shipping, freeShip, remainingShop: shopItems.length });
   }, []);
 
   // Authoritative (mock) timer: drives the countdown and fires the charge at 0:00.
@@ -146,12 +164,15 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   }, [endTs, finalized, hydrated, finalize]);
 
   const open = useCallback(() => {
+    // A window already running is NEVER restarted, reset, or re-displayed — adding a
+    // Ticker after a SESH (or any further item) leaves the running countdown and its
+    // current display state (badge/full) exactly as-is, ticking to the same deadline.
+    if (endTsRef.current !== null && endTsRef.current > Date.now()) return;
+    // Otherwise start a fresh window (first SESH/Ticker add, or after a prior settle).
+    settlingRef.current = false;
     setFinalized(null);
     setMinimized(false);
-    // Only the FIRST add starts the 15-min window. Later adds happen WITHIN that
-    // same countdown — they never reset it — so there's real time pressure to add
-    // more wines before the card auto-charges.
-    setEndTs((cur) => (cur && cur > Date.now() ? cur : Date.now() + WINDOW_MS));
+    setEndTs(Date.now() + WINDOW_MS);
   }, []);
   const minimize = useCallback(() => setMinimized(true), []);
   const expand = useCallback(() => setMinimized(false), []);
