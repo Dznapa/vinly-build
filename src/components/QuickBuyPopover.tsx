@@ -3,9 +3,9 @@
 /* Quick-buy popover — ORDER-EXECUTION modal for SESH + Ticker (one shared component).
 
    TWO SEPARATE CLOCKS — this popup owns only the first:
-   1. PRICE HOLD (15 seconds): the live price is captured the instant the user clicks
-      "Place Order" and held for 15s to complete the transaction. There is NO pre-click
-      countdown here — it's a static reassurance line.
+   1. PRICE LOCK (45 seconds — QUICK_BUY_LOCK_SECONDS): a live countdown to place the
+      order; the captured price is held until it hits 0, then the lock expires. Shared
+      by SESH and Ticker.
    2. FREE-SHIP WINDOW (15 minutes): a SEPARATE post-purchase consolidation timer shown
       on the lower-right badge (ShippingWindowModal). It opens only AFTER the order is
       committed. It is NOT displayed in this popup and shares no state with it.
@@ -42,14 +42,14 @@ export type QuickBuyPopoverProps = {
 };
 
 // Editable copy.
-// SESH runs a 20s price lock where exits/expiry cost a cancellation; Ticker keeps
-// the original 15s "re-lock" behavior (exits harmless).
-const SESH_LOCK_SECONDS = 20;
-const TICKER_LOCK_SECONDS = 15;
+// The per-popup "time to place the order" price-lock countdown, shared by SESH and
+// Ticker (ONE value — not the separate 15-minute cart consolidation window). SESH's
+// exits/expiry cost a cancellation; Ticker keeps its harmless "re-lock" behavior.
+const QUICK_BUY_LOCK_SECONDS = 45;
 const priceLockLabelTicker = (s: number) => `Price locked · ${s}s to order`;
 const priceLockLabelSesh = (s: number) => `Price locked · ${s}s to confirm`;
 const PRICE_LOCK_EXPIRED = 'Price lock expired — re-lock to keep this price.'; // Ticker
-const RELOCK_LABEL = `Re-lock price (${TICKER_LOCK_SECONDS}s)`; // Ticker
+const RELOCK_LABEL = `Re-lock price (${QUICK_BUY_LOCK_SECONDS}s)`; // Ticker
 const ORDER_MICROCOPY = 'Card runs when the 15-minute window closes — no further confirmation.'; // Ticker
 const EXIT_LABEL = 'Not now'; // Ticker active-state exit
 const SESH_EXIT_LABEL = 'Cancel / Return to Sesh'; // SESH active-state exit
@@ -61,13 +61,13 @@ const placeOrderLabel = (last4: string) => `Place Order · Card ••${last4}`;
 export const SESH_LOCKED_COPY =
   "You've used both cancellations. Buying is locked for this SESH — back at the next drop.";
 const SESH_STATUS_ACTIVE = (n: number) =>
-  `Price locked · ${SESH_LOCK_SECONDS}s to confirm. Letting it expire or tapping "Cancel" uses a cancellation · ${n} left`;
+  `Price locked · ${QUICK_BUY_LOCK_SECONDS}s to confirm. Letting it expire or tapping "Cancel" uses a cancellation · ${n} left`;
 const SESH_STATUS_CAP = SESH_LOCKED_COPY;
 const SESH_EXPIRED_REMAIN = (n: number) =>
   n <= 0 ? SESH_LOCKED_COPY : '1 cancellation left.';
 // Lock-rules summary line shown below "Not now" on the SESH popup (editable).
 // The 15 min is the post-lock-in window to add more wines before the card is charged
-// (NOT a price lock — the price lock is the 20s timer above).
+// (NOT a price lock — the price lock is the 45s timer above).
 const SESH_LOCK_RULES = 'Max 2 cancellations · after you lock in, 15 min to add more wines before your card is charged';
 const BTN_EXPIRED_PRIMARY = 'Price Lock Expired — Return to SESH';
 const BTN_EXPIRED_SECONDARY = 'Not now — Return to SESH';
@@ -90,7 +90,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   const { push: toast } = useToast();
 
   const isSesh = source === 'sesh';
-  const LOCK_SECONDS = isSesh ? SESH_LOCK_SECONDS : TICKER_LOCK_SECONDS;
+  const LOCK_SECONDS = QUICK_BUY_LOCK_SECONDS; // shared SESH + Ticker countdown
 
   const [qty, setQty] = useState<number>(1);
   const [lockExpiresAt, setLockExpiresAt] = useState<number>(0);
@@ -158,8 +158,8 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
       setLockedPrice(fresh);
       toast({ kind: 'info', message: `Re-locked at $${fresh.toFixed(2)}.` });
     }
-    setLockExpiresAt(Date.now() + TICKER_LOCK_SECONDS * 1000);
-    setSecondsLeft(TICKER_LOCK_SECONDS);
+    setLockExpiresAt(Date.now() + QUICK_BUY_LOCK_SECONDS * 1000);
+    setSecondsLeft(QUICK_BUY_LOCK_SECONDS);
     setExpired(false);
   }, [wine, toast]);
 
@@ -262,8 +262,8 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
           </div>
         </div>
 
-        {/* PRICE LOCK banner — live countdown. SESH: 20s, flashes the whole time, and
-            expiry shows the remaining-cancellation count. Ticker: 15s, re-lockable. */}
+        {/* PRICE LOCK banner — live 45s countdown. SESH flashes the whole time and
+            expiry shows the remaining-cancellation count; Ticker is re-lockable. */}
         {expired ? (
           <div className="qbp-modal-banner qbp-modal-banner--expired" role="alert">
             <i className="fa-solid fa-triangle-exclamation" aria-hidden />
