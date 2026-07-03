@@ -158,6 +158,22 @@
 }
 .allReserved i { color: var(--green); margin-top: 2px; flex: 0 0 auto; }
 
+/* Disallowed-destination block (allowlist) — replaces tax/total/Place Order. */
+.shipBlock {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 0 0;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1px solid rgba(192, 57, 43, 0.28);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #c0392b;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.shipBlock i { margin-top: 2px; flex: 0 0 auto; }
+
 .fieldRow {
   display: flex;
   gap: 16px;

@@ -15,6 +15,7 @@ import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
 import { splitOrderTotals, assessShipping, taxAmount } from '@/lib/cartTotals';
 import { taxRateForState, formatTaxRate } from '@/lib/tax';
+import { isShippableState, shipBlockMessage } from '@/lib/shippableStates';
 import { SESH_COPY } from '@/lib/seshCopy';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useCartShipping } from '@/context/CartShippingContext';
@@ -49,7 +50,7 @@ const EMPTY_ADDRESS: AddressFields = {
   address1: '',
   address2: '',
   city: '',
-  state: US_STATES[0]!,
+  state: 'CA', // default to a shippable state
   zip: '',
   phone: '',
 };
@@ -114,6 +115,9 @@ export default function BillingPage() {
       : addresses.find((a) => a.id === selectedAddressId)?.state;
   const taxRate = taxRateForState(destState);
   const split = useMemo(() => splitOrderTotals(items, taxRate), [items, taxRate]);
+  // Shippable-states allowlist: a disallowed destination blocks tax + placement.
+  const destAllowed = isShippableState(destState);
+  const [placeError, setPlaceError] = useState<string | null>(null);
 
   // Locked SESH/Ticker reservations auto-charge the default card when the window
   // closes — the payment method can't be changed while any are in the cart.
@@ -130,10 +134,35 @@ export default function BillingPage() {
     e.preventDefault();
   };
 
-  const onPlaceOrder = () => {
+  const onPlaceOrder = async () => {
     // Place Order charges the STANDARD pool only. If there are no standard items
     // there is nothing to place (SESH reservations settle on their own at close).
     if (standardItems.length === 0) return;
+
+    // Client-side allowlist block (before tax/placement).
+    if (!destAllowed) {
+      setPlaceError(shipBlockMessage(destState));
+      return;
+    }
+
+    // SERVER-SIDE authoritative check — the order is rejected server-side for a
+    // disallowed destination even if this client were bypassed.
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ state: destState }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { message?: string };
+        setPlaceError(body.message ?? shipBlockMessage(destState));
+        return;
+      }
+    } catch {
+      // Network failure — fall back to the (already-passed) client allowlist check.
+      if (!destAllowed) return;
+    }
+    setPlaceError(null);
 
     // 1) Resolve / create the shipping address. When the cart is LOCKED to a
     //    destination (SESH/Ticker committed), the whole cart ships there — use it
@@ -462,15 +491,20 @@ export default function BillingPage() {
                           <span>{money(split.dueNow.shipping)}</span>
                         )}
                       </div>
-                      <div className={styles.row}>
-                        <span>Tax ({formatTaxRate(taxRate)})</span>
-                        <span>{money(split.dueNow.tax)}</span>
+                      {/* Tax only shown for an allowed destination (block before tax). */}
+                      {destAllowed && (
+                        <div className={styles.row}>
+                          <span>Tax ({formatTaxRate(taxRate)})</span>
+                          <span>{money(split.dueNow.tax)}</span>
+                        </div>
+                      )}
+                    </div>
+                    {destAllowed && (
+                      <div className={styles.totalRow}>
+                        <span>Due now</span>
+                        <span>{money(split.dueNow.total)}</span>
                       </div>
-                    </div>
-                    <div className={styles.totalRow}>
-                      <span>Due now</span>
-                      <span>{money(split.dueNow.total)}</span>
-                    </div>
+                    )}
                   </section>
                 )}
 
@@ -505,14 +539,28 @@ export default function BillingPage() {
                 )}
 
                 {split.hasStandard ? (
-                  <button
-                    type="button"
-                    className={`btn-billing ${styles.placeOrder}`}
-                    onClick={onPlaceOrder}
-                    disabled={standardItems.length === 0}
-                  >
-                    PLACE ORDER · {money(split.dueNow.total)}
-                  </button>
+                  destAllowed ? (
+                    <>
+                      <button
+                        type="button"
+                        className={`btn-billing ${styles.placeOrder}`}
+                        onClick={onPlaceOrder}
+                        disabled={standardItems.length === 0}
+                      >
+                        PLACE ORDER · {money(split.dueNow.total)}
+                      </button>
+                      {placeError && (
+                        <p className={styles.shipBlock} role="alert">
+                          <i className="fa-solid fa-triangle-exclamation" aria-hidden /> {placeError}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    // Disallowed destination — no tax, no order, clear message.
+                    <p className={styles.shipBlock} role="alert">
+                      <i className="fa-solid fa-triangle-exclamation" aria-hidden /> {shipBlockMessage(destState)}
+                    </p>
+                  )
                 ) : (
                   <div className={styles.allReserved} role="status">
                     <i className="fa-solid fa-circle-check" aria-hidden /> {SESH_COPY.allPurchasedConfirm}

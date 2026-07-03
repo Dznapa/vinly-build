@@ -9,6 +9,7 @@ import { useState, type FormEvent } from 'react';
 import { PageChrome } from '@/components/PageChrome';
 import ProfileBack from '@/components/ProfileBack';
 import { useProfile, type Address } from '@/context/ProfileContext';
+import { isShippableState, shipBlockMessage } from '@/lib/shippableStates';
 import styles from './addresses.module.css';
 
 const US_STATES: { code: string; name: string }[] = [
@@ -90,6 +91,7 @@ export default function AddressesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [shipError, setShipError] = useState<string | null>(null);
 
   const openAdd = () => {
     setEditingId(null);
@@ -107,10 +109,18 @@ export default function AddressesPage() {
     setFormOpen(false);
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setShipError(null);
   };
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Enforce the shippable-states allowlist before saving — block a disallowed
+    // destination with the standard message; the data layer also guards this.
+    if (!isShippableState(form.state)) {
+      setShipError(shipBlockMessage(form.state));
+      return;
+    }
+    setShipError(null);
     const payload = {
       label: form.label.trim() || 'Address',
       fullName: form.fullName.trim(),
@@ -246,7 +256,7 @@ export default function AddressesPage() {
               <select
                 className={styles.select}
                 value={form.state}
-                onChange={(e) => setField('state', e.target.value)}
+                onChange={(e) => { setField('state', e.target.value); setShipError(null); }}
                 aria-label="State"
               >
                 {US_STATES.map((s) => (
@@ -276,6 +286,12 @@ export default function AddressesPage() {
               />{' '}
               Set as default
             </label>
+
+            {shipError && (
+              <p className={styles.shipError} role="alert">
+                <i className="fa-solid fa-triangle-exclamation" aria-hidden /> {shipError}
+              </p>
+            )}
 
             <div className={styles.formActions}>
               <button type="button" className="btn-skip" onClick={closeForm}>

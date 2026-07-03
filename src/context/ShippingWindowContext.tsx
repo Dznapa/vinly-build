@@ -23,6 +23,7 @@ import {
 import { useCart, assessShipping, FREE_SHIP_THRESHOLD } from '@/context/CartContext';
 import { taxAmount } from '@/lib/cartTotals';
 import { taxRateForState } from '@/lib/tax';
+import { isShippableState } from '@/lib/shippableStates';
 import { useProfile } from '@/context/ProfileContext';
 import { useCartShipping } from '@/context/CartShippingContext';
 
@@ -103,6 +104,14 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     // tax-inclusive total previewed in the quick-buy panel and the standard checkout.
     const card = pr.cards.find((c2) => c2.isDefault) ?? pr.cards[0];
     const addr = cartShipRef.current.address ?? pr.addresses.find((a) => a.isDefault) ?? pr.addresses[0];
+    // AUTHORITATIVE settlement guard: never settle/charge to a disallowed destination,
+    // even if a client bypass forced one into the cart. (Disallowed states can't be
+    // selected/locked through the UI, so this is defense-in-depth.)
+    if (!isShippableState(addr?.state)) {
+      setEndTs(null);
+      setMinimized(false);
+      return;
+    }
     const tax = taxAmount(subtotal, taxRateForState(addr?.state));
     const total = Number((subtotal + shipping + tax).toFixed(2));
     const orderId = pr.placeOrder({

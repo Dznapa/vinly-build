@@ -11,10 +11,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import { useUserState } from './UserStateContext';
+import { isShippableState } from '@/lib/shippableStates';
 
 export type ProfileBasics = {
   firstName: string;
@@ -160,6 +162,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const { setUserState } = useUserState();
   const [blob, setBlob] = useState<ProfileBlob>(DEFAULT_BLOB);
   const [hydrated, setHydrated] = useState(false);
+  // Latest blob via ref so the placeOrder guard can resolve an address's state
+  // synchronously without adding blob to its deps.
+  const blobRef = useRef(blob);
+  blobRef.current = blob;
 
   useEffect(() => {
     try {
@@ -236,6 +242,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   // ---------- addresses ----------
   const addAddress = useCallback(
     (addr: Omit<Address, 'id' | 'isDefault'> & { isDefault?: boolean }) => {
+      // Authoritative allowlist guard — refuse to save a disallowed destination even
+      // if the form UI is bypassed. Returns '' (no id) so callers can detect it.
+      if (!isShippableState(addr.state)) return '';
       const id = genId('addr');
       setBlob((b) => {
         const isFirst = b.addresses.length === 0;
@@ -261,6 +270,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   );
 
   const updateAddress = useCallback((id: string, patch: Partial<Omit<Address, 'id'>>) => {
+    // Refuse to move an address to a disallowed state.
+    if (patch.state !== undefined && !isShippableState(patch.state)) return;
     setBlob((b) => ({
       ...b,
       addresses: b.addresses.map((a) => (a.id === id ? { ...a, ...patch } : a)),
@@ -337,6 +348,13 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   // ---------- orders ----------
   const placeOrder = useCallback<Ctx['placeOrder']>((input) => {
+    // Authoritative data-layer guard: never record an order to a disallowed
+    // destination, regardless of which path (checkout or settlement) calls in or
+    // whether the client was bypassed. Returns '' (no order) on block.
+    const shipTo = input.shippingAddressId
+      ? blobRef.current.addresses.find((a) => a.id === input.shippingAddressId)
+      : undefined;
+    if (shipTo && !isShippableState(shipTo.state)) return '';
     const id = genOrderId();
     const order: Order = {
       id,

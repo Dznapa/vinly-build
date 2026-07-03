@@ -15,7 +15,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { liveTickerPrice } from '@/lib/tickerPrice';
 import { taxAmount } from '@/lib/cartTotals';
-import { taxRateForState, formatTaxRate, canShipToState } from '@/lib/tax';
+import { taxRateForState, formatTaxRate } from '@/lib/tax';
+import { isShippableState, shipBlockMessage } from '@/lib/shippableStates';
 import { useCart } from '@/context/CartContext';
 import { useCartShipping } from '@/context/CartShippingContext';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
@@ -186,7 +187,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   const addToCart = useCallback((quantity: number) => {
     if (!wine || expired) return; // lock must be live to capture the held price
     if (isSesh && capReached) return; // locked out of buying this SESH (2 cancellations)
-    if (!destAddress || !canShipToState(destAddress.state)) return; // no / undeliverable destination
+    if (!destAddress || !isShippableState(destAddress.state)) return; // no / disallowed destination
     const added = addItem(
       { wineId: wine.id, name: wine.name, unitPrice: lockedPrice, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true, source },
       quantity,
@@ -221,8 +222,9 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   // on qty / price / destination change. If no address is on file (shouldn't happen
   // for a qualified user), fall back to the default rate and FLAG it — never silently $0.
   const hasDestination = !!destAddress;
-  // Whether the destination is deliverable — block commit for undeliverable states.
-  const canShip = hasDestination && canShipToState(destAddress?.state);
+  // Whether the destination is deliverable per the authoritative allowlist — block
+  // commit (and tax display) for disallowed states.
+  const canShip = hasDestination && isShippableState(destAddress?.state);
   const taxRate = useMemo(() => taxRateForState(destAddress?.state), [destAddress]);
   // Short, recognizable preview of the destination (default shipping address) for
   // the "shipping to" helper line under Place Order — truncate the street line to
@@ -367,8 +369,10 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
           </span>
         </div>
 
-        {/* ORDER SUMMARY — real locked values; makes the charge feel official. */}
-        {hasCard && !expired && (
+        {/* ORDER SUMMARY — real locked values; makes the charge feel official. Hidden
+            for a disallowed destination so NO tax figure is computed/shown (block
+            before tax). */}
+        {hasCard && !expired && canShip && (
           <div className="qbp-order-summary" role="group" aria-label="Order summary">
             <div className="qbp-os-row">
               <span className="qbp-os-name">{wine.name}</span>
@@ -476,7 +480,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                       </p>
                       {!canShip && (
                         <p className="qbp-microcopy qbp-shipto qbp-shipto--missing">
-                          <i className="fa-solid fa-triangle-exclamation" aria-hidden /> We can’t ship wine to {destAddress?.state} yet.
+                          <i className="fa-solid fa-triangle-exclamation" aria-hidden /> {shipBlockMessage(destAddress?.state)}
                         </p>
                       )}
                     </>
@@ -505,7 +509,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                       </div>
                       {!canShip && (
                         <p className="qbp-microcopy qbp-shipto qbp-shipto--missing">
-                          <i className="fa-solid fa-triangle-exclamation" aria-hidden /> We can’t ship wine to {destAddress?.state} yet — choose another address.
+                          <i className="fa-solid fa-triangle-exclamation" aria-hidden /> {shipBlockMessage(destAddress?.state)}
                         </p>
                       )}
                     </>
