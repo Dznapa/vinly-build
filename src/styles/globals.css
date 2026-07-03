@@ -26,6 +26,15 @@ body {
   margin: 0;
   padding: 0;
 }
+/* Reserve the vertical-scrollbar gutter on BOTH inline edges so centered content
+   (max-width containers via margin:auto — e.g. the SESH hero + sections) stays truly
+   centered relative to the viewport. Without this, a classic (non-overlay) desktop
+   scrollbar is only subtracted from the RIGHT, so the window's left/right gutters are
+   unequal by the scrollbar width and centered content looks shifted. No-op where
+   scrollbars are overlays (macOS default, mobile), so mobile is unchanged. */
+html {
+  scrollbar-gutter: stable both-edges;
+}
 body {
   background: var(--navy);
   color: var(--text-gray);
