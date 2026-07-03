@@ -13,6 +13,7 @@
    Dismissing the popup ("Not now" / Esc / backdrop) is harmless — never a cancellation. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { liveTickerPrice } from '@/lib/tickerPrice';
 import { taxAmount } from '@/lib/cartTotals';
 import { taxRateForState, formatTaxRate } from '@/lib/tax';
@@ -70,13 +71,15 @@ const SESH_EXPIRED_REMAIN = (n: number) =>
 // (NOT a price lock — the price lock is the 45s timer above).
 const SESH_LOCK_RULES = 'Max 2 cancellations · after you lock in, 15 min to add more wines before your card is charged';
 const BTN_EXPIRED_PRIMARY = 'Price Lock Expired — Return to SESH';
-const BTN_EXPIRED_SECONDARY = 'Not now — Return to SESH';
+// Second action is a useful next step (browse more wine) rather than a duplicate return.
+const BTN_EXPIRED_BROWSE = 'Browse the Shop →';
 const seshCancelMsg = (after: number) =>
   after >= 1
     ? 'Cancelled. 1 cancellation left.'
     : "That's your second cancellation — buying is locked for the rest of this SESH. Back at the next drop.";
 
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
+  const router = useRouter();
   const { addItem } = useCart();
   const shipWindow = useShippingWindow();
   const { cards } = useProfile();
@@ -202,6 +205,9 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
 
   // No card on file → send them to the qualification / add-card flow instead.
   const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);
+
+  // Expired-state "next step": close the popup and go browse more wine in the Shop.
+  const handleBrowseShop = useCallback(() => { onClose(); router.push('/shop'); }, [onClose, router]);
 
   // Backdrop click dismisses — same as "Not now".
   const handleBackdropClick = useCallback(() => { handleCancelExit(); }, [handleCancelExit]);
@@ -412,8 +418,10 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
         {/* ACTIONS */}
         <div className="qbp-modal-actions">
           {expired && isSesh ? (
-            // SESH expired: both buttons turn BLACK and just return to the SESH. The
-            // cancellation was already consumed the moment the lock expired.
+            // SESH expired (cancellation already consumed at expiry): ONE clear return
+            // to the SESH floor (primary, keeps the "Price Lock Expired" status), and a
+            // useful next step to browse more wine in the Shop (secondary) — not a
+            // duplicate return.
             <>
               <button
                 type="button"
@@ -426,10 +434,10 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
               <button
                 type="button"
                 className="qbp-modal-secondary qbp-modal-secondary--ended"
-                onClick={onClose}
-                aria-label={BTN_EXPIRED_SECONDARY}
+                onClick={handleBrowseShop}
+                aria-label="Browse the Shop"
               >
-                {BTN_EXPIRED_SECONDARY}
+                {BTN_EXPIRED_BROWSE}
               </button>
             </>
           ) : expired ? (
