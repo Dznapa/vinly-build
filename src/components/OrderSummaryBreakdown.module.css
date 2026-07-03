@@ -1,0 +1,96 @@
+/* Shared two-group order-summary breakdown — rendered identically by the Cart
+   Order Summary panel and the checkout "Consolidated Order Summary". "Due now"
+   (standard) group vs "Already purchased" (SESH/Ticker) group. Styles mirror the
+   original billing summary so both surfaces look the same and stay in sync. */
+
+.group {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+  margin-bottom: 6px;
+}
+.group:first-of-type { border-top: 0; padding-top: 0; }
+
+.groupHead {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 10px;
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+}
+.item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.itemName {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: #2a2a2a;
+}
+.itemMeta {
+  color: #777;
+  font-size: 12.5px;
+  margin-top: 2px;
+}
+.itemPrice {
+  color: #333;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  color: #444;
+  font-size: 15px;
+}
+.rowFree {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+  margin-bottom: 18px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.reservedTag {
+  color: var(--orange);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.reservedTag i { font-size: 10px; margin-right: 3px; }
+.reservedNote {
+  margin: -8px 0 16px;
+  color: #777;
+  font-size: 12.5px;
+  font-style: italic;
+  line-height: 1.45;
+}

@@ -8,15 +8,12 @@
 export const SESH_COPY = {
   /** Short badge/tag shown next to the wine name. */
   badge: 'Already purchased',
-  /** Line note in the cart + order summary (lead + settlement fine print). */
-  lineNote: 'Already purchased · settles at window close',
-  /** Billing summary group header for the already-purchased pool. */
-  groupHead: 'Already purchased · settles at window close',
+  /** Line note in the cart line items. */
+  lineNote: 'Already purchased',
+  /** Order-summary group header for the already-purchased pool (cart + checkout). */
+  groupHead: 'Already purchased',
   /** Row label for the already-purchased subtotal (followed by the bottle count). */
   subtotalLabel: 'Already purchased',
-  /** Billing reserved-group explanatory note. */
-  billingNote:
-    "These items are already purchased — they settle automatically on your default card when the window closes, so they're not part of this order's total.",
   /** Billing payment-method note (why the default card can't be changed). */
   paymentNote:
     "These items are already purchased — they settle automatically on your default card when the window closes, so the payment method can't be changed here.",

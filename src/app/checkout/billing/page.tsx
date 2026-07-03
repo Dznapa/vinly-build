@@ -14,8 +14,9 @@ import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
 import { splitOrderTotals, assessShipping, taxAmount } from '@/lib/cartTotals';
-import { taxRateForState, formatTaxRate } from '@/lib/tax';
+import { taxRateForState } from '@/lib/tax';
 import { isShippableState, shipBlockMessage } from '@/lib/shippableStates';
+import { OrderSummaryBreakdown } from '@/components/OrderSummaryBreakdown';
 import { SESH_COPY } from '@/lib/seshCopy';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useCartShipping } from '@/context/CartShippingContext';
@@ -461,82 +462,8 @@ export default function BillingPage() {
               </div>
             ) : (
               <>
-                {/* DUE NOW — standard (Shop / Winemaker Spotlight) items, charged now. */}
-                {split.hasStandard && (
-                  <section className={styles.group}>
-                    <div className={styles.groupHead}>Due now · Place Order</div>
-                    <div className={styles.itemList}>
-                      {standardItems.map((i) => (
-                        <div key={i.lineId} className={styles.item}>
-                          <div className={styles.itemName}>
-                            {i.name}
-                            <div className={styles.itemMeta}>
-                              {i.meta ? `${i.meta} · ` : ''}Qty {i.qty}
-                            </div>
-                          </div>
-                          <div className={styles.itemPrice}>{money(i.unitPrice * i.qty)}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className={styles.rows}>
-                      <div className={styles.row}>
-                        <span>Subtotal ({split.dueNow.bottles} bottle{split.dueNow.bottles === 1 ? '' : 's'})</span>
-                        <span>{money(split.dueNow.subtotal)}</span>
-                      </div>
-                      <div className={styles.row}>
-                        <span>Shipping</span>
-                        {split.dueNow.shipping === 0 ? (
-                          <span className={styles.rowFree}>FREE</span>
-                        ) : (
-                          <span>{money(split.dueNow.shipping)}</span>
-                        )}
-                      </div>
-                      {/* Tax only shown for an allowed destination (block before tax). */}
-                      {destAllowed && (
-                        <div className={styles.row}>
-                          <span>Tax ({formatTaxRate(taxRate)})</span>
-                          <span>{money(split.dueNow.tax)}</span>
-                        </div>
-                      )}
-                    </div>
-                    {destAllowed && (
-                      <div className={styles.totalRow}>
-                        <span>Due now</span>
-                        <span>{money(split.dueNow.total)}</span>
-                      </div>
-                    )}
-                  </section>
-                )}
-
-                {/* ALREADY PURCHASED — SESH/Ticker reservations, info only. */}
-                {split.hasReserved && (
-                  <section className={styles.group}>
-                    <div className={styles.groupHead}>{SESH_COPY.groupHead}</div>
-                    <div className={styles.itemList}>
-                      {seshItems.map((i) => (
-                        <div key={i.lineId} className={styles.item}>
-                          <div className={styles.itemName}>
-                            {i.name}
-                            <div className={styles.itemMeta}>
-                              {i.meta ? `${i.meta} · ` : ''}Qty {i.qty} ·{' '}
-                              <span className={styles.reservedTag}>
-                                <i className="fa-solid fa-circle-check" aria-hidden /> {SESH_COPY.badge}
-                              </span>
-                            </div>
-                          </div>
-                          <div className={styles.itemPrice}>{money(i.unitPrice * i.qty)}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className={styles.rows}>
-                      <div className={styles.row}>
-                        <span>{SESH_COPY.subtotalLabel} ({split.reserved.bottles} bottle{split.reserved.bottles === 1 ? '' : 's'})</span>
-                        <span>{money(split.reserved.subtotal)}</span>
-                      </div>
-                    </div>
-                    <p className={styles.reservedNote}>{SESH_COPY.billingNote}</p>
-                  </section>
-                )}
+                {/* Shared two-group breakdown (identical to the Cart Order Summary). */}
+                <OrderSummaryBreakdown items={items} split={split} taxRate={taxRate} blockTax={!destAllowed} />
 
                 {split.hasStandard ? (
                   destAllowed ? (
