@@ -11,13 +11,17 @@
 
    Presentation only — all figures come from the caller's splitOrderTotals result. */
 
-import { type OrderSplit } from '@/lib/cartTotals';
+import { type OrderSplit, taxAmount } from '@/lib/cartTotals';
 import { type CartItem } from '@/context/CartContext';
 import { formatTaxRate } from '@/lib/tax';
 import { SESH_COPY } from '@/lib/seshCopy';
 import styles from './OrderSummaryBreakdown.module.css';
 
 const money = (n: number) => `$${n.toFixed(2)}`;
+// Already-purchased (SESH/Ticker) prices are shown TAX-INCLUSIVE: bottle price + its
+// tax (the tax that settles at window close), via the shared tax calc. There's no
+// separate Tax line for this group.
+const taxInclusive = (subtotal: number, rate: number) => subtotal + taxAmount(subtotal, rate);
 
 export function OrderSummaryBreakdown({
   items,
@@ -99,16 +103,17 @@ export function OrderSummaryBreakdown({
                     </span>
                   </div>
                 </div>
-                <div className={styles.itemPrice}>{money(i.unitPrice * i.qty)}</div>
+                <div className={styles.itemPrice}>{money(taxInclusive(i.unitPrice * i.qty, taxRate))}</div>
               </div>
             ))}
           </div>
           <div className={styles.rows}>
             <div className={styles.row}>
               <span>{SESH_COPY.subtotalLabel} ({split.reserved.bottles} bottle{split.reserved.bottles === 1 ? '' : 's'})</span>
-              <span>{money(split.reserved.subtotal)}</span>
+              <span>{money(taxInclusive(split.reserved.subtotal, taxRate))}</span>
             </div>
           </div>
+          <p className={styles.reservedTaxNote}>Prices include tax.</p>
           <p className={styles.reservedNote}>
             {split.reserved.bottles} already-purchased bottle{split.reserved.bottles === 1 ? '' : 's'} — not part of this total.
           </p>

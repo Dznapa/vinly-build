@@ -94,3 +94,9 @@
   font-style: italic;
   line-height: 1.45;
 }
+/* "Prices include tax." — clarifies the already-purchased group's tax-inclusive prices. */
+.reservedTaxNote {
+  margin: -10px 0 4px;
+  color: #888;
+  font-size: 12px;
+}

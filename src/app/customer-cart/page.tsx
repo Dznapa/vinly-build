@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE, type CartItem } from '@/context/CartContext';
 import { useCartShipping } from '@/context/CartShippingContext';
-import { splitOrderTotals } from '@/lib/cartTotals';
+import { splitOrderTotals, taxAmount } from '@/lib/cartTotals';
 import { taxRateForState } from '@/lib/tax';
 import { OrderSummaryBreakdown } from '@/components/OrderSummaryBreakdown';
 import { SESH_COPY } from '@/lib/seshCopy';
@@ -52,14 +52,19 @@ function clampQty(n: number) {
 // Shop/Winemaker Spotlight items keep the quantity stepper + Remove.
 function CartRow({
   item,
+  taxRate,
   onSetQty,
   onRemove,
 }: {
   item: CartItem;
+  taxRate: number;
   onSetQty: (lineId: string, qty: number) => void;
   onRemove: (lineId: string, name: string) => void;
 }) {
-  const lineTotal = item.unitPrice * item.qty;
+  const rawTotal = item.unitPrice * item.qty;
+  // Already-purchased (locked) SESH/Ticker lines show TAX-INCLUSIVE prices (bottle +
+  // its tax that settles at window close); adjustable shop lines stay pre-tax.
+  const lineTotal = item.locked ? rawTotal + taxAmount(rawTotal, taxRate) : rawTotal;
   const variant = pickVariant(item.name, item.meta ?? '');
   return (
     <div className={styles.row}>
@@ -263,9 +268,9 @@ export default function CustomerCartPage() {
     const sesh = items.filter((i) => i.locked && i.source !== 'ticker');
     const ticker = items.filter((i) => i.locked && i.source === 'ticker');
     return [
-      { key: 'due', title: `Shop & Spotlight — Due Now (${dueNow.length})`, items: dueNow },
-      { key: 'sesh', title: `SESH — Already Purchased (${sesh.length})`, items: sesh },
-      { key: 'ticker', title: `Ticker — Already Purchased (${ticker.length})`, items: ticker },
+      { key: 'due', title: `Shop & Spotlight — Due Now (${dueNow.length})`, items: dueNow, taxInclusive: false },
+      { key: 'sesh', title: `SESH — Already Purchased (${sesh.length})`, items: sesh, taxInclusive: true },
+      { key: 'ticker', title: `Ticker — Already Purchased (${ticker.length})`, items: ticker, taxInclusive: true },
     ].filter((g) => g.items.length > 0);
   }, [items]);
 
@@ -296,10 +301,13 @@ export default function CustomerCartPage() {
             <div className={styles.cartGroups}>
               {cartGroups.map((g) => (
                 <section key={g.key} className={styles.cartPanel}>
-                  <div className={styles.cartGroupHead}>{g.title}</div>
+                  <div className={styles.cartGroupHead}>
+                    {g.title}
+                    {g.taxInclusive && <span className={styles.cartGroupTaxNote}>Prices include tax.</span>}
+                  </div>
                   <div className={styles.rows}>
                     {g.items.map((item) => (
-                      <CartRow key={item.lineId} item={item} onSetQty={setQty} onRemove={handleRemove} />
+                      <CartRow key={item.lineId} item={item} taxRate={taxRate} onSetQty={setQty} onRemove={handleRemove} />
                     ))}
                   </div>
                 </section>
