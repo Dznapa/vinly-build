@@ -12,6 +12,7 @@ import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE } from '@/context/CartContext';
+import { useCartShipping } from '@/context/CartShippingContext';
 import { splitOrderTotals } from '@/lib/cartTotals';
 import { SESH_COPY } from '@/lib/seshCopy';
 import { useToast } from '@/components/ToastProvider';
@@ -45,6 +46,7 @@ function clampQty(n: number) {
 export default function CustomerCartPage() {
   const router = useRouter();
   const { items, setQty, removeItem, count } = useCart();
+  const { address: shipAddr, locked: shipLocked } = useCartShipping();
   const { push: toast } = useToast();
 
   // The Order Summary shows only what's DUE NOW. SESH/Ticker quick-buys are already
@@ -215,6 +217,15 @@ export default function CustomerCartPage() {
               {savings > 0 && (
                 <div className={styles.savedRow}>
                   You&apos;re saving <b>${savings.toFixed(2)}</b> vs MSRP.
+                </div>
+              )}
+              {/* Cart-wide shipping destination (single source of truth). Read-only
+                  here; while locked the whole cart ships to this one address. */}
+              {shipAddr && (
+                <div className={styles.shipToRow}>
+                  <i className="fa-solid fa-location-dot" aria-hidden />{' '}
+                  Shipping to: {shipAddr.label} — {shipAddr.city}, {shipAddr.state} {shipAddr.zip}
+                  {shipLocked && <span className={styles.shipToLock}> · <i className="fa-solid fa-lock" aria-hidden /> locked</span>}
                 </div>
               )}
               {hasAdjustable ? (

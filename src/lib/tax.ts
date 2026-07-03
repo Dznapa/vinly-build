@@ -43,6 +43,17 @@ export const STATE_TAX_RATES: Record<string, number> = {
   TN: 0.07,
 };
 
+/* States Vinly can't ship wine to yet (mirrors the qualification gate's mock list).
+   Used to warn/block rather than settle a shipment we can't fulfil. */
+export const NO_SHIP_STATES = new Set(['UT', 'MS']);
+
+/** Whether a destination state is shippable. Unknown/missing → treated as shippable
+   (the missing-address case is handled separately by the caller). */
+export function canShipToState(state?: string | null): boolean {
+  if (!state) return true;
+  return !NO_SHIP_STATES.has(state.trim().toUpperCase());
+}
+
 /** Resolve the sales-tax rate for a destination state code. Missing/unknown → default. */
 export function taxRateForState(state?: string | null): number {
   if (!state) return DEFAULT_TAX_RATE;

@@ -17,6 +17,7 @@ import { splitOrderTotals, assessShipping, taxAmount } from '@/lib/cartTotals';
 import { taxRateForState, formatTaxRate } from '@/lib/tax';
 import { SESH_COPY } from '@/lib/seshCopy';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
+import { useCartShipping } from '@/context/CartShippingContext';
 import { useProfile, cardBrand as detectBrand } from '@/context/ProfileContext';
 import styles from './billing.module.css';
 
@@ -69,6 +70,10 @@ export default function BillingPage() {
   const { items, count, subtotal, clear } = useCart();
   const { addresses, cards, addAddress, addCard, placeOrder } = useProfile();
   const { endWindow: endShipWindow } = useShippingWindow();
+  // While the cart shipping address is LOCKED (a SESH/Ticker quick-buy was committed),
+  // the destination is fixed cart-wide — the selector here is disabled and everything
+  // (tax, the placed order) uses the locked address.
+  const { locked: shipLocked, address: lockedShipAddress } = useCartShipping();
 
   // Split the cart into the two pools. STANDARD items are charged now by Place Order;
   // SESH/Ticker (locked) reservations are already paid and settle at window close, so
@@ -102,9 +107,11 @@ export default function BillingPage() {
   // panel and window-close settlement use, so the numbers agree for the same
   // address. Missing state → default rate (never $0). Split recomputes when the
   // destination changes.
-  const destState = usingNewAddress
-    ? shippingAddr.state
-    : addresses.find((a) => a.id === selectedAddressId)?.state;
+  const destState = shipLocked
+    ? lockedShipAddress?.state
+    : usingNewAddress
+      ? shippingAddr.state
+      : addresses.find((a) => a.id === selectedAddressId)?.state;
   const taxRate = taxRateForState(destState);
   const split = useMemo(() => splitOrderTotals(items, taxRate), [items, taxRate]);
 
@@ -128,9 +135,13 @@ export default function BillingPage() {
     // there is nothing to place (SESH reservations settle on their own at close).
     if (standardItems.length === 0) return;
 
-    // 1) Resolve / create the shipping address.
+    // 1) Resolve / create the shipping address. When the cart is LOCKED to a
+    //    destination (SESH/Ticker committed), the whole cart ships there — use it
+    //    directly and ignore the (disabled) selector.
     let shippingAddressId: string | undefined;
-    if (usingNewAddress) {
+    if (shipLocked && lockedShipAddress) {
+      shippingAddressId = lockedShipAddress.id;
+    } else if (usingNewAddress) {
       if (!shippingAddr.fullName || !shippingAddr.address1 || !shippingAddr.city || !shippingAddr.zip) {
         // form invalid — bail silently for now (NEEDS REVIEW: surface errors)
         return;
@@ -227,6 +238,28 @@ export default function BillingPage() {
           >
             <h4>Shipping Address</h4>
 
+            {shipLocked && lockedShipAddress ? (
+              /* Cart locked to one destination by a committed SESH/Ticker quick-buy —
+                 read-only, no selector. Everything in the cart ships here. */
+              <>
+                <label className="check-row" style={{ marginTop: 0 }}>
+                  Shipping address
+                </label>
+                <div className={styles.lockedPay}>
+                  <span>
+                    {lockedShipAddress.label} — {lockedShipAddress.line1}, {lockedShipAddress.city}{' '}
+                    {lockedShipAddress.state} {lockedShipAddress.zip}
+                  </span>
+                  <span className={styles.lockedPayTag}>
+                    <i className="fa-solid fa-lock" aria-hidden /> Locked
+                  </span>
+                </div>
+                <p className={styles.lockedPayNote}>
+                  Locked for this cart — everything ships to this address. It resets when the cart is emptied or the order completes.
+                </p>
+              </>
+            ) : (
+              <>
             {addresses.length > 0 && (
               <>
                 <label className="check-row" style={{ marginTop: 0 }}>
@@ -301,6 +334,8 @@ export default function BillingPage() {
                   value={shippingAddr.phone}
                   onChange={updateShipping('phone')}
                 />
+              </>
+            )}
               </>
             )}
 

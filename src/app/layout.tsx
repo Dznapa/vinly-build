@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { UserStateProvider } from '@/context/UserStateContext';
 import { BillingGateProvider } from '@/context/BillingGateContext';
 import { CartProvider } from '@/context/CartContext';
+import { CartShippingProvider } from '@/context/CartShippingContext';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { ToastProvider } from '@/components/ToastProvider';
 import { ScrollToTop } from '@/components/ScrollToTop';
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <ProfileProvider>
             <BillingGateProvider>
               <CartProvider>
+                <CartShippingProvider>
                 <ShippingWindowProvider>
                   <CancellationProvider>
                   <ToastProvider>
@@ -62,6 +64,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </ToastProvider>
                   </CancellationProvider>
                 </ShippingWindowProvider>
+                </CartShippingProvider>
               </CartProvider>
             </BillingGateProvider>
           </ProfileProvider>

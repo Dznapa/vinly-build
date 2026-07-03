@@ -24,6 +24,7 @@ import { useCart, assessShipping, FREE_SHIP_THRESHOLD } from '@/context/CartCont
 import { taxAmount } from '@/lib/cartTotals';
 import { taxRateForState } from '@/lib/tax';
 import { useProfile } from '@/context/ProfileContext';
+import { useCartShipping } from '@/context/CartShippingContext';
 
 const STORAGE_KEY = 'vinly:shipWindow';
 const WINDOW_MS = 15 * 60 * 1000;
@@ -48,6 +49,7 @@ const ShippingWindowContext = createContext<Ctx | null>(null);
 export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   const cart = useCart();
   const profile = useProfile();
+  const cartShip = useCartShipping();
 
   const [endTs, setEndTs] = useState<number | null>(null);
   const [minimized, setMinimized] = useState(false);
@@ -55,11 +57,13 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [hydrated, setHydrated] = useState(false);
 
-  // Latest cart/profile via refs so the timer effect doesn't churn on cart edits.
+  // Latest cart/profile/ship via refs so the timer effect doesn't churn on cart edits.
   const cartRef = useRef(cart);
   cartRef.current = cart;
   const profileRef = useRef(profile);
   profileRef.current = profile;
+  const cartShipRef = useRef(cartShip);
+  cartShipRef.current = cartShip;
 
   useEffect(() => {
     try {
@@ -94,11 +98,11 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     const shipping = assessShipping(c.count);
     const freeShip = c.count >= FREE_SHIP_THRESHOLD;
     const subtotal = c.subtotal;
-    // Settle tax against the DESTINATION (default shipping address) using the shared
-    // resolver + calculation — so the window-close charge equals the tax-inclusive
-    // total previewed in the quick-buy panel and the standard checkout.
+    // Settle tax against the cart's LOCKED shipping address (single source of truth)
+    // using the shared resolver + calculation — so the window-close charge equals the
+    // tax-inclusive total previewed in the quick-buy panel and the standard checkout.
     const card = pr.cards.find((c2) => c2.isDefault) ?? pr.cards[0];
-    const addr = pr.addresses.find((a) => a.isDefault) ?? pr.addresses[0];
+    const addr = cartShipRef.current.address ?? pr.addresses.find((a) => a.isDefault) ?? pr.addresses[0];
     const tax = taxAmount(subtotal, taxRateForState(addr?.state));
     const total = Number((subtotal + shipping + tax).toFixed(2));
     const orderId = pr.placeOrder({

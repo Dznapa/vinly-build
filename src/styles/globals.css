@@ -4318,6 +4318,29 @@ button {
 .qbp-shipto i { margin-right: 5px; opacity: 0.85; }
 .qbp-shipto--missing { color: var(--orange); }
 .qbp-shipto--missing i { opacity: 1; }
+/* Editable destination (pre-lock): label + a saved-address dropdown with a chevron. */
+.qbp-shipto--select {
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  gap: 6px 8px; margin: 4px 0 0; text-align: center;
+}
+.qbp-shipto-label { color: #8aa2bb; font-size: 12px; }
+.qbp-shipto-label i { margin-right: 5px; opacity: 0.85; }
+.qbp-shipselect-wrap { position: relative; display: inline-flex; align-items: center; }
+.qbp-shipselect {
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e7eef6;
+  font-size: 12px; font-family: inherit;
+  padding: 5px 26px 5px 10px; border-radius: 8px;
+  max-width: 260px; cursor: pointer;
+}
+.qbp-shipselect:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.qbp-shipselect option { color: #14355F; }
+.qbp-shipselect-chev {
+  position: absolute; right: 9px; pointer-events: none;
+  color: #8aa2bb; font-size: 11px;
+}
 .qbp-modal-primary {
   width: 100%;
   background: var(--orange);

@@ -286,6 +286,17 @@
   text-align: center;
 }
 
+/* Cart-wide shipping destination — read-only summary line. Muted helper text. */
+.shipToRow {
+  margin-top: 10px;
+  color: #6b7280;
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: center;
+}
+.shipToRow i { margin-right: 4px; opacity: 0.8; }
+.shipToLock { color: var(--orange); font-weight: 600; white-space: nowrap; }
+
 /* Note that already-purchased SESH/Ticker items settle separately and aren't in
    the due-now total. Muted, orange accent to match the "Already purchased" tag. */
 .reservedNote {

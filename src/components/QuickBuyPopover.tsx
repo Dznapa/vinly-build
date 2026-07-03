@@ -15,8 +15,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { liveTickerPrice } from '@/lib/tickerPrice';
 import { taxAmount } from '@/lib/cartTotals';
-import { taxRateForState, formatTaxRate } from '@/lib/tax';
+import { taxRateForState, formatTaxRate, canShipToState } from '@/lib/tax';
 import { useCart } from '@/context/CartContext';
+import { useCartShipping } from '@/context/CartShippingContext';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useBillingGate } from '@/context/BillingGateContext';
@@ -77,7 +78,10 @@ const seshCancelMsg = (after: number) =>
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
   const shipWindow = useShippingWindow();
-  const { cards, addresses } = useProfile();
+  const { cards } = useProfile();
+  // ONE cart-wide shipping address (the single source of truth). Editable until the
+  // first SESH/Ticker quick-buy commits, then locked for the life of the cart.
+  const { addresses, address: destAddress, locked: shipLocked, setAddress: setShipAddress, lock: lockShip } = useCartShipping();
   const { openGate } = useBillingGate();
   // Single SESH cancellation counter (2 per SESH). On SESH, "Not now"/Esc/backdrop and
   // timer-expiry each consume one (when remaining > 0); committed buys never do.
@@ -182,14 +186,18 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   const addToCart = useCallback((quantity: number) => {
     if (!wine || expired) return; // lock must be live to capture the held price
     if (isSesh && capReached) return; // locked out of buying this SESH (2 cancellations)
+    if (!destAddress || !canShipToState(destAddress.state)) return; // no / undeliverable destination
     const added = addItem(
       { wineId: wine.id, name: wine.name, unitPrice: lockedPrice, image: wine.image, msrp: wine.msrp, meta: wine.region, locked: true, source },
       quantity,
     );
     onClose();
     if (!added) return;
+    // FIRST committed SESH/Ticker quick-buy locks the cart shipping address to the
+    // in-effect destination (idempotent — later commits don't change it).
+    lockShip();
     shipWindow.open();
-  }, [wine, expired, isSesh, capReached, addItem, lockedPrice, onClose, shipWindow, source]);
+  }, [wine, expired, isSesh, capReached, destAddress, addItem, lockedPrice, onClose, lockShip, shipWindow, source]);
 
   // No card on file → send them to the qualification / add-card flow instead.
   const handleAddCard = useCallback(() => { onClose(); openGate(); }, [onClose, openGate]);
@@ -207,16 +215,14 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   }, [wine, lockedPrice]);
 
   // Destination-based sales tax. The reservation ships to and settles against the
-  // default shipping address, so its state drives the rate — the SAME resolver +
-  // calculation the standard checkout and the window-close settlement use, so the
-  // preview here matches what actually gets charged. Recomputes on qty / price /
-  // destination change. If no address is on file (shouldn't happen for a qualified
-  // user), fall back to the default rate and FLAG it — never silently $0.
-  const destAddress = useMemo(
-    () => addresses.find((a) => a.isDefault) ?? addresses[0],
-    [addresses],
-  );
+  // cart-wide shipping address (from CartShippingContext), so its state drives the
+  // rate — the SAME resolver + calculation the standard checkout and the window-close
+  // settlement use, so the preview here matches what actually gets charged. Recomputes
+  // on qty / price / destination change. If no address is on file (shouldn't happen
+  // for a qualified user), fall back to the default rate and FLAG it — never silently $0.
   const hasDestination = !!destAddress;
+  // Whether the destination is deliverable — block commit for undeliverable states.
+  const canShip = hasDestination && canShipToState(destAddress?.state);
   const taxRate = useMemo(() => taxRateForState(destAddress?.state), [destAddress]);
   // Short, recognizable preview of the destination (default shipping address) for
   // the "shipping to" helper line under Place Order — truncate the street line to
@@ -445,7 +451,7 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                     type="button"
                     className="qbp-modal-primary"
                     onClick={() => addToCart(qty)}
-                    disabled={isSesh && capReached}
+                    disabled={(isSesh && capReached) || !canShip}
                     aria-label={`${placeOrderLabel(last4)} — total $${lineTotal.toFixed(2)}`}
                   >
                     <i className="fa-solid fa-credit-card" aria-hidden /> {placeOrderLabel(last4)}
@@ -457,16 +463,52 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                   ) : (
                     <p className="qbp-microcopy">{ORDER_MICROCOPY}</p>
                   )}
-                  {/* Destination — SESH/Ticker reservations always ship & settle to the
-                      primary address. Muted helper line; truncated preview. */}
-                  {hasDestination ? (
-                    <p className="qbp-microcopy qbp-shipto">
-                      <i className="fa-solid fa-location-dot" aria-hidden /> This wine is shipping to: {shipPreview}
-                    </p>
-                  ) : (
+                  {/* Destination — ONE cart, ONE address. Editable dropdown until the
+                      first quick-buy commits; read-only + locked afterward. */}
+                  {!hasDestination ? (
                     <p className="qbp-microcopy qbp-shipto qbp-shipto--missing">
                       <i className="fa-solid fa-location-dot" aria-hidden /> Add a primary shipping address to set the destination.
                     </p>
+                  ) : shipLocked ? (
+                    <>
+                      <p className="qbp-microcopy qbp-shipto">
+                        <i className="fa-solid fa-lock" aria-hidden /> Shipping to your {destAddress?.label} address — locked for this cart · {shipPreview}
+                      </p>
+                      {!canShip && (
+                        <p className="qbp-microcopy qbp-shipto qbp-shipto--missing">
+                          <i className="fa-solid fa-triangle-exclamation" aria-hidden /> We can’t ship wine to {destAddress?.state} yet.
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="qbp-shipto qbp-shipto--select">
+                        <label className="qbp-shipto-label" htmlFor="qbp-ship-select">
+                          <i className="fa-solid fa-location-dot" aria-hidden /> This wine is shipping to:
+                        </label>
+                        <div className="qbp-shipselect-wrap">
+                          <select
+                            id="qbp-ship-select"
+                            className="qbp-shipselect"
+                            value={destAddress?.id}
+                            onChange={(e) => setShipAddress(e.target.value)}
+                            aria-label="Cart shipping address"
+                          >
+                            {addresses.map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.label} — {a.line1}, {a.city} {a.state}
+                              </option>
+                            ))}
+                          </select>
+                          <i className="fa-solid fa-chevron-down qbp-shipselect-chev" aria-hidden />
+                        </div>
+                      </div>
+                      {!canShip && (
+                        <p className="qbp-microcopy qbp-shipto qbp-shipto--missing">
+                          <i className="fa-solid fa-triangle-exclamation" aria-hidden /> We can’t ship wine to {destAddress?.state} yet — choose another address.
+                        </p>
+                      )}
+                    </>
                   )}
                 </>
               ) : (
