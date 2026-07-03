@@ -31,6 +31,13 @@ export function bottleCount(lines: TotalsLine[]): number {
 
 const round2 = (n: number) => Number(n.toFixed(2));
 
+/* Sales tax on a subtotal at a given rate — the SINGLE tax calculation reused by
+   the standard checkout, the window-close settlement, and the quick-buy panels, so
+   they all round identically. The RATE comes from the destination (see lib/tax). */
+export function taxAmount(subtotal: number, rate: number): number {
+  return round2(subtotal * rate);
+}
+
 export type TotalsLine = { qty: number; unitPrice: number; locked?: boolean };
 
 export type PoolTotals = {

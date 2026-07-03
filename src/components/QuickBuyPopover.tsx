@@ -14,6 +14,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { liveTickerPrice } from '@/lib/tickerPrice';
+import { taxAmount } from '@/lib/cartTotals';
+import { taxRateForState, formatTaxRate } from '@/lib/tax';
 import { useCart } from '@/context/CartContext';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile } from '@/context/ProfileContext';
@@ -75,7 +77,7 @@ const seshCancelMsg = (after: number) =>
 export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps) {
   const { addItem } = useCart();
   const shipWindow = useShippingWindow();
-  const { cards } = useProfile();
+  const { cards, addresses } = useProfile();
   const { openGate } = useBillingGate();
   // Single SESH cancellation counter (2 per SESH). On SESH, "Not now"/Esc/backdrop and
   // timer-expiry each consume one (when remaining > 0); committed buys never do.
@@ -203,7 +205,23 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
     if (!wine || !wine.msrp) return 0;
     return Math.max(0, (1 - lockedPrice / wine.msrp) * 100);
   }, [wine, lockedPrice]);
-  const lineTotal = useMemo(() => (wine ? lockedPrice * qty : 0), [wine, lockedPrice, qty]);
+
+  // Destination-based sales tax. The reservation ships to and settles against the
+  // default shipping address, so its state drives the rate — the SAME resolver +
+  // calculation the standard checkout and the window-close settlement use, so the
+  // preview here matches what actually gets charged. Recomputes on qty / price /
+  // destination change. If no address is on file (shouldn't happen for a qualified
+  // user), fall back to the default rate and FLAG it — never silently $0.
+  const destAddress = useMemo(
+    () => addresses.find((a) => a.isDefault) ?? addresses[0],
+    [addresses],
+  );
+  const hasDestination = !!destAddress;
+  const taxRate = useMemo(() => taxRateForState(destAddress?.state), [destAddress]);
+  const lineSubtotal = useMemo(() => Number((lockedPrice * qty).toFixed(2)), [lockedPrice, qty]);
+  const taxDue = useMemo(() => taxAmount(lineSubtotal, taxRate), [lineSubtotal, taxRate]);
+  // Estimated / order / Place Order amount is now tax-INCLUSIVE.
+  const lineTotal = useMemo(() => Number((lineSubtotal + taxDue).toFixed(2)), [lineSubtotal, taxDue]);
 
   if (!wine) return null;
 
@@ -343,10 +361,26 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
               <span className="qbp-os-label">Locked price</span>
               <span className="qbp-os-val">${lockedPrice.toFixed(2)}{qty > 1 ? ` × ${qty}` : ''}</span>
             </div>
+            <div className="qbp-os-row">
+              <span className="qbp-os-label">Subtotal</span>
+              <span className="qbp-os-val">${lineSubtotal.toFixed(2)}</span>
+            </div>
+            <div className="qbp-os-row">
+              <span className="qbp-os-label">
+                Tax ({formatTaxRate(taxRate)})
+                {!hasDestination && <span className="qbp-os-flag"> · est.</span>}
+              </span>
+              <span className="qbp-os-val">${taxDue.toFixed(2)}</span>
+            </div>
             <div className="qbp-os-row qbp-os-total">
               <span className="qbp-os-label">Order total</span>
               <span className="qbp-os-val">${lineTotal.toFixed(2)}</span>
             </div>
+            {!hasDestination && (
+              <div className="qbp-os-taxnote" role="note">
+                <i className="fa-solid fa-triangle-exclamation" aria-hidden /> No shipping address on file — tax estimated at {formatTaxRate(taxRate)}. Add an address so the settled amount is exact.
+              </div>
+            )}
             <div className="qbp-os-row qbp-os-pay">
               <span className="qbp-os-label">Paying with</span>
               <span className="qbp-os-val">Card ••{last4}</span>

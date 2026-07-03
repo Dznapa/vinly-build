@@ -4297,6 +4297,16 @@ button {
 .qbp-os-total .qbp-os-val { color: #fff; font-weight: 800; font-size: 15px; }
 .qbp-os-pay { border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px; }
 .qbp-os-pay .qbp-os-val { color: var(--green); font-weight: 700; }
+/* "est." flag on the Tax label when no destination address is on file. */
+.qbp-os-flag { color: var(--orange); font-weight: 700; }
+/* Note shown under the summary when tax is estimated (missing shipping address). */
+.qbp-os-taxnote {
+  display: flex; align-items: flex-start; gap: 7px;
+  margin-top: 2px;
+  color: #f2b48c;
+  font-size: 12px; line-height: 1.4;
+}
+.qbp-os-taxnote i { color: var(--orange); margin-top: 2px; }
 .qbp-microcopy {
   margin: 2px 0 0;
   text-align: center;

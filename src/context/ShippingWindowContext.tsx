@@ -21,11 +21,12 @@ import {
   type ReactNode,
 } from 'react';
 import { useCart, assessShipping, FREE_SHIP_THRESHOLD } from '@/context/CartContext';
+import { taxAmount } from '@/lib/cartTotals';
+import { taxRateForState } from '@/lib/tax';
 import { useProfile } from '@/context/ProfileContext';
 
 const STORAGE_KEY = 'vinly:shipWindow';
 const WINDOW_MS = 15 * 60 * 1000;
-const TAX_RATE = 0.0825;
 
 type Finalized = { orderId: string; total: number; shipping: number; freeShip: boolean };
 
@@ -93,10 +94,13 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     const shipping = assessShipping(c.count);
     const freeShip = c.count >= FREE_SHIP_THRESHOLD;
     const subtotal = c.subtotal;
-    const tax = Number((subtotal * TAX_RATE).toFixed(2));
+    // Settle tax against the DESTINATION (default shipping address) using the shared
+    // resolver + calculation — so the window-close charge equals the tax-inclusive
+    // total previewed in the quick-buy panel and the standard checkout.
+    const card = pr.cards.find((c2) => c2.isDefault) ?? pr.cards[0];
+    const addr = pr.addresses.find((a) => a.isDefault) ?? pr.addresses[0];
+    const tax = taxAmount(subtotal, taxRateForState(addr?.state));
     const total = Number((subtotal + shipping + tax).toFixed(2));
-    const card = pr.cards[0];
-    const addr = pr.addresses[0];
     const orderId = pr.placeOrder({
       lines,
       subtotal,

@@ -13,7 +13,8 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
-import { splitOrderTotals, assessShipping, CHECKOUT_TAX_RATE } from '@/lib/cartTotals';
+import { splitOrderTotals, assessShipping, taxAmount } from '@/lib/cartTotals';
+import { taxRateForState, formatTaxRate } from '@/lib/tax';
 import { SESH_COPY } from '@/lib/seshCopy';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useProfile, cardBrand as detectBrand } from '@/context/ProfileContext';
@@ -74,7 +75,6 @@ export default function BillingPage() {
   // they are EXCLUDED from the charged amount (shown for information only).
   const standardItems = items.filter((i) => !i.locked);
   const seshItems = items.filter((i) => i.locked);
-  const split = useMemo(() => splitOrderTotals(items, CHECKOUT_TAX_RATE), [items]);
 
   // ----- Saved address / card selection -----
   const [selectedAddressId, setSelectedAddressId] = useState<string>(() =>
@@ -96,6 +96,17 @@ export default function BillingPage() {
   const usingNewAddress =
     addresses.length === 0 || selectedAddressId === NEW_ADDR_ID;
   const usingNewCard = cards.length === 0 || selectedCardId === NEW_CARD_ID;
+
+  // Destination-based tax rate: driven by the state of the shipping address being
+  // used (newly entered or the selected saved one). Same resolver the quick-buy
+  // panel and window-close settlement use, so the numbers agree for the same
+  // address. Missing state → default rate (never $0). Split recomputes when the
+  // destination changes.
+  const destState = usingNewAddress
+    ? shippingAddr.state
+    : addresses.find((a) => a.id === selectedAddressId)?.state;
+  const taxRate = taxRateForState(destState);
+  const split = useMemo(() => splitOrderTotals(items, taxRate), [items, taxRate]);
 
   // Locked SESH/Ticker reservations auto-charge the default card when the window
   // closes — the payment method can't be changed while any are in the cart.
@@ -182,7 +193,7 @@ export default function BillingPage() {
     //    per-pool). The Due-now / Already-purchased SPLIT shown above is unchanged;
     //    this is the settled order record.
     const orderShipping = assessShipping(count);
-    const orderTax = Number((subtotal * CHECKOUT_TAX_RATE).toFixed(2));
+    const orderTax = taxAmount(subtotal, taxRate);
     const orderTotal = Number((subtotal + orderShipping + orderTax).toFixed(2));
     const id = placeOrder({
       lines,
@@ -417,7 +428,7 @@ export default function BillingPage() {
                         )}
                       </div>
                       <div className={styles.row}>
-                        <span>Tax (8.25%)</span>
+                        <span>Tax ({formatTaxRate(taxRate)})</span>
                         <span>{money(split.dueNow.tax)}</span>
                       </div>
                     </div>
