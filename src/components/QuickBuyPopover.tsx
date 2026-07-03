@@ -218,6 +218,17 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
   );
   const hasDestination = !!destAddress;
   const taxRate = useMemo(() => taxRateForState(destAddress?.state), [destAddress]);
+  // Short, recognizable preview of the destination (default shipping address) for
+  // the "shipping to" helper line under Place Order — truncate the street line to
+  // ~12 chars + ellipsis, then city/state/ZIP. Display-only; never the full line.
+  const shipPreview = useMemo(() => {
+    if (!destAddress) return null;
+    const line1 = (destAddress.line1 ?? '').trim();
+    const head = line1.length > 14 ? `${line1.slice(0, 12).trimEnd()}…` : line1;
+    const cityState = [destAddress.city, destAddress.state].filter(Boolean).join(', ');
+    const tail = [cityState, destAddress.zip].filter(Boolean).join(' ');
+    return tail ? `${head} · ${tail}` : head;
+  }, [destAddress]);
   const lineSubtotal = useMemo(() => Number((lockedPrice * qty).toFixed(2)), [lockedPrice, qty]);
   const taxDue = useMemo(() => taxAmount(lineSubtotal, taxRate), [lineSubtotal, taxRate]);
   // Estimated / order / Place Order amount is now tax-INCLUSIVE.
@@ -445,6 +456,17 @@ export function QuickBuyPopover({ wine, onClose, source }: QuickBuyPopoverProps)
                     </p>
                   ) : (
                     <p className="qbp-microcopy">{ORDER_MICROCOPY}</p>
+                  )}
+                  {/* Destination — SESH/Ticker reservations always ship & settle to the
+                      primary address. Muted helper line; truncated preview. */}
+                  {hasDestination ? (
+                    <p className="qbp-microcopy qbp-shipto">
+                      <i className="fa-solid fa-location-dot" aria-hidden /> This wine is shipping to: {shipPreview}
+                    </p>
+                  ) : (
+                    <p className="qbp-microcopy qbp-shipto qbp-shipto--missing">
+                      <i className="fa-solid fa-location-dot" aria-hidden /> Add a primary shipping address to set the destination.
+                    </p>
                   )}
                 </>
               ) : (
