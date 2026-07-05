@@ -4933,8 +4933,6 @@ body.prices-locked .chart-legend-item {
   box-shadow: none;
 }
 .welcome-cta--ghost:hover { filter: none; background: rgba(255, 255, 255, 0.05); }
-/* Smaller "first time?" hint line under the warm intro. */
-.welcome-sub--hint { color: #8aa2bb; font-size: 13px; margin-bottom: 14px; }
 /* "← Back" affordance under the explainer CTA. */
 .welcome-back {
   margin-top: 10px;
@@ -4958,6 +4956,22 @@ body.prices-locked .chart-legend-item {
   margin: 0 0 10px;
 }
 .welcome-sub { color: #cfe0ef; font-size: 14.5px; line-height: 1.5; margin: 0 auto 18px; max-width: 44ch; }
+/* Stage 1 body text — high-contrast cream on the dark modal so it's clearly legible
+   (cream #f4f0e6 on --navy-deep #0E2647 ≈ 13:1, well past WCAG AA). Declared AFTER
+   .welcome-sub so these win. Applies to the main line and the smaller helper line. */
+.welcome-sub--lead {
+  color: #f4f0e6;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.55;
+  max-width: 42ch;
+}
+.welcome-sub--hint {
+  color: #f4f0e6;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
 .welcome-manifesto {
   text-align: left;
   border-top: 1px solid rgba(255, 255, 255, 0.1);

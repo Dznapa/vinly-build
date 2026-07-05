@@ -60,9 +60,9 @@ export function WelcomeModal() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="welcome-logo" src="/vinly-logo.png" alt="Vinly" />
             <p className="welcome-lede">Welcome to Vinly.</p>
-            <p className="welcome-sub">
-              Glad you&apos;re here — now forget everything you know about buying wine. This is a
-              live market: prices move, bottles are limited, and the floor&apos;s already open.
+            <p className="welcome-sub welcome-sub--lead">
+              Forget everything you know about buying wine. This is a live market. Prices move
+              with demand. Inventory is limited. The SESH is open.
             </p>
             <p className="welcome-sub welcome-sub--hint">
               First time? Take the 20-second tour. Been around the block? Head straight in.
