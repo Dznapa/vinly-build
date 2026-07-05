@@ -4892,6 +4892,7 @@ body.prices-locked .chart-legend-item {
   -webkit-backdrop-filter: blur(1.6px);
 }
 .welcome-modal {
+  position: relative;
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
@@ -4903,6 +4904,49 @@ body.prices-locked .chart-legend-item {
   text-align: center;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
 }
+/* Close (X) — top-right, both stages. */
+.welcome-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  color: #cfe0ef;
+  font-size: 15px;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+.welcome-close:hover { filter: brightness(1.2); }
+.welcome-close:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+/* Stage 1 fork buttons stacked; secondary is a ghost variant of .welcome-cta. */
+.welcome-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.welcome-actions .welcome-cta { margin-top: 0; }
+.welcome-cta--ghost {
+  background: transparent;
+  color: #cfe0ef;
+  border: 1px solid rgba(99, 162, 222, 0.5);
+  box-shadow: none;
+}
+.welcome-cta--ghost:hover { filter: none; background: rgba(255, 255, 255, 0.05); }
+/* Smaller "first time?" hint line under the warm intro. */
+.welcome-sub--hint { color: #8aa2bb; font-size: 13px; margin-bottom: 14px; }
+/* "← Back" affordance under the explainer CTA. */
+.welcome-back {
+  margin-top: 10px;
+  background: none;
+  border: 0;
+  color: #8aa2bb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.welcome-back:hover { color: #cfe0ef; }
+.welcome-back:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
 .welcome-eyebrow { color: #8aa2bb; letter-spacing: 3px; font-size: 12px; font-weight: 700; }
 .welcome-logo { display: block; width: 158px; height: auto; margin: 6px auto 16px; }
 .welcome-lede {
