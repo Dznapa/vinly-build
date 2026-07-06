@@ -68,8 +68,8 @@ export default function InventoryBar({
   const glowVars = {
     '--pct': `${pct}%`, // filled portion (EMPTY → current level at the marker)
     '--glow-rgb': glowRgb, // cool blue (full) → warm orange-red (empty)
-    '--glow-a': lerp(0.28, 0.7, urgency).toFixed(2), // dimmer when full, brighter when empty
-    '--pulse-dur': `${lerp(3.4, 1.7, urgency).toFixed(2)}s`, // slow when full, faster when empty
+    '--glow-a': lerp(0.6, 1.0, urgency).toFixed(2), // bold near full, blazing near empty
+    '--pulse-dur': `${lerp(3.0, 1.05, urgency).toFixed(2)}s`, // slow when full, much faster near empty
   } as CSSProperties;
 
   return (
