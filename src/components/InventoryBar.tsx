@@ -8,7 +8,9 @@
 
    Accepts `percentRemaining` (0–100, controlled) OR `initial`/`total` (drifts). */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 type Props = {
   percentRemaining?: number; // 0–100, controlled (no drift when provided)
@@ -57,10 +59,23 @@ export default function InventoryBar({
       ? Math.max(0, Math.min(1, left / total)) * 100
       : 0;
   const stage = stageFor(pct);
+  const closed = pct <= 0;
+
+  // Urgency drives the glow: near FULL it's calm/cool/slow; as inventory sells down
+  // toward EMPTY it warms up, brightens, and pulses faster. Purely from the value.
+  const urgency = Math.max(0, Math.min(1, (100 - pct) / 100));
+  const glowRgb = `${Math.round(lerp(96, 242, urgency))}, ${Math.round(lerp(170, 96, urgency))}, ${Math.round(lerp(224, 61, urgency))}`;
+  const glowVars = {
+    '--pct': `${pct}%`, // filled portion (EMPTY → current level at the marker)
+    '--glow-rgb': glowRgb, // cool blue (full) → warm orange-red (empty)
+    '--glow-a': lerp(0.28, 0.7, urgency).toFixed(2), // dimmer when full, brighter when empty
+    '--pulse-dur': `${lerp(3.4, 1.7, urgency).toFixed(2)}s`, // slow when full, faster when empty
+  } as CSSProperties;
 
   return (
     <div
-      className={`vinly-gauge vinly-gauge--${size} vinly-gauge--${variant}`}
+      className={`vinly-gauge vinly-gauge--${size} vinly-gauge--${variant}${closed ? ' vinly-gauge--closed' : ''}`}
+      style={glowVars}
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
@@ -75,7 +90,16 @@ export default function InventoryBar({
         </span>
       </div>
       <div className="vinly-gauge-track-wrap">
-        <div className="vinly-gauge-track" />
+        {/* Base track = the full gradient, dimmed (the un-filled remainder). */}
+        <div className="vinly-gauge-track">
+          {/* Urgency glow bloom, sized to the filled portion. */}
+          <div className="vinly-gauge-glow" aria-hidden />
+          {/* Vivid, saturated filled portion — clipped from EMPTY up to the marker. */}
+          <div className="vinly-gauge-fill" aria-hidden>
+            {/* Live sheen sweep across the filled portion. */}
+            <div className="vinly-gauge-sheen" aria-hidden />
+          </div>
+        </div>
         <div className="vinly-gauge-marker" style={{ left: `${pct}%` }} aria-hidden>
           <i className="fa-solid fa-wine-bottle vinly-gauge-bottle" aria-hidden />
         </div>
