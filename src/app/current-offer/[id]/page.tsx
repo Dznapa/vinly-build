@@ -136,7 +136,7 @@ function CurrentOfferInner({ id }: { id: string }) {
 
   return (
     <PageChrome>
-      <main className={`wrap sesh-page sesh-${variant} ${stateClass}`}>
+      <main className={`wrap sesh-page sesh-${variant} ${stateClass}${userState === 'signed_in' ? ' sesh-solo-cta' : ''}`}>
         {variant === 'v1' && <LayoutSplit {...shared} />}
         {variant === 'v2' && <LayoutHero {...shared} />}
         {variant === 'v3' && <LayoutTicket {...shared} />}

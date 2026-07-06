@@ -5921,6 +5921,19 @@ body.prices-locked .chart-legend-item {
 }
 .sesh-unlock-btn:hover { filter: brightness(1.07); }
 .sesh-unlock-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* MOBILE, SESH page, signed-in-not-qualified only: consolidate the competing
+   "Get SESH Qualified" asks down to the single sticky bar (.sesh-fab). All descriptive
+   copy stays (hero band text, the "Live pricing is locked" lock + text, the "watching
+   the floor" line); only the duplicate/floating buttons are removed. Scoped to
+   .sesh-solo-cta (added to <main> only when signed_in) + the header pathname check, so
+   desktop, anonymous, and SESH-qualified states are unaffected. */
+@media (max-width: 600px) {
+  .header-cta--sesh-solo { display: none; }                                /* header CTA */
+  .sesh-solo-cta .sesh-vp-cta { display: none; }                           /* "You're in. Time to trade." band button */
+  .sesh-solo-cta .sesh-unlock-overlay .sesh-unlock-btn { display: none; }  /* "Unlock Live Pricing" overlay button (fixes the overlap) */
+  .sesh-solo-cta .sesh-buy--view { display: none; }                        /* in-card "VIEW PRICING" button */
+}
 .sesh-term-livehero-label {
   font-family: 'League Spartan', sans-serif;
   font-size: 11px;

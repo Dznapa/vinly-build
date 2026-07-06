@@ -33,6 +33,9 @@ export function Header() {
   //   sesh_qualified  → Learn More                       (account + qualification done)
   const showCreateAccount = userState === 'anonymous';
   const showGetQualified = userState !== 'sesh_qualified';
+  // On the SESH offer page, a signed-in-not-qualified user gets ONE consolidated CTA
+  // (the mobile sticky bar), so the header CTA is hidden on mobile for that case only.
+  const seshSoloMobile = userState === 'signed_in' && (pathname?.startsWith('/current-offer') ?? false);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -102,7 +105,7 @@ export function Header() {
           {showGetQualified && (
             <button
               type="button"
-              className="header-cta header-cta--orange"
+              className={`header-cta header-cta--orange${seshSoloMobile ? ' header-cta--sesh-solo' : ''}`}
               onClick={openGate}
               aria-label={CTA_GET_QUALIFIED}
             >
