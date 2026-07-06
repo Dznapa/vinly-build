@@ -1,18 +1,51 @@
 'use client';
 
 /* MarketDivider — state-aware section divider for the Shop and Winemaker Spotlight
-   pages (NOT the SESH page). Anonymous / signed-in-not-qualified users get the punchy
-   ↑/↓ banner (a random variant per load so repeat pre-qualified visits vary); SESH-
-   qualified users get a quiet, compact section label instead — a clear section label
-   remains in every state. Presentation only. */
+   pages (NOT the SESH page).
 
-import { useEffect, useState } from 'react';
+   - Anonymous / signed-in-not-qualified → the punchy ↑/↓ banner (a random variant per
+     load so repeat pre-qualified visits vary). UNCHANGED.
+   - SESH-qualified → a single centered witty line that rotates through the page's bank
+     in randomized order every ~4s, pausing on hover; prefers-reduced-motion shows one
+     static line. Reuses the SESH-hero rotation pattern (timer + opacity fade + hover
+     pause). Day/day-of-week-aware lines are mixed in when applicable.
+
+   Presentation only. */
+
+import { useEffect, useRef, useState } from 'react';
 import { useUserState } from '@/context/UserStateContext';
 
 export type DividerVariant = { l1: string; l2: string };
 
-// Reuses the app's rotation pattern (see WelcomeBackLine): random index per load,
-// re-rolled if it matches the immediately-previous one (tracked in localStorage).
+const ROTATE_MS = 4000; // dwell per line (3–5s band)
+const FADE_MS = 450; // matches the CSS opacity transition
+
+// Editable day/date-aware lines, mixed into the qualified rotation only when they
+// apply (evaluated client-side on mount). Shared across both pages.
+const DAY_AWARE: { line: string; when: (d: Date) => boolean }[] = [
+  { line: "It's Friday. The cooler's stocked. You know what to do.", when: (d) => d.getDay() === 5 },
+  { line: "The grill's hot, the cooler's stocked, the wine's right here.", when: (d) => d.getDay() === 0 || d.getDay() === 6 },
+  { line: 'America turns 250 — pour something worthy.', when: (d) => d.getMonth() === 6 && d.getDate() === 4 },
+];
+
+function shuffle<T>(input: T[]): T[] {
+  const a = [...input];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Effective, randomized bank = witty lines + any applicable day-aware lines.
+function buildLines(bank: string[]): string[] {
+  const now = new Date();
+  const extra = DAY_AWARE.filter((x) => x.when(now)).map((x) => x.line);
+  return shuffle([...bank, ...extra]);
+}
+
+// Reuses the app's per-load pick pattern (see WelcomeBackLine): random index, re-rolled
+// if it matches the immediately-previous one (tracked in localStorage).
 function pickRotatingIndex(len: number, key: string): number {
   if (len <= 1) return 0;
   let last = -1;
@@ -26,13 +59,61 @@ function pickRotatingIndex(len: number, key: string): number {
   return idx;
 }
 
+/* Qualified rotator — only mounts client-side (after hydration), so Math.random /
+   new Date() here can't cause a hydration mismatch. */
+function QualifiedRotator({ bank }: { bank: string[] }) {
+  // Randomized order fixed at mount (client-only initializer).
+  const [lines] = useState<string[]>(() => buildLines(bank));
+  const [idx, setIdx] = useState(0);
+  const [shown, setShown] = useState(true);
+  const [reduced, setReduced] = useState(false);
+  const hoverRef = useRef(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setReduced(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+
+  // Rotation: fade out, swap, fade in. Skips a tick while hovered. Static under
+  // reduced-motion or a single line.
+  useEffect(() => {
+    if (reduced || lines.length <= 1) return;
+    let swap: number | undefined;
+    const cycle = window.setInterval(() => {
+      if (hoverRef.current) return;
+      setShown(false);
+      swap = window.setTimeout(() => {
+        setIdx((i) => (i + 1) % lines.length);
+        setShown(true);
+      }, FADE_MS);
+    }, ROTATE_MS);
+    return () => {
+      window.clearInterval(cycle);
+      if (swap) window.clearTimeout(swap);
+    };
+  }, [reduced, lines.length]);
+
+  return (
+    <div
+      className="market-rotator"
+      onMouseEnter={() => { hoverRef.current = true; }}
+      onMouseLeave={() => { hoverRef.current = false; }}
+    >
+      <p className={`market-rotator-line${shown ? ' is-shown' : ''}`}>{lines[idx]}</p>
+    </div>
+  );
+}
+
 export function MarketDivider({
   variants,
-  compactLabel,
+  qualifiedBank,
   storageKey,
 }: {
   variants: DividerVariant[];
-  compactLabel: string;
+  qualifiedBank: string[];
   storageKey: string;
 }) {
   const { userState, hydrated } = useUserState();
@@ -45,14 +126,10 @@ export function MarketDivider({
     setIdx(pickRotatingIndex(variants.length, storageKey));
   }, [hydrated, userState, variants.length, storageKey]);
 
-  // SESH-qualified → quiet compact section label. (Pre-hydration we render the punchy
-  // default so a section label always shows and SSR/CSR agree.)
+  // SESH-qualified → witty rotating banner. (Pre-hydration we render the punchy default
+  // so a banner always shows and SSR/CSR agree.)
   if (hydrated && userState === 'sesh_qualified') {
-    return (
-      <div className="market-divider-compact">
-        <h1>{compactLabel}</h1>
-      </div>
-    );
+    return <QualifiedRotator bank={qualifiedBank} />;
   }
 
   const v = variants[idx] ?? variants[0];

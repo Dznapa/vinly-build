@@ -12,12 +12,36 @@ import { SHOP, WINES_COUNT } from '@/data/mock';
 import styles from './shop.module.css';
 
 // Punchy divider pool for non-qualified users (original copy kept as the first
-// variant). Rotates per load; SESH-qualified users get the compact label instead.
+// variant). Rotates per load; SESH-qualified users get the witty rotator instead.
 const SHOP_DIVIDERS: DividerVariant[] = [
   { l1: '↑ DEEP CUTS. ALMOST GONE. ↑', l2: '↓ FIXED PRICES. DEEP CUTS. ↓' },
   { l1: '↑ THE MARKET MOVES. THIS AISLE DOESN’T. ↑', l2: '↓ FIXED PRICES. NO CLOCK. ↓' },
   { l1: '↑ NO COUNTDOWN. NO DRAMA. ↑', l2: '↓ GOOD BOTTLES, FAIRLY PRICED. ↓' },
   { l1: '↑ THE CALM CORNER OF THE FLOOR. ↑', l2: '↓ FIXED PRICES. DEEP CUTS. ↓' },
+];
+
+// Witty rotating bank for SESH-qualified users (editable — add/remove freely).
+const SHOP_QUALIFIED_LINES: string[] = [
+  "No clock. No countdown. Just wine and your questionable restraint.",
+  "The prices don't move. Your cart can.",
+  "The bottles you reach for when you've stopped trying to impress anyone.",
+  "Cellar math is hard. Adding to cart is easy.",
+  "Drink well, spend less, tell no one.",
+  "Somewhere, a sommelier is nervous. Good.",
+  "We priced these so you'd stop overthinking. You're welcome.",
+  "The responsible choice is two bottles. For balance.",
+  "No auctions. No anxiety. Just pour.",
+  "Trust your humble wine scribe — grab more than one.",
+  "Great wine, honest prices, zero peer pressure. (Okay, a little.)",
+  "Your future self already thanked you. Rude not to listen.",
+  "Stock the rack. Impress no one. Enjoy everything.",
+  "Do the math later. Right now, add to cart.",
+  "Fixed prices, because your heart rate's been through enough today.",
+  "Buy the wine. We'll pretend we didn't see how much.",
+  "Nobody ever regretted a full wine rack. Nobody.",
+  "The corkscrew is patient. These bottles are not.",
+  "Cheaper than therapy, and it pairs with dinner.",
+  "The rack's looking a little empty. We both noticed.",
 ];
 
 type SortKey =
@@ -128,7 +152,7 @@ export default function ShopPage() {
     <PageChrome>
       <main className="wrap">
         {/* State-aware divider: punchy (rotating) for non-qualified, quiet label for qualified. */}
-        <MarketDivider variants={SHOP_DIVIDERS} compactLabel="Shop — Fixed Prices" storageKey="vinly:shopDividerLast" />
+        <MarketDivider variants={SHOP_DIVIDERS} qualifiedBank={SHOP_QUALIFIED_LINES} storageKey="vinly:shopDividerLast" />
 
         <div className="search-row">
           <div className={`sort-wrap ${styles.sortWrap}`} ref={sortWrapRef}>

@@ -16,12 +16,36 @@ import { MarketDivider, type DividerVariant } from '@/components/MarketDivider';
 import styles from './winemaker.module.css';
 
 // Punchy divider pool for non-qualified users (original copy kept as the first
-// variant). Rotates per load; SESH-qualified users get the compact label instead.
+// variant). Rotates per load; SESH-qualified users get the witty rotator instead.
 const SPOTLIGHT_DIVIDERS: DividerVariant[] = [
   { l1: '↑ LIVE MARKET ABOVE. DON’T BLINK. ↑', l2: '↓ HAND-PICKED BY THE MAKER. ↓' },
   { l1: '↑ THE SESH IS UPSTAIRS. ↑', l2: '↓ DOWN HERE, THE MAKER CHOSE. ↓' },
   { l1: '↑ NO TICKER. NO TIMER. ↑', l2: '↓ ONE MAKER. THEIR BEST BOTTLES. ↓' },
   { l1: '↑ CURATED, NOT AUCTIONED. ↑', l2: '↓ HAND-PICKED BY THE MAKER. ↓' },
+];
+
+// Witty rotating bank for SESH-qualified users (editable — add/remove freely).
+const SPOTLIGHT_QUALIFIED_LINES: string[] = [
+  "Hand-picked by the people who actually made it.",
+  "The winemaker chose these. Argue with them, not us.",
+  "Someone lost sleep over this bottle. The least you can do is buy it.",
+  "These aren't algorithms. They're opinions. Strong ones.",
+  "What the winemaker drinks when nobody's watching.",
+  "No committee picked these. One stubborn genius did.",
+  "Curated by calloused hands and stained teeth.",
+  "The good stuff the maker almost kept for themselves.",
+  "Chosen by the person who bottled their whole year into it.",
+  "Trust the maker. The maker knows.",
+  "Picked by someone who smells oak in their sleep.",
+  "Not the wines they sell you — the wines they'd pour you.",
+  "Vetted by a nose that's been ruined for cheap wine forever.",
+  "Every bottle here survived the winemaker's own taste test.",
+  "Recommended by people who genuinely can't shut up about dirt.",
+  "The bottle a winemaker hides behind the good glasses.",
+  "Made by hand, chosen by heart, priced with a straight face.",
+  "These earned their spot. The maker doesn't hand out favorites.",
+  "Fewer bottles, stronger opinions, zero filler.",
+  "The maker's short list. Now it's yours.",
 ];
 
 function clampQty(n: number) {
@@ -108,7 +132,7 @@ export default function WinemakerSpotlightPage() {
     <PageChrome>
       <main className="wrap">
         {/* State-aware divider: punchy (rotating) for non-qualified, quiet label for qualified. */}
-        <MarketDivider variants={SPOTLIGHT_DIVIDERS} compactLabel="Winemaker Spotlight" storageKey="vinly:spotlightDividerLast" />
+        <MarketDivider variants={SPOTLIGHT_DIVIDERS} qualifiedBank={SPOTLIGHT_QUALIFIED_LINES} storageKey="vinly:spotlightDividerLast" />
 
         <section className={`shop-panel ${styles.spotlightPanel}`}>
           <div className={styles.spotlightCarousel}>
