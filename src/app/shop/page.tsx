@@ -7,8 +7,18 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageChrome } from '@/components/PageChrome';
 import { IconFunnel, IconSearch } from '@/components/Icons';
 import { WineCard } from '@/components/WineCard';
+import { MarketDivider, type DividerVariant } from '@/components/MarketDivider';
 import { SHOP, WINES_COUNT } from '@/data/mock';
 import styles from './shop.module.css';
+
+// Punchy divider pool for non-qualified users (original copy kept as the first
+// variant). Rotates per load; SESH-qualified users get the compact label instead.
+const SHOP_DIVIDERS: DividerVariant[] = [
+  { l1: '↑ DEEP CUTS. ALMOST GONE. ↑', l2: '↓ FIXED PRICES. DEEP CUTS. ↓' },
+  { l1: '↑ THE MARKET MOVES. THIS AISLE DOESN’T. ↑', l2: '↓ FIXED PRICES. NO CLOCK. ↓' },
+  { l1: '↑ NO COUNTDOWN. NO DRAMA. ↑', l2: '↓ GOOD BOTTLES, FAIRLY PRICED. ↓' },
+  { l1: '↑ THE CALM CORNER OF THE FLOOR. ↑', l2: '↓ FIXED PRICES. DEEP CUTS. ↓' },
+];
 
 type SortKey =
   | 'default'
@@ -117,11 +127,8 @@ export default function ShopPage() {
   return (
     <PageChrome>
       <main className="wrap">
-        <div className="shop-hero">
-          {/* Branch B headline — scarcity, not price-movement. Editable copy (final TBD). */}
-          <div className="l1">&uarr; DEEP CUTS. ALMOST GONE. &uarr;</div>
-          <div className="l2">&darr; FIXED PRICES. DEEP CUTS. &darr;</div>
-        </div>
+        {/* State-aware divider: punchy (rotating) for non-qualified, quiet label for qualified. */}
+        <MarketDivider variants={SHOP_DIVIDERS} compactLabel="Shop — Fixed Prices" storageKey="vinly:shopDividerLast" />
 
         <div className="search-row">
           <div className={`sort-wrap ${styles.sortWrap}`} ref={sortWrapRef}>

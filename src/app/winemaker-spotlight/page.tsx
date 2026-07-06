@@ -12,7 +12,17 @@ import { PageChrome } from '@/components/PageChrome';
 import { useCart } from '@/context/CartContext';
 import { WINEMAKER_SPOTLIGHT, type ShopWine } from '@/data/mock';
 import BottlePlaceholder, { pickVariant } from '@/components/BottlePlaceholder';
+import { MarketDivider, type DividerVariant } from '@/components/MarketDivider';
 import styles from './winemaker.module.css';
+
+// Punchy divider pool for non-qualified users (original copy kept as the first
+// variant). Rotates per load; SESH-qualified users get the compact label instead.
+const SPOTLIGHT_DIVIDERS: DividerVariant[] = [
+  { l1: '↑ LIVE MARKET ABOVE. DON’T BLINK. ↑', l2: '↓ HAND-PICKED BY THE MAKER. ↓' },
+  { l1: '↑ THE SESH IS UPSTAIRS. ↑', l2: '↓ DOWN HERE, THE MAKER CHOSE. ↓' },
+  { l1: '↑ NO TICKER. NO TIMER. ↑', l2: '↓ ONE MAKER. THEIR BEST BOTTLES. ↓' },
+  { l1: '↑ CURATED, NOT AUCTIONED. ↑', l2: '↓ HAND-PICKED BY THE MAKER. ↓' },
+];
 
 function clampQty(n: number) {
   if (Number.isNaN(n)) return 0;
@@ -97,10 +107,8 @@ export default function WinemakerSpotlightPage() {
   return (
     <PageChrome>
       <main className="wrap">
-        <div className="shop-hero">
-          <div className="l1">&uarr; LIVE MARKET ABOVE. DON&apos;T BLINK. &uarr;</div>
-          <div className="l2">&darr; HAND-PICKED BY THE MAKER. &darr;</div>
-        </div>
+        {/* State-aware divider: punchy (rotating) for non-qualified, quiet label for qualified. */}
+        <MarketDivider variants={SPOTLIGHT_DIVIDERS} compactLabel="Winemaker Spotlight" storageKey="vinly:spotlightDividerLast" />
 
         <section className={`shop-panel ${styles.spotlightPanel}`}>
           <div className={styles.spotlightCarousel}>
