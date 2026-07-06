@@ -1,111 +1,48 @@
-// NEEDS REVIEW: built from spec only
-'use client';
-
-import { useState, type FormEvent } from 'react';
+import type { CSSProperties } from 'react';
 import { PageChrome } from '@/components/PageChrome';
 
+const H3: CSSProperties = { margin: '0 0 10px', color: '#1f1f1f', fontSize: 18, fontWeight: 700 };
+const H4: CSSProperties = { margin: '22px 0 8px', color: '#1f1f1f', fontSize: 16, fontWeight: 700 };
+const P: CSSProperties = { margin: '0 0 12px', color: '#555', lineHeight: 1.6 };
+const LIST: CSSProperties = { margin: '0 0 4px', paddingLeft: 20, color: '#555', lineHeight: 1.6 };
+const LI: CSSProperties = { marginBottom: 6 };
+const LINK: CSSProperties = { color: '#F26A35', textDecoration: 'underline' };
+
 export default function CustomerServicePage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    alert("Thanks — we'll be in touch.");
-    setName('');
-    setEmail('');
-    setMessage('');
-  }
-
   return (
     <PageChrome ticker={false}>
       <div className="wrap">
         <h1 className="sesh-title">
-          <span className="tag">VINLY</span> CUSTOMER SERVICE
+          <span className="tag">VINLY</span> Customer Service
         </h1>
 
-        <div
-          className="signup-card"
-          style={{ maxWidth: 720, margin: '0 auto 24px' }}
-        >
-          <h4
-            style={{
-              margin: '0 0 12px',
-              color: '#1f1f1f',
-              fontSize: 16,
-              fontWeight: 700,
-            }}
-          >
-            Get in touch
-          </h4>
-          <p style={{ margin: '0 0 8px', color: '#555', lineHeight: 1.6 }}>
-            Email us at{' '}
-            <a
-              href="mailto:support@vinly.local"
-              style={{ color: '#F26A35', textDecoration: 'underline' }}
-            >
-              support@vinly.local
-            </a>
-            .
+        <div className="signup-card" style={{ maxWidth: 720, margin: '0 auto 60px' }}>
+          <h3 style={H3}>Need to Reach Us?</h3>
+          <p style={P}>
+            {`We keep overhead low so your wine prices stay lower. That means no call centers. No hold music. Just real people, real inboxes, and answers that don't sound like they were written by a chatbot in 2012.`}
           </p>
-          <p style={{ margin: '0 0 8px', color: '#555', lineHeight: 1.6 }}>
-            Hours: Monday – Friday, 9:00 AM – 5:00 PM PT.
-          </p>
-          <p style={{ margin: 0, color: '#555', lineHeight: 1.6 }}>
-            Typical response time: within one business day.
-          </p>
-        </div>
 
-        <div
-          className="signup-card"
-          style={{ maxWidth: 720, margin: '0 auto 60px' }}
-        >
-          <h4
-            style={{
-              margin: '0 0 18px',
-              color: '#1f1f1f',
-              fontSize: 16,
-              fontWeight: 700,
-            }}
-          >
-            Send us a message
-          </h4>
-          <form onSubmit={handleSubmit}>
-            <input
-              className="field"
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <input
-              className="field"
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <textarea
-              className="field"
-              placeholder="Message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              required
-              rows={5}
-              style={{
-                resize: 'vertical',
-                minHeight: 120,
-                borderBottom: '1px solid #d9dde2',
-              }}
-            />
-            <div style={{ marginTop: 12 }}>
-              <button type="submit" className="btn-billing">
-                SEND
-              </button>
-            </div>
-          </form>
+          <h4 style={H4}>Email Us:</h4>
+          <ul style={LIST}>
+            <li style={LI}>
+              <a href="mailto:support@vinlywine.com" style={LINK}>support@vinlywine.com</a>
+            </li>
+            <li style={LI}>
+              {`Questions, concerns, rave reviews, or existential wine crises — drop us a line.`}
+            </li>
+            <li>
+              {`Just make sure to include your name and email address — because we'll be responding via email (faster, cleaner, no phone tag).`}
+            </li>
+          </ul>
+
+          <h4 style={H4}>Office Hours:</h4>
+          <ul style={LIST}>
+            <li style={LI}>{`Monday–Friday | 8AM–5PM`}</li>
+            <li style={LI}>{`Napa Valley time (yes, the actual Napa)`}</li>
+            <li>
+              {`Emails sent after hours or over the weekend will be answered in the order received once we're back — fully caffeinated and ready to go.`}
+            </li>
+          </ul>
         </div>
       </div>
     </PageChrome>
