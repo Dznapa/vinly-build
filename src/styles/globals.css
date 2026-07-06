@@ -1177,12 +1177,13 @@ button {
   right: 0;
   background: linear-gradient(102deg, transparent 38%, rgba(255, 255, 255, 0.9) 50%, transparent 62%);
   mix-blend-mode: screen;
-  transform: translateX(-140%);
+  /* Travels RIGHT → LEFT so it reads as inventory depleting toward EMPTY (left). */
+  transform: translateX(140%);
   animation: vinly-gauge-sheen 2.4s ease-in-out infinite;
 }
 @keyframes vinly-gauge-sheen {
-  0% { transform: translateX(-140%); }
-  58%, 100% { transform: translateX(140%); }
+  0% { transform: translateX(140%); }
+  58%, 100% { transform: translateX(-140%); }
 }
 /* Urgency glow bloom, sized to the filled portion, "breathing" at --pulse-dur.
    Big radius + spread + a soft outer drop-glow beneath the fill so it clearly bleeds
