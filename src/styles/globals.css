@@ -313,13 +313,33 @@ button {
   color: var(--orange);
 }
 .header-icons .icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+}
+/* Icon glyph box — fixed size so the cart badge anchors to the glyph, not the label. */
+.header-icons .nav-ic {
+  position: relative;
   width: 26px;
   height: 26px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  position: relative;
+}
+/* Always-visible short label beneath each nav icon. */
+.header-icons .nav-label {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--orange);
+  line-height: 1;
+  white-space: nowrap;
 }
 .header-icons svg {
   width: 26px;
@@ -4671,8 +4691,11 @@ button {
   /* Container: tighter side gutters on phones */
   .wrap { padding-left: 16px; padding-right: 16px; }
 
-  /* Header: tighten the icon row so it fits ~320px */
-  .header-icons { gap: 12px; }
+  /* Header: tighten the labelled icon row so it fits narrow phones. */
+  .header-icons { gap: 9px; }
+  .header-icons i { font-size: 19px; }
+  .header-icons .nav-ic { width: 22px; height: 22px; }
+  .header-icons .nav-label { font-size: 8.5px; letter-spacing: 0.2px; }
 
   /* Footer: stack the three link columns */
   .foot-links { flex-direction: column; gap: 8px; }

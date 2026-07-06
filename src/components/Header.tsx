@@ -112,18 +112,24 @@ export function Header() {
         </div>
 
         <nav className="header-icons" aria-label="Primary">
-          <Link className="icon" href="/current-offer/justin-isosceles" title="SESH" aria-label="SESH">
-            <i className="fa-solid fa-arrow-trend-up" aria-hidden />
+          <Link className="icon" href="/current-offer/justin-isosceles" title="The SESH — live market" aria-label="The SESH — live market">
+            <span className="nav-ic"><i className="fa-solid fa-arrow-trend-up" aria-hidden /></span>
+            <span className="nav-label">SESH</span>
           </Link>
-          <Link className="icon" href="/shop" title="Shop" aria-label="Shop">
-            <i className="fa-solid fa-store" aria-hidden />
+          <Link className="icon" href="/shop" title="Shop — the Market" aria-label="Shop — the Market">
+            <span className="nav-ic"><i className="fa-solid fa-store" aria-hidden /></span>
+            <span className="nav-label">Shop</span>
           </Link>
-          <Link className="icon" href="/winemaker-spotlight" title="Winemaker" aria-label="Winemaker">
-            <i className="fa-solid fa-award" aria-hidden />
+          <Link className="icon" href="/winemaker-spotlight" title="Winemaker Spotlight" aria-label="Winemaker Spotlight">
+            <span className="nav-ic"><i className="fa-solid fa-award" aria-hidden /></span>
+            <span className="nav-label">Spotlight</span>
           </Link>
           <Link className="icon" href="/customer-cart" title="Cart" aria-label="Cart">
-            <i className="fa-solid fa-cart-shopping" aria-hidden />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            <span className="nav-ic">
+              <i className="fa-solid fa-cart-shopping" aria-hidden />
+              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            </span>
+            <span className="nav-label">Cart</span>
           </Link>
           <span className="divider-v" aria-hidden />
 
@@ -137,7 +143,8 @@ export function Header() {
               aria-label="Account menu"
               title="Account"
             >
-              <i className="fa-solid fa-user" aria-hidden />
+              <span className="nav-ic"><i className="fa-solid fa-user" aria-hidden /></span>
+              <span className="nav-label">Account</span>
             </button>
 
             {menuOpen && (
