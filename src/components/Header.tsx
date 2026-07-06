@@ -80,7 +80,7 @@ export function Header() {
           <img src="/vinly-logo.png" alt="Vinly" className="logo-img" />
         </Link>
 
-        <div className="header-cta-group">
+        <div className={`header-cta-group${userState === 'anonymous' ? ' header-cta-group--anon' : ''}`}>
           <a
             href="https://vinly.wine"
             target="_blank"

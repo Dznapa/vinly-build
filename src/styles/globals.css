@@ -3771,6 +3771,22 @@ button {
     min-height: 44px;
   }
   .header-cta--link { padding: 11px 8px; }
+  /* Anonymous mobile: collapse to ONE full-width "Get SESH Qualified" primary with the
+     "Learn More" link centered above it. "Create An Account" is redundant (Get SESH
+     Qualified funnels through sign-up), so it's hidden. Scoped to --anon so signed-in /
+     SESH-qualified states — and all of desktop — are unchanged. */
+  .header-cta-group--anon {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px; /* comfortable side margins, no overflow at ~360–390px */
+  }
+  .header-cta-group--anon .header-cta--blue { display: none; }
+  .header-cta-group--anon .header-cta--orange {
+    width: 100%;
+    max-width: 420px;
+    justify-content: center;
+  }
   .foot-links {
     gap: 30px;
   }
