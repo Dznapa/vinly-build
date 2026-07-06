@@ -319,10 +319,19 @@ function FloatingBuy(p: SharedProps) {
     );
   }
   if (isGated) {
+    // Locked (anonymous or signed-in-not-qualified). The in-card button already says
+    // "VIEW PRICING"; make the sticky one the distinct unlock ACTION instead of a
+    // second identical CTA. Same qualification entry (billing gate → address + payment,
+    // no false grant) the header/hero/Profile "Get SESH Qualified" uses.
     return (
       <div className="sesh-fab">
-        <button type="button" className="sesh-fab-btn is-gated" onClick={openBillingGate}>
-          <i className="fa-solid fa-lock" aria-hidden /> <span>VIEW PRICING</span>
+        <button
+          type="button"
+          className="sesh-fab-btn is-gated"
+          onClick={openBillingGate}
+          aria-label="Get SESH qualified — unlock live pricing"
+        >
+          <i className="fa-solid fa-lock" aria-hidden /> <span>GET SESH QUALIFIED</span>
         </button>
       </div>
     );
