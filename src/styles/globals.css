@@ -707,6 +707,9 @@ button {
   height: 20px;
   fill: var(--orange);
 }
+/* Desktop: transparent wrapper (children flatten into .search-row exactly as before).
+   Mobile (≤600px) overrides this to a real flex row so input + SEARCH stay on one line. */
+.search-input-row { display: contents; }
 .search-box {
   flex: 1;
   display: flex;
@@ -4821,10 +4824,18 @@ button {
   /* IPO / collection head: stack title + action button */
   .ipo-head { flex-direction: column; align-items: flex-start; gap: 10px; }
 
-  /* Shop controls row: wrap; full-width search field */
+  /* Shop controls row: wrap; input + SEARCH share one full-width row (no button wrap) */
   .search-row { flex-wrap: wrap; gap: 12px; }
-  .search-row .search-box { order: 3; flex: 1 1 100%; max-width: none; }
-  .search-row .btn-search { order: 4; }
+  .search-row .search-input-row {
+    order: 3;
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .search-row .search-input-row .search-box { flex: 1 1 auto; min-width: 0; max-width: none; margin: 0; }
+  .search-row .search-input-row .btn-search { flex: 0 0 auto; padding: 0 16px; }
   .search-row .wines-count { order: 2; margin-left: auto; }
 
   /* Panels: trim padding on phones */

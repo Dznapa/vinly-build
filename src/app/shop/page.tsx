@@ -192,26 +192,29 @@ export default function ShopPage() {
               </div>
             )}
           </div>
-          <div className="search-box">
-            <IconSearch />
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search wines…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') setSubmittedQuery(query);
-              }}
-            />
+          {/* Input + SEARCH stay on one row on mobile (display:contents on desktop = no change). */}
+          <div className="search-input-row">
+            <div className="search-box">
+              <IconSearch />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search wines…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') setSubmittedQuery(query);
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              className="btn-search"
+              onClick={() => setSubmittedQuery(query)}
+            >
+              SEARCH
+            </button>
           </div>
-          <button
-            type="button"
-            className="btn-search"
-            onClick={() => setSubmittedQuery(query)}
-          >
-            SEARCH
-          </button>
           <span className="wines-count">WINES : {winesCount}</span>
         </div>
 
