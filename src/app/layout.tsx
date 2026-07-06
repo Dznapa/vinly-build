@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { AgeGateProvider } from '@/context/AgeGateContext';
 import { UserStateProvider } from '@/context/UserStateContext';
 import { BillingGateProvider } from '@/context/BillingGateContext';
 import { CartProvider } from '@/context/CartContext';
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <UserStateProvider>
+        <AgeGateProvider>
           <ProfileProvider>
             <BillingGateProvider>
               <CartProvider>
@@ -68,6 +70,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </CartProvider>
             </BillingGateProvider>
           </ProfileProvider>
+        </AgeGateProvider>
         </UserStateProvider>
       </body>
     </html>

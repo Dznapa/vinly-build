@@ -4891,6 +4891,47 @@ body.prices-locked .chart-legend-item {
   backdrop-filter: blur(1.6px);
   -webkit-backdrop-filter: blur(1.6px);
 }
+
+/* ===== Age gate — the FIRST screen, above everything (incl. the welcome). ===== */
+.age-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4000; /* above welcome (1000), dev bar, and all site content */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 20, 38, 0.8);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.age-modal { max-width: 460px; text-align: center; }
+.age-ic {
+  width: 54px;
+  height: 54px;
+  margin: 2px auto 12px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: var(--orange);
+  background: rgba(242, 106, 53, 0.14);
+  box-shadow: 0 0 0 1px rgba(242, 106, 53, 0.3) inset;
+}
+.age-ic--no {
+  color: #ffb4a6;
+  background: rgba(192, 57, 43, 0.16);
+  box-shadow: 0 0 0 1px rgba(192, 57, 43, 0.4) inset;
+}
+/* High-contrast cream body (#f4f0e6 on --navy-deep ≈ 13:1, well past WCAG AA). */
+.age-body {
+  color: #f4f0e6;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.55;
+  margin: 0 auto 18px;
+  max-width: 40ch;
+}
 .welcome-modal {
   position: relative;
   width: 100%;

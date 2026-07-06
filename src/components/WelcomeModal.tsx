@@ -12,6 +12,7 @@
 
 import { useEffect, useState } from 'react';
 import { useUserState } from '@/context/UserStateContext';
+import { useAgeGate } from '@/context/AgeGateContext';
 
 const STORAGE_KEY = 'vinly:welcomeSeen';
 
@@ -19,18 +20,20 @@ type Stage = 'welcome' | 'explainer';
 
 export function WelcomeModal() {
   const { userState, hydrated } = useUserState();
+  // The age gate comes FIRST — the welcome only opens once the visitor has affirmed.
+  const { passed: agePassed } = useAgeGate();
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<Stage>('welcome');
 
-  // Auto-open only for anonymous users who haven't dismissed it before, and only
-  // once state has hydrated (so known/qualified users never see it and there's no
-  // SSR/hydration flash).
+  // Auto-open only for anonymous users who haven't dismissed it before, once state
+  // has hydrated AND the age gate has been passed (so the order is age gate → welcome,
+  // known/qualified users never see it, and there's no SSR/hydration flash).
   useEffect(() => {
-    if (!hydrated || userState !== 'anonymous') return;
+    if (!hydrated || userState !== 'anonymous' || !agePassed) return;
     let dismissed = false;
     try { dismissed = window.localStorage.getItem(STORAGE_KEY) === '1'; } catch { /* ignore */ }
     if (!dismissed) { setStage('welcome'); setOpen(true); }
-  }, [hydrated, userState]);
+  }, [hydrated, userState, agePassed]);
 
   // Close + remember the dismissal so it doesn't re-prompt next visit.
   const dismiss = () => {
