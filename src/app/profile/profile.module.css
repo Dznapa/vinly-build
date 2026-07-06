@@ -60,10 +60,23 @@
   align-self: stretch;
 }
 
-.accountActions .btn-explore {
+/* Account-management utilities are SECONDARY: a cohesive, slightly graduated set of
+   greys (subordinate to the orange SESH-qualify CTA). Scoped to the profile card, so the
+   shared orange .btn-explore elsewhere is untouched. Dark text keeps AA contrast on the
+   light greys. SIGN OUT keeps its existing grey (.btn-skip) and sits in the same family. */
+.accountActions :global(.btn-explore) {
   align-self: stretch;
   text-align: center;
+  color: #1f2937;
+  background: #dfe3e8;
 }
+.accountActions :global(.btn-explore):nth-child(1) { background: #e7eaee; } /* EDIT PROFILE — lightest */
+.accountActions :global(.btn-explore):nth-child(2) { background: #d7dce2; } /* MANAGE ADDRESSES — mid */
+.accountActions :global(.btn-explore):nth-child(3) { background: #c6ccd4; } /* PAYMENT METHODS — darkest */
+.accountActions :global(.btn-explore):hover { filter: none; background: #c9cfd6; }
+.accountActions :global(.btn-explore):nth-child(1):hover { background: #d9dde3; }
+.accountActions :global(.btn-explore):nth-child(2):hover { background: #c7cdd4; }
+.accountActions :global(.btn-explore):nth-child(3):hover { background: #b6bdc6; }
 
 .statusHead {
   display: flex;
