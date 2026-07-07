@@ -5982,7 +5982,18 @@ body.prices-locked .chart-legend-item {
   font-size: 12px;
   letter-spacing: 0.3px;
 }
-.sesh-buydock-stock { color: #cfe0ef; font-size: 12px; }
+/* Inventory-driven urgency line (replaces the raw "Bottles Left" count). Visual heat
+   escalates as inventory drops: hot orange/red → warm amber → neutral → calm. */
+.sesh-buydock-urgency {
+  font-family: 'League Spartan', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.sesh-buydock-urgency--hot { color: #ff5b39; font-weight: 800; text-shadow: 0 0 12px rgba(255, 91, 57, 0.45); }
+.sesh-buydock-urgency--warm { color: #f2913d; font-weight: 800; }
+.sesh-buydock-urgency--mid { color: #cfe0ef; font-weight: 700; }
+.sesh-buydock-urgency--calm { color: #8aa2bb; font-weight: 600; }
 .sesh-buydock-btn {
   margin-left: auto;
   flex: 0 0 auto;
@@ -6009,7 +6020,7 @@ body.prices-locked .chart-legend-item {
   .sesh-buydock-name { max-width: 108px; font-size: 13px; }
   .sesh-buydock-price { font-size: 19px; }
   .sesh-buydock-delta { display: none; } /* keep it slim; Bottles Left + price remain */
-  .sesh-buydock-stock { font-size: 11px; }
+  .sesh-buydock-urgency { font-size: 11px; }
   .sesh-buydock-btn { padding: 11px 16px; font-size: 14px; }
   .sesh-buydock-btn-price { display: none; } /* price already shown to the left */
 }

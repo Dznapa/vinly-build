@@ -53,6 +53,24 @@ const ANON_UNLOCK_TITLE = 'Live pricing is locked';
 const ANON_UNLOCK_SUB = "The whole floor can see this number. You're one quick signup away.";
 const ANON_UNLOCK_CTA = 'Get SESH-Qualified →';
 
+// Sticky buy bar urgency copy — replaces a raw "Bottles Left: N" with an inventory-driven
+// nudge (never reveals the count). EDITABLE: tune thresholds/lines/tones freely. The first
+// tier whose `maxBottles` the current count is <= wins; the line is picked from the pool by
+// count (stable per level, varies as inventory drifts). `tone` drives the visual heat
+// (hot → calm) so it escalates with scarcity, mirroring the inventory bar heating up.
+type DockTier = { maxBottles: number; tone: 'hot' | 'warm' | 'mid' | 'calm'; lines: string[] };
+const DOCK_URGENCY_TIERS: DockTier[] = [
+  { maxBottles: 5,        tone: 'hot',  lines: ['Almost gone.', "Last few — don't blink.", 'Going, going…'] },
+  { maxBottles: 10,       tone: 'warm', lines: ['Selling fast.', 'Moving quick.'] },
+  { maxBottles: 20,       tone: 'mid',  lines: ['In play.', 'Trading now.'] },
+  { maxBottles: Infinity, tone: 'calm', lines: ['On the floor.', 'Plenty on the tape.'] },
+];
+function dockUrgency(bottlesLeft: number): { line: string; tone: DockTier['tone'] } {
+  const n = Math.max(0, bottlesLeft);
+  const tier = DOCK_URGENCY_TIERS.find((t) => n <= t.maxBottles) ?? DOCK_URGENCY_TIERS[DOCK_URGENCY_TIERS.length - 1];
+  return { line: tier.lines[n % tier.lines.length], tone: tier.tone };
+}
+
 export default function CurrentOfferPage({ params }: { params: { id: string } }) {
   return (
     <Suspense fallback={null}>
@@ -380,6 +398,7 @@ function SeshBuyDock(p: SharedProps) {
   }, [canBuy, buyRef]);
 
   if (!canBuy) return null;
+  const urgency = dockUrgency(bottlesLeft); // inventory-driven nudge (same source, no raw count)
   return (
     <div className={`sesh-buydock${visible ? ' is-visible' : ''}`} aria-hidden={!visible}>
       <div className="sesh-buydock-inner">
@@ -389,7 +408,7 @@ function SeshBuyDock(p: SharedProps) {
           <span className="sesh-buydock-delta">
             <i className="fa-solid fa-caret-down" aria-hidden /> {offMsrpPct.toFixed(2)}% off MSRP
           </span>
-          <span className="sesh-buydock-stock">Bottles Left: {bottlesLeft}</span>
+          <span className={`sesh-buydock-urgency sesh-buydock-urgency--${urgency.tone}`}>{urgency.line}</span>
         </span>
         <button
           type="button"
