@@ -7,7 +7,7 @@
    tuned so panels puzzle together at matching heights. */
 
 import { useRouter } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { PageChrome } from '@/components/PageChrome';
 import PriceChart, { type Timeframe } from '@/components/PriceChart';
 import InventoryBar from '@/components/InventoryBar';
@@ -101,6 +101,8 @@ function CurrentOfferInner({ id }: { id: string }) {
   const [recapDismissed, setRecapDismissed] = useState(false);
 
   const { openGate: openBillingGate } = useBillingGate();
+  // The in-page BUY button; the docked buy bar watches it to know when to show.
+  const buyRef = useRef<HTMLButtonElement>(null);
 
   const { open: openQuickBuy, popover } = useQuickBuy('sesh');
   // Hide the mobile floating Buy Now whenever ANY quick-buy popup is open
@@ -129,7 +131,7 @@ function CurrentOfferInner({ id }: { id: string }) {
   const shared: SharedProps = {
     offer, isGated, signedInUnqualified: userState === 'signed_in', isAnonymous: userState === 'anonymous', lockedOut, timeframe, setTimeframe, readMore, setReadMore,
     livePrice, offMsrpPct, offStreetPct, savings,
-    initialBottles, totalBottles, invPct, floorClosed,
+    initialBottles, totalBottles, bottlesLeft, invPct, floorClosed, buyRef,
     handlePriceTick, openBuy, openBillingGate,
     handleGetQualified, handleLoginExplore, handleSkipSesh,
   };
@@ -149,6 +151,9 @@ function CurrentOfferInner({ id }: { id: string }) {
             exit or sit in the tab/screen-reader order. Desktop is unaffected
             (the bar is CSS-hidden there regardless). */}
         {!anyQuickBuyOpen && <FloatingBuy {...shared} />}
+        {/* Docked buy bar (desktop + mobile): shows the live price + Buy whenever the
+            in-page BUY button is off-screen, for a qualified buyer on a live offer. */}
+        {!anyQuickBuyOpen && <SeshBuyDock {...shared} />}
 
         {popover}
         {floorClosed && !recapDismissed && (
@@ -175,8 +180,10 @@ type SharedProps = {
   savings: number;
   initialBottles: number;
   totalBottles: number;
+  bottlesLeft: number;
   invPct: number;
   floorClosed: boolean;
+  buyRef: RefObject<HTMLButtonElement>; // in-page BUY button, watched by the docked bar
   handlePriceTick: (p: number) => void;
   openBuy: () => void;
   openBillingGate: () => void;
@@ -298,7 +305,7 @@ function OfferDuration({ offer, floorClosed }: { offer: SharedProps['offer']; fl
 // Mobile-only sticky floating buy bar — mirrors BuyButton's three states.
 // (CSS hides it on desktop; rendered only on the SESH offer page.)
 function FloatingBuy(p: SharedProps) {
-  const { isGated, livePrice, openBuy, openBillingGate, floorClosed, lockedOut } = p;
+  const { isGated, openBillingGate, floorClosed, lockedOut } = p;
   if (floorClosed) {
     return (
       <div className="sesh-fab">
@@ -336,12 +343,65 @@ function FloatingBuy(p: SharedProps) {
       </div>
     );
   }
+  // Qualified + buyable → the docked buy bar (SeshBuyDock) owns this state on both
+  // desktop and mobile, so the old always-on mobile BUY NOW fab is retired here.
+  return null;
+}
+
+// Docked buy bar — desktop + mobile. Shows the live price + context + a Buy action
+// whenever the in-page BUY button is scrolled out of view (so a qualified buyer never
+// loses the price/CTA below the fold). Reuses the same openBuy handler and livePrice
+// source as the in-page button; hides while the footer is in view so it can't cover it.
+function SeshBuyDock(p: SharedProps) {
+  const { offer, livePrice, offMsrpPct, bottlesLeft, openBuy, buyRef, isGated, floorClosed, lockedOut } = p;
+  const canBuy = !isGated && !floorClosed && !lockedOut;
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!canBuy) { setVisible(false); return; }
+    const buyEl = buyRef.current;
+    const footerEl = document.querySelector('.site-footer');
+    // Show only when the real BUY button is out of view AND the footer isn't showing.
+    let buyIn = false;
+    let footIn = false;
+    const sync = () => setVisible(!buyIn && !footIn);
+    const observers: IntersectionObserver[] = [];
+    if (buyEl) {
+      const io = new IntersectionObserver(([e]) => { buyIn = e.isIntersecting; sync(); }, { threshold: 0 });
+      io.observe(buyEl);
+      observers.push(io);
+    }
+    if (footerEl) {
+      const io = new IntersectionObserver(([e]) => { footIn = e.isIntersecting; sync(); }, { threshold: 0 });
+      io.observe(footerEl);
+      observers.push(io);
+    }
+    return () => observers.forEach((io) => io.disconnect());
+  }, [canBuy, buyRef]);
+
+  if (!canBuy) return null;
   return (
-    <div className="sesh-fab">
-      <button type="button" className="sesh-fab-btn is-buy" onClick={openBuy}>
-        <span>BUY NOW</span>
-        <span className="sesh-fab-price">${livePrice.toFixed(2)}</span>
-      </button>
+    <div className={`sesh-buydock${visible ? ' is-visible' : ''}`} aria-hidden={!visible}>
+      <div className="sesh-buydock-inner">
+        <span className="sesh-buydock-name" title={offer.title}>{offer.title}</span>
+        <span className="sesh-buydock-price">${livePrice.toFixed(2)}</span>
+        <span className="sesh-buydock-ctx">
+          <span className="sesh-buydock-delta">
+            <i className="fa-solid fa-caret-down" aria-hidden /> {offMsrpPct.toFixed(2)}% off MSRP
+          </span>
+          <span className="sesh-buydock-stock">Bottles Left: {bottlesLeft}</span>
+        </span>
+        <button
+          type="button"
+          className="sesh-buydock-btn"
+          onClick={openBuy}
+          tabIndex={visible ? 0 : -1}
+          aria-label={`Buy ${offer.title} now at $${livePrice.toFixed(2)}`}
+        >
+          <span>BUY NOW</span>
+          <span className="sesh-buydock-btn-price">${livePrice.toFixed(2)}</span>
+        </button>
+      </div>
     </div>
   );
 }
@@ -388,6 +448,7 @@ function BuyButton(p: SharedProps & { full?: boolean }) {
   }
   return (
     <button
+      ref={p.buyRef}
       type="button"
       className={`sesh-buy${full ? ' sesh-buy--full' : ''}`}
       onClick={openBuy}

@@ -5922,6 +5922,101 @@ body.prices-locked .chart-legend-item {
 .sesh-unlock-btn:hover { filter: brightness(1.07); }
 .sesh-unlock-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
+/* Docked buy bar (SESH offer page, qualified + live buyer) — slim on-brand bar pinned
+   to the bottom on desktop AND mobile, shown only when the in-page BUY button is off
+   screen (IntersectionObserver). Live price matches the main display (green #34e06b). */
+.sesh-buydock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  background: #0b1e38;
+  border-top: 1px solid rgba(99, 162, 222, 0.28);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.42);
+  transform: translateY(112%);
+  transition: transform 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.sesh-buydock.is-visible { transform: translateY(0); }
+.sesh-buydock-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+}
+.sesh-buydock-name {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  color: #fff;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+  flex: 0 1 auto;
+}
+.sesh-buydock-price {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  line-height: 1;
+  color: #34e06b;
+  text-shadow: 0 0 18px rgba(52, 224, 107, 0.35);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+.sesh-buydock-ctx {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.2;
+  flex: 0 0 auto;
+}
+.sesh-buydock-delta {
+  color: #34e06b;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+.sesh-buydock-stock { color: #cfe0ef; font-size: 12px; }
+.sesh-buydock-btn {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--orange);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-size: 15px;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+.sesh-buydock-btn:hover { filter: brightness(1.06); }
+.sesh-buydock-btn:active { transform: translateY(1px); }
+.sesh-buydock-btn-price { font-variant-numeric: tabular-nums; opacity: 0.95; }
+@media (max-width: 600px) {
+  .sesh-buydock-inner { gap: 10px; padding: 9px 12px 9px 14px; }
+  .sesh-buydock-name { max-width: 108px; font-size: 13px; }
+  .sesh-buydock-price { font-size: 19px; }
+  .sesh-buydock-delta { display: none; } /* keep it slim; Bottles Left + price remain */
+  .sesh-buydock-stock { font-size: 11px; }
+  .sesh-buydock-btn { padding: 11px 16px; font-size: 14px; }
+  .sesh-buydock-btn-price { display: none; } /* price already shown to the left */
+}
+@media (prefers-reduced-motion: reduce) {
+  .sesh-buydock { transition: none; }
+}
+
 /* MOBILE, SESH page, signed-in-not-qualified only: consolidate the competing
    "Get SESH Qualified" asks down to the single sticky bar (.sesh-fab). All descriptive
    copy stays (hero band text, the "Live pricing is locked" lock + text, the "watching
