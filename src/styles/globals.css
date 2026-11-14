@@ -2014,7 +2014,9 @@ button {
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px; color: #fff;
-  margin-bottom: 18px;
+  /* Name block sits tight against the chart/grid below it at ALL widths (desktop +
+     mobile) — no gap, so it reads as part of the board. */
+  margin-bottom: 0;
 }
 .sesh-term-sym {
   color: var(--cyan);
@@ -4801,14 +4803,10 @@ button {
   .proto-bar { flex-wrap: wrap; gap: 8px 10px; font-size: 11px; padding: 8px 14px; }
   .proto-bar .spacer { display: none; }
 
-  /* MOBILE ONLY — reclaim vertical space on the SESH page so the wine name, live
-     SESH price and chart land near the top without scrolling. Desktop (>600px) keeps
-     the value-prop banner and the original spacing untouched. */
-  .sesh-vp { display: none; }                 /* drop the value-prop banner; its space is reclaimed */
-
-  /* SESH terminal header: stack symbol / title / price, and sit tight to the chart
-     below it (collapse the gap so the name reads as part of the chart section). */
-  .sesh-term-headerbar { grid-template-columns: 1fr; gap: 6px; padding: 14px 16px; margin-bottom: 0; }
+  /* SESH terminal header: stack symbol / title / price. (Banner hide + the tight
+     name→chart gap are now base rules applied at all widths — see .sesh-vp and
+     .sesh-term-headerbar above.) */
+  .sesh-term-headerbar { grid-template-columns: 1fr; gap: 6px; padding: 14px 16px; }
   .sesh-term-headerprice { justify-content: flex-start; flex-wrap: wrap; }
   .sesh-term-headerprice > span:first-child { font-size: 24px; }
 
@@ -5879,10 +5877,13 @@ body.prices-locked .chart-legend-item {
 }
 
 /* ===== Value-prop hero (top of the SESH page) — state-aware anchor + rotating
-   subline. Reuses the SESH dark panel chrome, --orange CTA, and --cyan accent. ===== */
+   subline. Reuses the SESH dark panel chrome, --orange CTA, and --cyan accent.
+   Hidden at ALL widths (desktop + mobile) to reclaim vertical space so the wine
+   name, live SESH price and chart lead the page. Remaining .sesh-vp-* rules are
+   kept for styling should it ever be re-enabled. ===== */
 .sesh-vp {
   min-height: 132px;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   text-align: center;
