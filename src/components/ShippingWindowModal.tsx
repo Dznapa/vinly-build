@@ -15,6 +15,9 @@ import { FREE_SHIP_THRESHOLD } from '@/context/CartContext';
 // Single source for the free-shipping threshold (display side).
 const FREE_AT = FREE_SHIP_THRESHOLD;
 
+// First-timers get the explainer auto-opened once; returning users just see the chip.
+const EXPLAINER_SEEN_KEY = 'vinly:shipWindowExplainerSeen';
+
 // Editable headlines for the under-6 progress states. The >= 6 (free) headline is
 // left inline below and untouched. Plural/singular handled here; driven by the same
 // cart bottle total the meter and counter use.
@@ -85,6 +88,29 @@ export function ShippingWindowModal() {
     return () => window.clearTimeout(t);
   }, [unlockAlert]);
 
+  // Collapsed chip ⇄ explainer popover. `canHover` splits the interaction: hover
+  // (desktop) peeks the explainer and a click opens the full window; on touch there's
+  // no hover, so a tap toggles the explainer (which carries its own "Open window" CTA).
+  const [explain, setExplain] = useState(false);
+  const [canHover, setCanHover] = useState(false);
+  const autoShown = useRef(false);
+  useEffect(() => {
+    setCanHover(window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ?? false);
+  }, []);
+  // FIRST-TIME EDUCATION: auto-expand the explainer exactly once (ever, per browser),
+  // then collapse after a few seconds. Returning users just get the compact chip.
+  useEffect(() => {
+    if (!(w.active && w.minimized) || autoShown.current) return;
+    autoShown.current = true;
+    let seen = false;
+    try { seen = window.localStorage.getItem(EXPLAINER_SEEN_KEY) === '1'; } catch { /* ignore */ }
+    if (seen) return;
+    try { window.localStorage.setItem(EXPLAINER_SEEN_KEY, '1'); } catch { /* ignore */ }
+    setExplain(true);
+    const t = window.setTimeout(() => setExplain(false), 6000);
+    return () => window.clearTimeout(t);
+  }, [w.active, w.minimized]);
+
   // FINALIZED — SESH/Ticker settled. If shop wines are still in the cart, prompt to
   // complete them; otherwise just confirm the charge.
   if (w.finalized) {
@@ -138,6 +164,7 @@ export function ShippingWindowModal() {
 
   const filled = Math.min(FREE_AT, w.bottles);
   const free = w.bottles >= FREE_AT;
+  const pct = Math.round((filled / FREE_AT) * 100);
   const danger = w.secondsLeft <= 120;
   // Staged urgency for the floating badge (PRESENTATION ONLY — same countdown):
   // steady > 2:00 · red ≤ 2:00 (matches the modal's red clock) · soft breath ≤ 1:00 ·
@@ -176,24 +203,58 @@ export function ShippingWindowModal() {
             <p>You dropped under 6 — add more before the window closes, or it&apos;s a flat $35.</p>
           </div>
         )}
-        <button
-          type="button"
-          className={`ship-badge${free ? ' is-free' : ''} ship-stage-${stage}`}
-          onClick={w.expand}
-          aria-label={`Free-ship window: ${stage === 'done' ? 'charging now' : `${mmss(sec)} left`}, ${filled} of 6 bottles${free ? ' — free shipping unlocked' : ''}. Tap to expand.`}
+        <div
+          className="ship-chipwrap"
+          onMouseEnter={() => { if (canHover) setExplain(true); }}
+          onMouseLeave={() => { if (canHover) setExplain(false); }}
+          onFocus={() => setExplain(true)}
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setExplain(false); }}
         >
-          <span className="ship-badge-dot" aria-hidden />
-          <span className="ship-badge-main">
-            {/* key remounts the digits each second in the tick stage so they pulse
-                once per tick (reads as time passing). */}
-            <span className="ship-badge-time" key={stage === 'tick' ? sec : 'time'}>
-              {stage === 'done' ? 'Charging…' : mmss(sec)}
+          {explain && (
+            <div className="ship-explainer" role="status" id="ship-explainer">
+              <button type="button" className="ship-explainer-x" onClick={() => setExplain(false)} aria-label="Close">
+                <i className="fa-solid fa-xmark" aria-hidden />
+              </button>
+              <p className="ship-explainer-lead">
+                Reach <b>6 bottles</b> before the clock hits zero and shipping’s <b className="ship-free">free</b>. Stop
+                short and we add a flat <b>$35</b>. Either way, the card runs when time’s up.
+              </p>
+              <div className="ship-explainer-sub">Mix &amp; match across the floor — SESH, Ticker, Market. They all count.</div>
+              <div className="ship-explainer-prog">
+                <span className="ship-explainer-track" aria-hidden>
+                  <span className={`ship-explainer-fill${free ? ' free' : ''}`} style={{ width: `${pct}%` }} />
+                </span>
+                <span className="ship-explainer-count">{free ? `${w.bottles} in · free` : `${filled} / ${FREE_AT} bottles`}</span>
+              </div>
+              <button type="button" className="ship-explainer-cta" onClick={w.expand}>Open window&nbsp;&nbsp;→</button>
+            </div>
+          )}
+          <button
+            type="button"
+            className={`ship-badge${free ? ' is-free' : ''} ship-stage-${stage}${explain ? ' is-open' : ''}`}
+            onClick={() => { if (canHover) w.expand(); else setExplain((o) => !o); }}
+            aria-expanded={explain}
+            aria-label={`Free-ship window: ${stage === 'done' ? 'charging now' : `${mmss(sec)} left`}, ${filled} of 6 bottles${free ? ' — free shipping unlocked' : ''}. ${canHover ? 'Click to open the window; hover for how it works.' : 'Tap for how it works.'}`}
+          >
+            <span className="ship-badge-dot" aria-hidden />
+            <span className="ship-badge-main">
+              {/* key remounts the digits each second in the tick stage so they pulse
+                  once per tick (reads as time passing). */}
+              <span className="ship-badge-time" key={stage === 'tick' ? sec : 'time'}>
+                {stage === 'done' ? 'Charging…' : mmss(sec)}
+              </span>
+              <span className="ship-badge-label">
+                {stage === 'done' ? 'ORDER PLACED' : free ? 'FREE SHIPPING ✓' : `${filled} / ${FREE_AT} bottles`}
+              </span>
+              {stage !== 'done' && (
+                <span className="ship-badge-track" aria-hidden>
+                  <span className={`ship-badge-fill${free ? ' free' : ''}`} style={{ width: `${pct}%` }} />
+                </span>
+              )}
             </span>
-            <span className="ship-badge-label">
-              {stage === 'done' ? 'ORDER PLACED' : free ? 'FREE SHIPPING ✓' : `${filled}/6 · free-ship window`}
-            </span>
-          </span>
-        </button>
+            <i className="ship-badge-chev fa-solid fa-chevron-up" aria-hidden />
+          </button>
+        </div>
       </>
     );
   }
