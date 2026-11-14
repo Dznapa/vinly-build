@@ -4807,6 +4807,10 @@ button {
      name→chart gap are now base rules applied at all widths — see .sesh-vp and
      .sesh-term-headerbar above.) */
   .sesh-term-headerbar { grid-template-columns: 1fr; gap: 6px; padding: 14px 16px; }
+  /* Shrink the symbol + wine name ~35% on phones (22px → 14px) so a long name like
+     "JUSTIN ISOSCELES | 2021" fits without heavy stacking. Desktop keeps 22px. */
+  .sesh-term-sym { font-size: 14px; }
+  .sesh-term-title { font-size: 14px; }
   .sesh-term-headerprice { justify-content: flex-start; flex-wrap: wrap; }
   .sesh-term-headerprice > span:first-child { font-size: 24px; }
 
