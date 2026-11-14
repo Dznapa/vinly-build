@@ -159,7 +159,7 @@ function detectCardBrand(num: string): PaymentCard['brand'] {
 }
 
 export function ProfileProvider({ children }: { children: ReactNode }) {
-  const { setUserState } = useUserState();
+  const { userState, setUserState, hydrated: userHydrated } = useUserState();
   const [blob, setBlob] = useState<ProfileBlob>(DEFAULT_BLOB);
   const [hydrated, setHydrated] = useState(false);
   // Latest blob via ref so the placeOrder guard can resolve an address's state
@@ -194,6 +194,35 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       /* ignore */
     }
   }, [blob, hydrated]);
+
+  // PROTOTYPE: the SESH-qualified mock user is a fully set-up account — logged in,
+  // qualified, and already carrying a default payment card + shipping address. Real
+  // card/address capture is complete in production and can't be exercised here, so
+  // whenever the user is SESH-qualified (dev-toolbar toggle, or hydrating into that
+  // state) we seed those two records once if they're missing. This is what clears the
+  // "Use Card" / Place Order / settlement / checkout entry walls, since every gate
+  // keys off a default card/address existing on the profile.
+  //
+  // Idempotent and non-destructive: it only fills an empty slot, never overwrites a
+  // card/address the user added (e.g. via the real billing gate), and it fires ONLY in
+  // the sesh_qualified state — anonymous and signed-in profiles are left untouched, so
+  // a signed-in-not-qualified user still goes through qualification exactly as before.
+  useEffect(() => {
+    if (!hydrated || !userHydrated || userState !== 'sesh_qualified') return;
+    setBlob((b) => {
+      const needsCard = b.cards.length === 0;
+      const needsAddr = b.addresses.length === 0;
+      if (!needsCard && !needsAddr) return b;
+      const who = `${b.basics.firstName} ${b.basics.lastName}`.trim() || 'Demo User';
+      const cards: PaymentCard[] = needsCard
+        ? [{ id: genId('card'), isDefault: true, brand: 'Visa', last4: '4242', expMonth: '12', expYear: '29', nameOnCard: who }]
+        : b.cards;
+      const addresses: Address[] = needsAddr
+        ? [{ id: genId('addr'), isDefault: true, label: 'Home', fullName: who, line1: '123 Market St', city: 'San Francisco', state: 'CA', zip: '94105', phone: '' }]
+        : b.addresses;
+      return { ...b, cards, addresses };
+    });
+  }, [hydrated, userHydrated, userState]);
 
   // ---------- session ----------
   const login = useCallback(
