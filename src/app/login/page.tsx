@@ -2,7 +2,8 @@
 
 /* /login — Mock log-in form for the click-through clone.
    No real auth: any non-empty email + password triggers useProfile().login(email),
-   which flips userState to 'signed_in' and routes the user to /profile. The form
+   which flips userState to 'sesh_qualified' (account == qualified) and routes the
+   user to /profile. The form
    re-uses the .signup-card / .field / .btn-create grammar from /register_details. */
 
 import { useState, type FormEvent } from 'react';

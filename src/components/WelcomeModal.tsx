@@ -26,7 +26,7 @@ export function WelcomeModal() {
   // has hydrated AND the age gate has been passed (so the order is age gate → welcome,
   // known/qualified users never see it, and there's no SSR/hydration flash).
   useEffect(() => {
-    if (!hydrated || userState !== 'anonymous' || !agePassed) return;
+    if (!hydrated || userState !== 'guest' || !agePassed) return;
     let dismissed = false;
     try { dismissed = window.localStorage.getItem(STORAGE_KEY) === '1'; } catch { /* ignore */ }
     if (!dismissed) setOpen(true);

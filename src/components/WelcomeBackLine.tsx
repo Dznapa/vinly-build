@@ -55,10 +55,10 @@ export function WelcomeBackLine() {
   const { userState, hydrated } = useUserState();
   const [line, setLine] = useState<string | null>(null);
 
-  // Known users only (anonymous gets the full explainer instead). Pick once,
-  // after state hydrates.
+  // Qualified (account-holding) users only — guests get the welcome explainer
+  // instead. Pick once, after state hydrates.
   useEffect(() => {
-    if (!hydrated || userState === 'anonymous') return;
+    if (!hydrated || userState !== 'sesh_qualified') return;
     setLine(pickLine());
   }, [hydrated, userState]);
 

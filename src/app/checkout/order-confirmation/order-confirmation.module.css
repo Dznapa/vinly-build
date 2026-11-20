@@ -1,0 +1,96 @@
+/* Co-located styles for /checkout/order-confirmation. Reuses global .signup-card /
+   .field / .check-row / .btn-billing / .btn-skip; only layout extras here. */
+
+.head {
+  text-align: center;
+  padding: 30px 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.check {
+  font-size: 46px;
+  color: var(--green);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.title {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.sub { color: #cfe0ef; font-size: 14px; }
+.sub a { color: var(--orange); font-weight: 700; }
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 26px;
+  margin: 0 auto 60px;
+  max-width: 1080px;
+  align-items: start;
+}
+
+.card {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
+.cardTitle {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.itemList {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.itemRow {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14px;
+  color: #333;
+}
+.itemName { flex: 1; min-width: 0; font-weight: 600; color: #2a2a2a; }
+.itemQty { color: #777; font-size: 13px; white-space: nowrap; }
+.lineTotal { font-weight: 600; white-space: nowrap; }
+
+.totals { display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; justify-content: space-between; color: #444; font-size: 15px; }
+.grand {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+.meta { margin: 16px 0 0; color: #777; font-size: 13px; }
+
+/* Upsell card */
+.upsell { align-self: start; }
+.upsellSub { margin: 0 0 14px; color: #555; font-size: 14px; line-height: 1.5; }
+.upsellSub b { color: #1f1f1f; }
+.cta { width: 100%; margin-top: 12px; text-align: center; }
+.hint { margin: 8px 0 0; color: #c0392b; font-size: 12.5px; }
+
+/* Success state after account creation */
+.success { text-align: center; }
+.successIc { font-size: 40px; color: var(--orange); margin-bottom: 8px; }
+.successSub { margin: 0 0 8px; color: #555; font-size: 14px; line-height: 1.5; }
+
+@media (max-width: 860px) {
+  .grid { grid-template-columns: 1fr; }
+}

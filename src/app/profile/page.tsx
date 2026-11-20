@@ -145,7 +145,7 @@ export default function ProfilePage() {
         <div className="sesh-title">
           <span className="tag">PROFILE</span> {fullName}
         </div>
-        {userState !== 'anonymous' && basics.firstName && (
+        {userState === 'sesh_qualified' && basics.firstName && (
           <div className={styles.greeting}>
             Welcome back, <b>{basics.firstName}</b>.
           </div>
@@ -198,17 +198,17 @@ export default function ProfilePage() {
               <h2>SESH STATUS</h2>
             </div>
 
-            {userState === 'anonymous' && (
+            {userState === 'guest' && (
               <>
                 <div className={styles.statusRow}>
                   <span
                     className={`${styles.dot} ${styles.dotRed}`}
                     aria-hidden="true"
                   />
-                  Not signed in
+                  Guest — no account
                 </div>
                 <p className={styles.statusHint}>
-                  Log in to become a Vinly Member and unlock the SESH.
+                  Log in, or create an account to get SESH qualified and unlock live SESH offers.
                 </p>
                 <div className={styles.statusActions}>
                   <button
@@ -218,23 +218,6 @@ export default function ProfilePage() {
                   >
                     LOG IN
                   </button>
-                </div>
-              </>
-            )}
-
-            {userState === 'signed_in' && (
-              <>
-                <div className={styles.statusRow}>
-                  <span
-                    className={`${styles.dot} ${styles.dotYellow}`}
-                    aria-hidden="true"
-                  />
-                  Member — Not SESH qualified
-                </div>
-                <p className={styles.statusHint}>
-                  Add billing &amp; shipping to participate in live SESH offers.
-                </p>
-                <div className={styles.statusActions}>
                   <button
                     type="button"
                     className={`btn-billing ${styles.statusBtn}`}

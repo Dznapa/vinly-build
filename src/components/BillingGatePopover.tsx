@@ -104,11 +104,13 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
     setView('intro');
     setStateIdx('');
     setSameAddr(true);
-    const signedIn = userState !== 'anonymous';
-    setEmail(signedIn ? (basics.email ?? '') : '');
-    setFirstName(signedIn ? (basics.firstName ?? '') : '');
-    setLastName(signedIn ? (basics.lastName ?? '') : '');
-    setDob(signedIn && basics.birthDate ? isoToMMDDYYYY(basics.birthDate) : '');
+    // Prefill from profile basics only when they look real (not the demo default) —
+    // a fresh guest starts with empty fields.
+    const known = !!basics.email && basics.email !== 'demo@vinly.local';
+    setEmail(known ? (basics.email ?? '') : '');
+    setFirstName(known ? (basics.firstName ?? '') : '');
+    setLastName(known ? (basics.lastName ?? '') : '');
+    setDob(known && basics.birthDate ? isoToMMDDYYYY(basics.birthDate) : '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 

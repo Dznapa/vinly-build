@@ -27,15 +27,14 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // CTAs adapt to auth + qualification state (single source: userState).
-  //   anonymous       → Learn More · Create An Account · Get SESH Qualified
-  //   signed_in        → Learn More · Get SESH Qualified  (account already exists)
+  // CTAs adapt to state (single source: userState).
+  //   guest           → Learn More · Create An Account · Get SESH Qualified
   //   sesh_qualified  → Learn More                       (account + qualification done)
-  const showCreateAccount = userState === 'anonymous';
+  const showCreateAccount = userState === 'guest';
   const showGetQualified = userState !== 'sesh_qualified';
-  // On the SESH offer page, a signed-in-not-qualified user gets ONE consolidated CTA
-  // (the mobile sticky bar), so the header CTA is hidden on mobile for that case only.
-  const seshSoloMobile = userState === 'signed_in' && (pathname?.startsWith('/current-offer') ?? false);
+  // On the SESH offer page, a guest gets ONE consolidated CTA (the mobile sticky bar),
+  // so the header CTA is hidden on mobile for that case only.
+  const seshSoloMobile = userState === 'guest' && (pathname?.startsWith('/current-offer') ?? false);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -83,7 +82,7 @@ export function Header() {
           <img src="/vinly-logo.png" alt="Vinly" className="logo-img" />
         </Link>
 
-        <div className={`header-cta-group${userState === 'anonymous' ? ' header-cta-group--anon' : ''}`}>
+        <div className={`header-cta-group${userState === 'guest' ? ' header-cta-group--anon' : ''}`}>
           <a
             href="https://vinly.wine"
             target="_blank"
@@ -152,7 +151,7 @@ export function Header() {
 
             {menuOpen && (
               <div className="account-menu" role="menu">
-                {userState === 'anonymous' ? (
+                {userState === 'guest' ? (
                   <>
                     <div className="account-menu-head">
                       <span>Not signed in</span>

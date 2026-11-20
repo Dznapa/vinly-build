@@ -3,8 +3,7 @@
 import { useUserState, type UserState } from '@/context/UserStateContext';
 
 const STATES: { value: UserState; label: string }[] = [
-  { value: 'anonymous', label: 'Anonymous' },
-  { value: 'signed_in', label: 'Signed in' },
+  { value: 'guest', label: 'Guest' },
   { value: 'sesh_qualified', label: 'SESH qualified' },
 ];
 

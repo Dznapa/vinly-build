@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE, type CartItem } from '@/context/CartContext';
+import { useUserState } from '@/context/UserStateContext';
 import { useCartShipping } from '@/context/CartShippingContext';
 import { splitOrderTotals, taxAmount } from '@/lib/cartTotals';
 import { taxRateForState } from '@/lib/tax';
@@ -39,6 +40,10 @@ const sourceLabel = (source?: string) => SOURCE_LABEL[source ?? 'shop'] ?? 'Shop
 // CTA for "Keep Shopping".
 const CTA_PROCEED = 'PROCEED TO BILLING & SHIPPING';
 const CTA_KEEP_SHOPPING = 'KEEP SHOPPING';
+// Guest cart CTAs (no account yet).
+const CTA_LOG_IN = 'LOG IN';
+const CTA_CREATE_ACCOUNT = 'CREATE AN ACCOUNT';
+const CTA_GUEST_CHECKOUT = 'GUEST CHECKOUT';
 
 function clampQty(n: number) {
   if (Number.isNaN(n)) return 0;
@@ -224,7 +229,12 @@ export default function CustomerCartPage() {
   const router = useRouter();
   const { items, setQty, removeItem, count } = useCart();
   const { address: shipAddr, locked: shipLocked } = useCartShipping();
+  const { userState } = useUserState();
   const { push: toast } = useToast();
+
+  // Guests (no account) check out via the guest flow — Log In / Create an account /
+  // Guest Checkout. Qualified users keep the existing billing & shipping checkout.
+  const isGuest = userState === 'guest';
 
   // The Order Summary shows only what's DUE NOW. SESH/Ticker quick-buys are already
   // purchased (locked), excluded from subtotal / tax / total — same split (and now the
@@ -336,13 +346,40 @@ export default function CustomerCartPage() {
                 </div>
               )}
               {hasAdjustable ? (
-                <button
-                  type="button"
-                  className={`btn-billing ${styles.checkoutBtn}`}
-                  onClick={() => router.push('/checkout/billing')}
-                >
-                  {CTA_PROCEED}
-                </button>
+                isGuest ? (
+                  // Guest cart: Log In · Create an account · Guest Checkout (primary).
+                  <div className={styles.guestCheckoutRow}>
+                    <button
+                      type="button"
+                      className={`btn-skip ${styles.guestCheckoutBtn}`}
+                      onClick={() => router.push('/login')}
+                    >
+                      {CTA_LOG_IN}
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn-create ${styles.guestCheckoutBtn}`}
+                      onClick={() => router.push('/register_details')}
+                    >
+                      {CTA_CREATE_ACCOUNT}
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn-billing ${styles.guestCheckoutBtn}`}
+                      onClick={() => router.push('/checkout/guest')}
+                    >
+                      {CTA_GUEST_CHECKOUT}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className={`btn-billing ${styles.checkoutBtn}`}
+                    onClick={() => router.push('/checkout/billing')}
+                  >
+                    {CTA_PROCEED}
+                  </button>
+                )
               ) : (
                 // Only committed SESH/Ticker wines → already purchased, no checkout step.
                 <Link href="/shop" className={`btn-billing ${styles.checkoutBtn}`}>

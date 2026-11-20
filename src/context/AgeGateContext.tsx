@@ -56,8 +56,9 @@ export function AgeGateProvider({ children }: { children: ReactNode }) {
   // stays hidden until they affirm.
   const decline = useCallback(() => setBlocked(true), []);
 
-  // Only anonymous, not-yet-affirmed visitors are gated (after both state hydrations).
-  const showGate = userHydrated && storageRead && userState === 'anonymous' && !passed;
+  // Only guests (no account) who haven't yet affirmed are gated (after both state
+  // hydrations). Qualified users have already been through onboarding.
+  const showGate = userHydrated && storageRead && userState === 'guest' && !passed;
 
   const value = useMemo<Ctx>(() => ({ passed }), [passed]);
 

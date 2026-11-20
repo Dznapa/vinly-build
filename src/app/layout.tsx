@@ -6,6 +6,7 @@ import { BillingGateProvider } from '@/context/BillingGateContext';
 import { CartProvider } from '@/context/CartContext';
 import { CartShippingProvider } from '@/context/CartShippingContext';
 import { ProfileProvider } from '@/context/ProfileContext';
+import { GuestCheckoutProvider } from '@/context/GuestCheckoutContext';
 import { ToastProvider } from '@/components/ToastProvider';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { DevToolbar } from '@/components/DevToolbar';
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <UserStateProvider>
         <AgeGateProvider>
           <ProfileProvider>
+            <GuestCheckoutProvider>
             <BillingGateProvider>
               <CartProvider>
                 <CartShippingProvider>
@@ -69,6 +71,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </CartShippingProvider>
               </CartProvider>
             </BillingGateProvider>
+            </GuestCheckoutProvider>
           </ProfileProvider>
         </AgeGateProvider>
         </UserStateProvider>

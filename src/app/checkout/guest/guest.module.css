@@ -1,0 +1,92 @@
+/* Co-located styles for /checkout/guest. Reuses global .signup-card / .field /
+   .check-row / .btn-billing / .panel / .detail-panel; only layout extras here. */
+
+.title {
+  text-align: center;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 26px 0 18px;
+}
+
+.empty {
+  text-align: center;
+  color: #cfe0ef;
+  font-size: 15px;
+}
+.empty a { color: var(--orange); font-weight: 700; }
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 26px;
+  margin: 0 auto 60px;
+  max-width: 1180px;
+  align-items: start;
+}
+
+/* Override .signup-card centering for the two-column layout. */
+.formCard {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
+
+/* Two inputs side by side (name split, state + zip, exp + cvc). */
+.fieldRow {
+  display: flex;
+  gap: 16px;
+}
+.fieldRow > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.consent {
+  margin-top: 18px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+}
+.req {
+  color: #9aa3ad;
+  font-size: 13px;
+}
+
+.shipBlock {
+  color: #c0392b;
+  font-size: 13.5px;
+  line-height: 1.45;
+  margin: 2px 0 10px;
+}
+
+.summaryCard {
+  padding: 26px 28px;
+  position: sticky;
+  top: 24px;
+}
+.summaryTitle {
+  color: var(--orange);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin: 0 0 18px;
+}
+
+.placeOrder {
+  width: 100%;
+  font-size: 16px;
+  padding: 16px;
+  margin-top: 4px;
+}
+.confirmHint {
+  margin: 10px 0 0;
+  text-align: center;
+  color: #8a94a0;
+  font-size: 12.5px;
+}
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  .summaryCard { position: static; }
+}

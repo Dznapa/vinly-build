@@ -225,6 +225,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   }, [hydrated, userHydrated, userState]);
 
   // ---------- session ----------
+  // Having an account == SESH qualified (two-state model). Logging in or signing up
+  // lands the user qualified; logging out drops them back to a plain guest.
   const login = useCallback(
     (email: string) => {
       setBlob((b) => ({
@@ -235,13 +237,13 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
           memberSince: b.basics.memberSince || new Date().toISOString(),
         },
       }));
-      setUserState('signed_in');
+      setUserState('sesh_qualified');
     },
     [setUserState],
   );
 
   const logout = useCallback(() => {
-    setUserState('anonymous');
+    setUserState('guest');
   }, [setUserState]);
 
   const signupAndLogin = useCallback(
@@ -254,7 +256,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
           memberSince: b.basics.memberSince || new Date().toISOString(),
         },
       }));
-      setUserState('signed_in');
+      setUserState('sesh_qualified');
     },
     [setUserState],
   );

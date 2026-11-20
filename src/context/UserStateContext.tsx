@@ -10,7 +10,11 @@ import {
   type ReactNode,
 } from 'react';
 
-export type UserState = 'anonymous' | 'signed_in' | 'sesh_qualified';
+/* Two states only: a GUEST (no account — can browse everything and buy fixed-price
+   Shop / Winemaker Spotlight wine, but SESH + Ticker are gated) and a SESH_QUALIFIED
+   user (has an account — buys everything). There is no separate "signed in but not
+   qualified" state: having an account == SESH qualified. */
+export type UserState = 'guest' | 'sesh_qualified';
 
 type Ctx = {
   userState: UserState;
@@ -23,15 +27,16 @@ const UserStateContext = createContext<Ctx | null>(null);
 const STORAGE_KEY = 'vinly:userState';
 
 export function UserStateProvider({ children }: { children: ReactNode }) {
-  const [userState, setUserStateInternal] = useState<UserState>('anonymous');
+  const [userState, setUserStateInternal] = useState<UserState>('guest');
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     try {
-      const s = window.localStorage.getItem(STORAGE_KEY) as UserState | null;
-      if (s === 'anonymous' || s === 'signed_in' || s === 'sesh_qualified') {
-        setUserStateInternal(s);
-      }
+      const s = window.localStorage.getItem(STORAGE_KEY);
+      // Legacy migration: the old three-state model ('anonymous' | 'signed_in' |
+      // 'sesh_qualified') collapses to two — both non-qualified values become 'guest'.
+      if (s === 'sesh_qualified') setUserStateInternal('sesh_qualified');
+      else if (s === 'guest' || s === 'anonymous' || s === 'signed_in') setUserStateInternal('guest');
     } catch {
       /* ignore */
     }

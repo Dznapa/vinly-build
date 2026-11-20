@@ -27,26 +27,16 @@ type CTA =
 type HeroContent = { anchor: string; sublines: string[]; cta: CTA };
 
 // Editable copy. One line each — keep sublines short so they don't wrap.
-const HERO: Record<'anonymous' | 'signed_in' | 'sesh_qualified', HeroContent> = {
-  anonymous: {
+const HERO: Record<'guest' | 'sesh_qualified', HeroContent> = {
+  guest: {
     anchor: 'Vinly — trade wine like stocks.',
     sublines: [
       'Live pricing. Limited inventory. Buy before the market moves.',
       'Real Napa allocations, priced in real time — when bottles run low, the price climbs.',
       'Lock a bottle at today’s price. Settle when your 15-minute cart closes.',
-      'New here? Create an account to watch the board go live.',
+      'New here? Create an account to get SESH qualified and watch the board go live.',
     ],
     cta: { kind: 'link', label: 'Create your account', href: '/register_details' },
-  },
-  signed_in: {
-    anchor: 'You’re in. Time to trade.',
-    sublines: [
-      'One step left — get SESH qualified to lock bottles at live prices.',
-      'Add billing & shipping to trade before the market moves.',
-      'The board’s live. Qualify now so you’re ready when your bottle drops.',
-      'Watch prices climb as bottles sell — don’t get caught on the sidelines.',
-    ],
-    cta: { kind: 'qualify', label: 'Get SESH Qualified' },
   },
   sesh_qualified: {
     anchor: 'The market’s open.',

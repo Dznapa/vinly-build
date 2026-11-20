@@ -73,9 +73,9 @@ export function SeshClosedRecap({ recap, onClose }: { recap: SeshRecap; onClose:
   const [subscribed, setSubscribed] = useState(false);
   const { userState } = useUserState();
   const router = useRouter();
-  // Anonymous visitors can't be "notified" — there's no account to notify. Send
-  // them through sign-up first; signed-in users get the (mock) notify opt-in.
-  const needsSignup = userState === 'anonymous';
+  // Guests can't be "notified" — there's no account to notify. Send them through
+  // sign-up first; qualified (account) users get the (mock) notify opt-in.
+  const needsSignup = userState === 'guest';
 
   useEffect(() => {
     try { if (window.localStorage.getItem(NOTIFY_KEY)) setSubscribed(true); } catch { /* ignore */ }

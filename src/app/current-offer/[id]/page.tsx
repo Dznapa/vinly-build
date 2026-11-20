@@ -137,7 +137,7 @@ function CurrentOfferInner({ id }: { id: string }) {
     });
 
   const handleGetQualified = () =>
-    router.push(userState === 'anonymous' ? '/register_details' : '/profile');
+    router.push(userState === 'guest' ? '/register_details' : '/profile');
   const handleLoginExplore = () => router.push('/login');
   const handleSkipSesh = () => {
     try {
@@ -146,8 +146,12 @@ function CurrentOfferInner({ id }: { id: string }) {
     router.push('/shop');
   };
 
+  // Two-state model: every non-qualified viewer is a guest and gets ONE prompt — the
+  // create-account / get-qualified overlay (formerly the "anonymous" variant). The
+  // old "signed-in-but-not-qualified" variant no longer occurs.
+  const isGuest = userState === 'guest';
   const shared: SharedProps = {
-    offer, isGated, signedInUnqualified: userState === 'signed_in', isAnonymous: userState === 'anonymous', lockedOut, timeframe, setTimeframe, readMore, setReadMore,
+    offer, isGated, signedInUnqualified: false, isAnonymous: isGuest, lockedOut, timeframe, setTimeframe, readMore, setReadMore,
     livePrice, offMsrpPct, offStreetPct, savings,
     initialBottles, totalBottles, bottlesLeft, invPct, floorClosed, buyRef,
     handlePriceTick, openBuy, openBillingGate,
@@ -156,7 +160,7 @@ function CurrentOfferInner({ id }: { id: string }) {
 
   return (
     <PageChrome>
-      <main className={`wrap sesh-page sesh-${variant} ${stateClass}${userState === 'signed_in' ? ' sesh-solo-cta' : ''}`}>
+      <main className={`wrap sesh-page sesh-${variant} ${stateClass}${isGuest ? ' sesh-solo-cta' : ''}`}>
         {variant === 'v1' && <LayoutSplit {...shared} />}
         {variant === 'v2' && <LayoutHero {...shared} />}
         {variant === 'v3' && <LayoutTicket {...shared} />}
