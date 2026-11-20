@@ -29,6 +29,7 @@ import { useCartShipping } from '@/context/CartShippingContext';
 
 const STORAGE_KEY = 'vinly:shipWindow';
 const WINDOW_MS = 15 * 60 * 1000;
+const WINDOW_SECONDS = WINDOW_MS / 1000; // 900 → "15:00" idle display
 
 type Finalized = {
   orderId: string;
@@ -45,6 +46,10 @@ type Ctx = {
   finalized: Finalized | null;
   secondsLeft: number;
   bottles: number; // cart-wide bottle count (SESH + Ticker + Market)
+  /** Widget lifecycle: 'idle' (no dynamic purchase yet — clock shown but not ticking),
+      'running' (a SESH/Ticker purchase started the 15-min countdown), 'done' (hit 0:00). */
+  phase: 'idle' | 'running' | 'done';
+  windowSeconds: number; // full window length in seconds (idle display)
   open: () => void; // start a window, or expand an existing one (no restart)
   minimize: () => void;
   expand: () => void;
@@ -63,6 +68,9 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   const [minimized, setMinimized] = useState(false);
   const [finalized, setFinalized] = useState<Finalized | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  // A window has run to 0:00 (settled or closed). Keeps the widget showing "done" at
+  // 0:00 instead of reverting to idle, until a fresh dynamic purchase opens a new window.
+  const [completed, setCompleted] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   // Latest cart/profile/ship via refs so the timer effect doesn't churn on cart edits.
@@ -83,10 +91,11 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const p = JSON.parse(raw) as Partial<{ endTs: number; minimized: boolean; finalized: Finalized }>;
+        const p = JSON.parse(raw) as Partial<{ endTs: number; minimized: boolean; finalized: Finalized; completed: boolean }>;
         if (typeof p.endTs === 'number') setEndTs(p.endTs);
         if (typeof p.minimized === 'boolean') setMinimized(p.minimized);
         if (p.finalized) setFinalized(p.finalized);
+        if (typeof p.completed === 'boolean') setCompleted(p.completed);
       }
     } catch { /* ignore */ }
     setHydrated(true);
@@ -95,15 +104,16 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ endTs, minimized, finalized }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ endTs, minimized, finalized, completed }));
     } catch { /* ignore */ }
-  }, [endTs, minimized, finalized, hydrated]);
+  }, [endTs, minimized, finalized, completed, hydrated]);
 
   // Mock auto-charge at window close. Settles ONLY the already-purchased SESH/Ticker
   // (locked) items; any shop wines stay in the cart for explicit checkout.
   const finalize = useCallback(() => {
     if (settlingRef.current) return; // settle exactly once per window
     settlingRef.current = true;
+    setCompleted(true); // window reached 0:00 — widget stays "done" at 0:00
     const c = cartRef.current;
     const pr = profileRef.current;
     const lockedItems = c.items.filter((i) => i.locked);
@@ -171,7 +181,10 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     // Otherwise start a fresh window (first SESH/Ticker add, or after a prior settle).
     settlingRef.current = false;
     setFinalized(null);
-    setMinimized(false);
+    setCompleted(false);
+    // Start MINIMIZED so the always-on chip shows the live countdown rather than the
+    // full-screen modal taking over — the widget stays visible through the purchase.
+    setMinimized(true);
     setEndTs(Date.now() + WINDOW_MS);
   }, []);
   const minimize = useCallback(() => setMinimized(true), []);
@@ -183,10 +196,13 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const active = endTs !== null && !finalized;
+  // Countdown lifecycle for the always-on widget: ticking only while active; otherwise
+  // 'done' if a window has run to 0:00, else 'idle' (clock shown but not started).
+  const phase: Ctx['phase'] = active ? 'running' : completed ? 'done' : 'idle';
 
   const value = useMemo<Ctx>(
-    () => ({ active, minimized, finalized, secondsLeft, bottles: cart.count, open, minimize, expand, dismiss, endWindow }),
-    [active, minimized, finalized, secondsLeft, cart.count, open, minimize, expand, dismiss, endWindow],
+    () => ({ active, minimized, finalized, secondsLeft, bottles: cart.count, phase, windowSeconds: WINDOW_SECONDS, open, minimize, expand, dismiss, endWindow }),
+    [active, minimized, finalized, secondsLeft, cart.count, phase, open, minimize, expand, dismiss, endWindow],
   );
 
   return <ShippingWindowContext.Provider value={value}>{children}</ShippingWindowContext.Provider>;

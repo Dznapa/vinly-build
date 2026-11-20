@@ -5609,7 +5609,7 @@ body.prices-locked .chart-legend-item {
   font-family: 'Mulish', sans-serif;
   animation: ship-drop-in 160ms ease;
 }
-.ship-explainer-lead { margin: 0; font-size: 13.5px; line-height: 1.5; color: #dbe6f2; }
+.ship-explainer-lead { margin: 0; font-size: 12px; line-height: 1.45; color: #dbe6f2; }
 .ship-explainer-lead b { color: #fff; }
 .ship-explainer-lead b.ship-free { color: var(--green); }
 .ship-explainer-sub { margin-top: 9px; font-size: 11.5px; line-height: 1.45; color: #8aa2bb; }
@@ -5647,6 +5647,17 @@ body.prices-locked .chart-legend-item {
 .ship-badge.is-free .ship-badge-dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
 .ship-badge.is-free .ship-badge-time { color: #fff; }
 .ship-badge.is-free .ship-badge-label { color: var(--green); }
+
+/* IDLE — countdown not started (no SESH/Ticker purchase yet). The clock is shown but
+   visually dimmed/distinct so it reads as "not ticking"; the bottle count stays live.
+   Placed after .is-free so the dimmed clock wins even when 6+ bottles are already in. */
+.ship-badge.ship-stage-idle {
+  border-color: rgba(99, 162, 222, 0.45);
+  animation: none;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+.ship-badge.ship-stage-idle .ship-badge-dot { background: #8aa2bb; box-shadow: none; animation: none; }
+.ship-badge.ship-stage-idle .ship-badge-time { color: #8aa2bb; opacity: 0.7; }
 
 /* ===== Staged urgency on the floating badge (presentation only) =====
    steady > 2:00 (orange, calm) · red ≤ 2:00 (matches the modal's red clock) ·

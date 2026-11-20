@@ -97,10 +97,12 @@ export function ShippingWindowModal() {
   useEffect(() => {
     setCanHover(window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ?? false);
   }, []);
-  // FIRST-TIME EDUCATION: auto-expand the explainer exactly once (ever, per browser),
-  // then collapse after a few seconds. Returning users just get the compact chip.
+  // FIRST-TIME EDUCATION: auto-expand the explainer exactly once (ever, per browser)
+  // when the always-on chip first appears, then collapse after a few seconds. Returning
+  // users just get the compact chip.
   useEffect(() => {
-    if (!(w.active && w.minimized) || autoShown.current) return;
+    const chipVisible = !w.finalized && !(w.active && !w.minimized);
+    if (!chipVisible || autoShown.current) return;
     autoShown.current = true;
     let seen = false;
     try { seen = window.localStorage.getItem(EXPLAINER_SEEN_KEY) === '1'; } catch { /* ignore */ }
@@ -109,7 +111,7 @@ export function ShippingWindowModal() {
     setExplain(true);
     const t = window.setTimeout(() => setExplain(false), 6000);
     return () => window.clearTimeout(t);
-  }, [w.active, w.minimized]);
+  }, [w.finalized, w.active, w.minimized]);
 
   // FINALIZED — SESH/Ticker settled. If shop wines are still in the cart, prompt to
   // complete them; otherwise just confirm the charge.
@@ -160,25 +162,37 @@ export function ShippingWindowModal() {
     );
   }
 
-  if (!w.active) return null;
-
   const filled = Math.min(FREE_AT, w.bottles);
   const free = w.bottles >= FREE_AT;
   const pct = Math.round((filled / FREE_AT) * 100);
   const danger = w.secondsLeft <= 120;
-  // Staged urgency for the floating badge (PRESENTATION ONLY — same countdown):
-  // steady > 2:00 · red ≤ 2:00 (matches the modal's red clock) · soft breath ≤ 1:00 ·
-  // per-second tick ≤ 0:30 · done at 0. Calm, not a strobe.
-  const sec = w.secondsLeft;
-  const stage =
-    sec <= 0 ? 'done'
-      : sec <= 30 ? 'tick'
-        : sec <= 60 ? 'soft'
-          : sec <= 120 ? 'red'
-            : 'steady';
 
-  // MINIMIZED — floating timer badge, timer still running.
-  if (w.minimized) {
+  // The chip's bottle count is ALWAYS live (cart.count — shop + spotlight + ticker +
+  // sesh). The countdown display is phase-driven:
+  //   • idle    → static, dimmed window length (no dynamic purchase has started it yet)
+  //   • running → live countdown with staged urgency
+  //   • done    → frozen at 0:00
+  // Staged urgency (running only): steady > 2:00 · red ≤ 2:00 · soft breath ≤ 1:00 ·
+  // per-second tick ≤ 0:30 · done at 0. Calm, not a strobe.
+  const phase = w.phase;
+  const sec = phase === 'running' ? w.secondsLeft : phase === 'idle' ? w.windowSeconds : 0;
+  const stage =
+    phase === 'idle' ? 'idle'
+      : phase === 'done' ? 'done'
+        : sec <= 0 ? 'done'
+          : sec <= 30 ? 'tick'
+            : sec <= 60 ? 'soft'
+              : sec <= 120 ? 'red'
+                : 'steady';
+  const timeText =
+    phase === 'idle' ? mmss(w.windowSeconds)
+      : phase === 'done' ? mmss(0)
+        : stage === 'done' ? 'Charging…'
+          : mmss(sec);
+
+  // ALWAYS-ON CHIP — rendered in every state (idle, running-minimized, done). The full
+  // window modal only takes over when a running window is explicitly expanded.
+  if (!w.active || w.minimized) {
     return (
       <>
         {unlockAlert && (
@@ -216,8 +230,9 @@ export function ShippingWindowModal() {
                 <i className="fa-solid fa-xmark" aria-hidden />
               </button>
               <p className="ship-explainer-lead">
-                Reach <b>6 bottles</b> before the clock hits zero and shipping’s <b className="ship-free">free</b>. Stop
-                short and we add a flat <b>$35</b>. Either way, the card runs when time’s up.
+                A SESH or ticker purchase starts your 15 minute countdown. Reach <b>6 bottles</b> before the
+                clock hits zero and shipping’s <b className="ship-free">free</b>. Stop short and we add a flat
+                <b> $35</b>. Either way, the card runs when time’s up.
               </p>
               <div className="ship-explainer-sub">Mix &amp; match across the floor — SESH, Ticker, Market. They all count.</div>
               <div className="ship-explainer-prog">
@@ -234,17 +249,17 @@ export function ShippingWindowModal() {
             className={`ship-badge${free ? ' is-free' : ''} ship-stage-${stage}${explain ? ' is-open' : ''}`}
             onClick={() => { if (canHover) w.expand(); else setExplain((o) => !o); }}
             aria-expanded={explain}
-            aria-label={`Free-ship window: ${stage === 'done' ? 'charging now' : `${mmss(sec)} left`}, ${filled} of 6 bottles${free ? ' — free shipping unlocked' : ''}. ${canHover ? 'Click to open the window; hover for how it works.' : 'Tap for how it works.'}`}
+            aria-label={`Free-ship window: ${phase === 'idle' ? 'countdown not started' : phase === 'done' ? 'window closed' : stage === 'done' ? 'charging now' : `${mmss(sec)} left`}, ${filled} of 6 bottles${free ? ' — free shipping unlocked' : ''}. ${canHover ? 'Click to open the window; hover for how it works.' : 'Tap for how it works.'}`}
           >
             <span className="ship-badge-dot" aria-hidden />
             <span className="ship-badge-main">
               {/* key remounts the digits each second in the tick stage so they pulse
                   once per tick (reads as time passing). */}
               <span className="ship-badge-time" key={stage === 'tick' ? sec : 'time'}>
-                {stage === 'done' ? 'Charging…' : mmss(sec)}
+                {timeText}
               </span>
               <span className="ship-badge-label">
-                {stage === 'done' ? 'ORDER PLACED' : free ? 'FREE SHIPPING ✓' : `${filled} / ${FREE_AT} bottles`}
+                {phase === 'done' ? 'ORDER PLACED' : free ? 'FREE SHIPPING ✓' : `${filled} / ${FREE_AT} bottles`}
               </span>
               {stage !== 'done' && (
                 <span className="ship-badge-track" aria-hidden>
