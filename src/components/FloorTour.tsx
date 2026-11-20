@@ -90,19 +90,22 @@ function isVisible(selector: string): boolean {
 export function FloorTour() {
   const { userState, hydrated } = useUserState();
   const { passed: agePassed } = useAgeGate();
-  const { welcomeOpen } = useOnboarding();
+  const { welcomeOpen, welcomeResolved } = useOnboarding();
 
   const [mounted, setMounted] = useState(false);
   const [run, setRun] = useState(false);
   const [steps, setSteps] = useState<Step[]>([]);
-  const autoRan = useRef(false);
+  const startedRef = useRef(false);
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Build the runnable step list: center step always; element steps only if visible now.
-  const startTour = useCallback(() => {
+  // Build the runnable step list: center step always; element steps only if visible NOW
+  // (a target hidden on the current viewport — e.g. the qualify CTA on mobile — is
+  // skipped gracefully). The first step passed to Joyride is therefore always present,
+  // so one missing target never aborts the whole tour.
+  const buildSteps = useCallback((): Step[] => {
     const qualified = userState === 'sesh_qualified';
-    const built: Step[] = stepDefs(qualified)
+    return stepDefs(qualified)
       .filter((d) => d.center || isVisible(d.target))
       .map((d) => ({
         target: d.target,
@@ -111,35 +114,63 @@ export function FloorTour() {
         placement: d.center ? 'center' : 'auto',
         disableBeacon: true,
       }));
-    if (!built.length) return;
-    setSteps(built);
-    setRun(true);
   }, [userState]);
 
-  // Onboarding (age gate OR welcome explainer) must be fully dismissed first — same
-  // signal the always-on timer uses — so the tour never overlaps onboarding.
-  const onboardingActive = !hydrated || (userState === 'guest' && !agePassed) || welcomeOpen;
+  // Start now (markDone persists the one-run flag — only on a real start, so a failed
+  // start never burns the flag).
+  const beginTour = useCallback((markDone: boolean): boolean => {
+    if (startedRef.current) return false;
+    const built = buildSteps();
+    if (!built.length) return false;
+    startedRef.current = true;
+    if (markDone) { try { window.localStorage.setItem(DONE_KEY, '1'); } catch { /* ignore */ } }
+    setSteps(built);
+    setRun(true);
+    return true;
+  }, [buildSteps]);
 
-  // AUTO-RUN once: first floor visit after onboarding. Marked done immediately so a
-  // mid-tour refresh won't replay it.
+  // Tour may auto-start only once onboarding is fully RESOLVED: hydrated, past the age
+  // gate, the explainer not open AND resolved (shown+dismissed, or decided not to show).
+  // `welcomeResolved` closes the transient pre-welcome gap that previously latched the
+  // tour before the explainer and killed the real post-explainer start.
+  const tourGateOpen =
+    !hydrated
+    || (userState === 'guest' && !agePassed)
+    || welcomeOpen
+    || !welcomeResolved;
+
+  // AUTO-RUN once. Poll (while the gate is closed) until the real element targets have
+  // mounted — handles mobile layout timing — then start. The effect re-runs whenever the
+  // gate toggles, so the brief pre-welcome gap is cleared before any tick fires.
   useEffect(() => {
-    if (!mounted || onboardingActive || autoRan.current) return;
-    autoRan.current = true;
+    if (!mounted || tourGateOpen || startedRef.current) return;
     let done = false;
-    try { done = window.localStorage.getItem(DONE_KEY) === '1'; } catch { /* ignore */ }
-    if (done) return;
-    try { window.localStorage.setItem(DONE_KEY, '1'); } catch { /* ignore */ }
-    // Let the floor settle (explainer closed, targets laid out) before anchoring.
-    const t = window.setTimeout(() => startTour(), 600);
-    return () => window.clearTimeout(t);
-  }, [mounted, onboardingActive, startTour]);
+    try { done = window.localStorage.getItem(DONE_KEY) === '1'; } catch { done = false; /* fail open */ }
+    if (done) { startedRef.current = true; return; }
 
-  // Re-trigger: a "How it works" link dispatches this event to replay the tour anytime.
+    const qualified = userState === 'sesh_qualified';
+    const MAX_TRIES = 24; // ~6s budget (24 × 250ms) for targets to appear
+    let tries = 0;
+    const tick = () => {
+      if (startedRef.current) { window.clearInterval(id); return; }
+      tries += 1;
+      const anyRealTarget = stepDefs(qualified).some((d) => !d.center && isVisible(d.target));
+      if (anyRealTarget || tries >= MAX_TRIES) {
+        beginTour(true);
+        window.clearInterval(id);
+      }
+    };
+    const id = window.setInterval(tick, 250);
+    return () => window.clearInterval(id);
+  }, [mounted, tourGateOpen, userState, beginTour]);
+
+  // Re-trigger: a "How it works" link dispatches this event to replay the tour anytime
+  // (ignores the done flag; re-arms the one-shot guard).
   useEffect(() => {
-    const onStart = () => startTour();
+    const onStart = () => { startedRef.current = false; beginTour(false); };
     window.addEventListener(FLOOR_TOUR_START_EVENT, onStart);
     return () => window.removeEventListener(FLOOR_TOUR_START_EVENT, onStart);
-  }, [startTour]);
+  }, [beginTour]);
 
   const handleCallback = useCallback((data: CallBackProps) => {
     const finished = data.status === STATUS.FINISHED || data.status === STATUS.SKIPPED;

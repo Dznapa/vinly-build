@@ -21,25 +21,34 @@ export function WelcomeModal() {
   const { userState, hydrated } = useUserState();
   // The age gate comes FIRST — the welcome only opens once the visitor has affirmed.
   const { passed: agePassed } = useAgeGate();
-  const { setWelcomeOpen } = useOnboarding();
+  const { setWelcomeOpen, setWelcomeResolved } = useOnboarding();
   const [open, setOpen] = useState(false);
+  // `resolved` = the welcome has reached its final state (dismissed, or decided not to
+  // show). The floor tour waits on this so it never fires in the transient gap between
+  // age-gate-pass and the explainer opening.
+  const [resolved, setResolved] = useState(false);
 
   // Publish open-state so the always-on timer stays suppressed while the explainer is up.
   useEffect(() => { setWelcomeOpen(open); }, [open, setWelcomeOpen]);
+  useEffect(() => { setWelcomeResolved(resolved); }, [resolved, setWelcomeResolved]);
 
-  // Auto-open only for anonymous users who haven't dismissed it before, once state
-  // has hydrated AND the age gate has been passed (so the order is age gate → welcome,
-  // known/qualified users never see it, and there's no SSR/hydration flash).
+  // Decide the welcome's fate once state hydrates. Guests who haven't dismissed it get
+  // it after the age gate; everyone else (qualified, or already-seen) resolves without
+  // showing. localStorage is read in a fail-open try/catch (Safari Private throws).
   useEffect(() => {
-    if (!hydrated || userState !== 'guest' || !agePassed) return;
+    if (!hydrated) return;
+    if (userState !== 'guest') { setResolved(true); return; } // qualified: no welcome
+    if (!agePassed) return; // still behind the age gate
     let dismissed = false;
-    try { dismissed = window.localStorage.getItem(STORAGE_KEY) === '1'; } catch { /* ignore */ }
-    if (!dismissed) setOpen(true);
+    try { dismissed = window.localStorage.getItem(STORAGE_KEY) === '1'; } catch { /* fail open → show it */ }
+    if (dismissed) setResolved(true); // already seen → won't show, resolved now
+    else setOpen(true); // show it; resolves on dismiss
   }, [hydrated, userState, agePassed]);
 
-  // Close + remember the dismissal so it doesn't re-prompt next visit.
+  // Close + remember the dismissal so it doesn't re-prompt next visit (fail-open write).
   const dismiss = () => {
     setOpen(false);
+    setResolved(true);
     try { window.localStorage.setItem(STORAGE_KEY, '1'); } catch { /* ignore */ }
   };
 
