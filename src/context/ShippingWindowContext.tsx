@@ -65,7 +65,9 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   const cartShip = useCartShipping();
 
   const [endTs, setEndTs] = useState<number | null>(null);
-  const [minimized, setMinimized] = useState(false);
+  // Collapsed (chip) by default in every phase; the full window only shows when the
+  // user explicitly expands (expand()), which now works in idle/running/done alike.
+  const [minimized, setMinimized] = useState(true);
   const [finalized, setFinalized] = useState<Finalized | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   // A window has run to 0:00 (settled or closed). Keeps the widget showing "done" at
@@ -93,7 +95,7 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const p = JSON.parse(raw) as Partial<{ endTs: number; minimized: boolean; finalized: Finalized; completed: boolean }>;
         if (typeof p.endTs === 'number') setEndTs(p.endTs);
-        if (typeof p.minimized === 'boolean') setMinimized(p.minimized);
+        // Always start collapsed (chip) on load — don't restore an expanded full window.
         if (p.finalized) setFinalized(p.finalized);
         if (typeof p.completed === 'boolean') setCompleted(p.completed);
       }
@@ -124,7 +126,7 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     // window (AUTHORITATIVE guard: never settle to a disallowed state).
     if (lockedItems.length === 0 || !isShippableState(addr?.state)) {
       setEndTs(null);
-      setMinimized(false);
+      setMinimized(true);
       return;
     }
     // Charge from the locked lines' own snapshots — every line is priced, none dropped.
@@ -153,7 +155,7 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     // Remove ONLY the settled SESH/Ticker items; shop wines remain for checkout.
     lockedItems.forEach((i) => c.removeItem(i.lineId));
     setEndTs(null);
-    setMinimized(false);
+    setMinimized(true);
     setFinalized({ orderId, total, shipping, freeShip, remainingShop: shopItems.length });
   }, []);
 
@@ -192,7 +194,7 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   const dismiss = useCallback(() => setFinalized(null), []);
   const endWindow = useCallback(() => {
     setEndTs(null);
-    setMinimized(false);
+    setMinimized(true);
   }, []);
 
   const active = endTs !== null && !finalized;

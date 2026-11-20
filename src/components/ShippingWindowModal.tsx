@@ -183,7 +183,8 @@ export function ShippingWindowModal() {
   const filled = Math.min(FREE_AT, w.bottles);
   const free = w.bottles >= FREE_AT;
   const pct = Math.round((filled / FREE_AT) * 100);
-  const danger = w.secondsLeft <= 120;
+  // Red clock only while actually counting down (never in idle/done).
+  const danger = w.active && w.secondsLeft <= 120;
 
   // The chip's bottle count is ALWAYS live (cart.count — shop + spotlight + ticker +
   // sesh). The countdown display is phase-driven:
@@ -208,9 +209,10 @@ export function ShippingWindowModal() {
         : stage === 'done' ? 'Charging…'
           : mmss(sec);
 
-  // ALWAYS-ON CHIP — rendered in every state (idle, running-minimized, done). The full
-  // window modal only takes over when a running window is explicitly expanded.
-  if (!w.active || w.minimized) {
+  // ALWAYS-ON CHIP — rendered whenever collapsed, in every phase (idle, running, done).
+  // The full window takes over only when the user explicitly expands (expand()), which
+  // now works in any phase — including idle via the explainer's "Open window" link.
+  if (w.minimized) {
     return (
       <>
         {unlockAlert && (
@@ -304,7 +306,7 @@ export function ShippingWindowModal() {
 
         <div className="ship-timer">
           <div className="ship-eyebrow">YOUR WINDOW IS OPEN</div>
-          <div className={`ship-clock${danger ? ' is-danger' : ''}`} aria-live="polite">{mmss(w.secondsLeft)}</div>
+          <div className={`ship-clock${danger ? ' is-danger' : ''}`} aria-live="polite">{timeText}</div>
           <div className="ship-subclock">until your card runs — automatically</div>
         </div>
 
