@@ -1,8 +1,9 @@
 'use client';
 
-/* BillingGatePopover — "SESH ACCESS" gate + a 2-step Get-SESH-Qualified flow
-   (shipping → payment) for viewers/anonymous users. Classic e-commerce shape,
-   stylized to Vinly.
+/* BillingGatePopover — the 2-step Get-SESH-Qualified flow (shipping → payment) for
+   guests. Opens DIRECTLY on step 1; the old "SESH ACCESS / Unlock Live Pricing" intro
+   splash was removed so triggers go straight into the qualification form. Classic
+   e-commerce shape, stylized to Vinly.
 
    REVEAL: completing payment flips userState → 'sesh_qualified' (the mock of
    "billing added"), which instantly un-blurs SESH + Ticker pricing in place via
@@ -23,24 +24,10 @@ function isoToMMDDYYYY(iso: string): string {
   return m ? `${m[2]} / ${m[3]} / ${m[1]}` : '';
 }
 
-// ---- Editable copy — Direction 1 (active) ----
+// Header eyebrow shown on every step of the gate.
 const COPY = {
   eyebrow: 'SESH ACCESS',
-  headline: "There's a live price. You just can't see it yet.",
-  body: "Drop in a card and the number goes live. Then lock bottles the second it's right.",
-  cta: 'UNLOCK LIVE PRICING',
-  trust: "Costs nothing to unlock. You're only charged when you lock a bottle.",
-  footer: 'Viewer mode · Shop & Spotlight visible · SESH & Ticker locked',
 };
-// Alternate copy — swap fields into COPY above to use.
-// Direction 2 — Watchers vs buyers:
-//   headline: "Right now you're watching. Buyers see the price."
-//   cta: 'GET ON THE FLOOR'
-//   trust: 'No charge to qualify. The card only runs when you lock a bottle.'
-// Direction 3 — Short:
-//   headline: "Qualified buyers see the number. You don't. Yet."
-//   cta: 'SHOW ME THE PRICE'
-//   trust: 'Free to qualify. Charged only when you buy.'
 
 // ---- Editable step copy ----
 const SHIP_COPY = {
@@ -75,13 +62,13 @@ const STATES: { name: string; ok: boolean }[] = [
   { name: 'Mississippi', ok: false },
 ];
 
-type View = 'intro' | 'shipping' | 'payment';
+type View = 'shipping' | 'payment';
 
 export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { userState, setUserState } = useUserState();
   const { basics } = useProfile();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [view, setView] = useState<View>('intro');
+  const [view, setView] = useState<View>('shipping');
   const [stateIdx, setStateIdx] = useState('');
   const [sameAddr, setSameAddr] = useState(true);
 
@@ -95,13 +82,13 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
   const [lastName, setLastName] = useState('');
   const [dob, setDob] = useState('');
 
-  // Start fresh at the intro each time the gate opens; seed known identity fields.
-  // Reads userState/basics from the current render's closure (the effect only runs
-  // on the open→ transition, and by then a just-completed signup has flushed), so
+  // Start fresh at step 1 (shipping) each time the gate opens; seed known identity
+  // fields. Reads userState/basics from the current render's closure (the effect only
+  // runs on the open→ transition, and by then a just-completed signup has flushed), so
   // deps stay [open] to avoid resetting the view mid-flow if basics change.
   useEffect(() => {
     if (!open) return;
-    setView('intro');
+    setView('shipping');
     setStateIdx('');
     setSameAddr(true);
     // Prefill from profile basics only when they look real (not the demo default) —
@@ -162,29 +149,8 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
           </button>
         </div>
 
-        {/* ===== INTRO GATE ===== */}
-        {view === 'intro' && (
-          <>
-            <div className="qbp-gate-body">
-              <div className="qbp-gate-icon"><i className="fa-solid fa-credit-card" aria-hidden /></div>
-              <h3 className="qbp-gate-title">{COPY.headline}</h3>
-              <p className="qbp-gate-copy">{COPY.body}</p>
-            </div>
-            <div className="qbp-modal-actions">
-              <button type="button" className="qbp-modal-primary" onClick={() => setView('shipping')}>
-                <i className="fa-solid fa-credit-card" aria-hidden /> {COPY.cta}
-              </button>
-              <p className="qbp-gate-trust">{COPY.trust}</p>
-            </div>
-            <div className="qbp-modal-foot">
-              <span><i className="fa-solid fa-eye" aria-hidden /> {COPY.footer}</span>
-            </div>
-          </>
-        )}
-
-        {/* ===== QUALIFY FLOW (shipping / payment) ===== */}
-        {view !== 'intro' && (
-          <>
+        {/* ===== QUALIFY FLOW (shipping / payment) — opens directly, no intro splash ===== */}
+        <>
             <div className="sqf-prog" aria-hidden>
               <div className={`sqf-step${view === 'payment' ? ' is-done' : ' is-on'}`}>
                 <span className="sqf-num">{view === 'payment' ? <i className="fa-solid fa-check" /> : '1'}</span>
@@ -239,7 +205,6 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
 
                   <p className="qbp-gate-trust">{SHIP_COPY.trust}</p>
                   <div className="qbp-modal-actions sqf-actions">
-                    <button type="button" className="sqf-back" onClick={() => setView('intro')}>← Back</button>
                     <button type="submit" className="qbp-modal-primary">{SHIP_COPY.cta}&nbsp;&nbsp;→</button>
                   </div>
                 </form>
@@ -299,8 +264,7 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
             <div className="qbp-modal-foot">
               <span><i>Instinct wins. Hesitation loses.</i></span>
             </div>
-          </>
-        )}
+        </>
       </div>
     </div>
   );
