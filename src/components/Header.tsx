@@ -16,7 +16,7 @@ import { useBillingGate } from '@/context/BillingGateContext';
 
 // Top-of-page CTA labels (editable). Which ones render is gated on user state below.
 const CTA_LEARN_MORE = 'Learn More About Vinly';
-const CTA_CREATE_ACCOUNT = 'Create An Account';
+const CTA_CREATE_ACCOUNT = 'Create Account';
 const CTA_GET_QUALIFIED = 'Get SESH Qualified';
 
 export function Header() {
@@ -28,9 +28,10 @@ export function Header() {
   const pathname = usePathname();
 
   // CTAs adapt to state (single source: userState).
-  //   guest           → Learn More · Create An Account · Get SESH Qualified
+  //   guest           → Learn More · [Get SESH Qualified / Create Account] (one button)
   //   sesh_qualified  → Learn More                       (account + qualification done)
-  const showCreateAccount = userState === 'guest';
+  // One combined CTA reinforces "an account IS SESH qualified": a single button with a
+  // bold "Get SESH Qualified" over a smaller "Create Account".
   const showGetQualified = userState !== 'sesh_qualified';
   // On the SESH offer page, a guest gets ONE consolidated CTA (the mobile sticky bar),
   // so the header CTA is hidden on mobile for that case only.
@@ -92,23 +93,15 @@ export function Header() {
           >
             {CTA_LEARN_MORE}
           </a>
-          {showCreateAccount && (
-            <Link
-              href="/register_details"
-              className="header-cta header-cta--blue"
-              aria-label={CTA_CREATE_ACCOUNT}
-            >
-              {CTA_CREATE_ACCOUNT}
-            </Link>
-          )}
           {showGetQualified && (
             <button
               type="button"
-              className={`header-cta header-cta--orange${seshSoloMobile ? ' header-cta--sesh-solo' : ''}`}
+              className={`header-cta header-cta--orange header-cta--stack${seshSoloMobile ? ' header-cta--sesh-solo' : ''}`}
               onClick={openGate}
-              aria-label={CTA_GET_QUALIFIED}
+              aria-label={`${CTA_GET_QUALIFIED} — create your account`}
             >
-              {CTA_GET_QUALIFIED}
+              <span className="header-cta-l1">{CTA_GET_QUALIFIED}</span>
+              <span className="header-cta-l2">{CTA_CREATE_ACCOUNT}</span>
             </button>
           )}
         </div>

@@ -79,17 +79,6 @@ export default function RegisterDetailsPage() {
     return `${yy}-${mm}-${dd}`;
   };
 
-  const onCreateAccount = () => {
-    signupAndLogin({
-      firstName,
-      lastName,
-      email,
-      phone,
-      birthDate: buildBirthDate(),
-    });
-    router.push('/profile');
-  };
-
   // "Add billing & shipping" = create the account AND go straight into the SESH
   // qualification flow (BillingGatePopover: shipping → payment → qualified). NOT
   // the /checkout/billing order-summary page. Land on the new member's profile
@@ -201,19 +190,15 @@ export default function RegisterDetailsPage() {
               Yes — send me Vinly Ticker and New Drop alerts
             </label>
 
-            <p className="sqf-sub signup-sesh-help">
-              Click CREATE ACCOUNT to become a Vinly Member now. To purchase or participate in the SESH
-              you&apos;ll need to add billing &amp; shipping.
-            </p>
-
             <div className="sqf-actions signup-sesh-actions">
-              <button type="button" className="qbp-modal-secondary" onClick={onCreateAccount}>
-                CREATE ACCOUNT
-              </button>
               <button type="button" className="qbp-modal-primary" onClick={onAddBilling}>
                 <i className="fa-solid fa-credit-card" aria-hidden /> ADD BILLING &amp; SHIPPING
               </button>
             </div>
+
+            <p className="sqf-sub signup-sesh-help">
+              To purchase or participate in the SESH you&apos;ll need to add billing &amp; shipping.
+            </p>
           </form>
         </div>
       </main>

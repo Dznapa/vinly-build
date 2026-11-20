@@ -290,6 +290,18 @@ button {
 .header-cta--orange { background: var(--orange); color: #fff; }
 .header-cta--orange:hover { filter: brightness(1.06); }
 
+/* Combined sign-up CTA: bold "Get SESH Qualified" over a smaller "Create Account". */
+.header-cta--stack {
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  line-height: 1.05;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+.header-cta-l1 { font-weight: 800; font-size: 13.5px; letter-spacing: 0.5px; }
+.header-cta-l2 { font-weight: 400; font-size: 10.5px; letter-spacing: 0.4px; opacity: 0.92; }
+
 /* Back link at the top of profile sub-pages. */
 .profile-back {
   display: inline-flex;
