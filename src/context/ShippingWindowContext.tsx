@@ -55,6 +55,9 @@ type Ctx = {
   expand: () => void;
   dismiss: () => void; // clear a finalized confirmation
   endWindow: () => void; // end the window early (skip → checkout)
+  /** Force-close an all-dynamic cart NOW: settle the locked wines once, cancel the
+      countdown, and return the placed order id (null if nothing to settle). */
+  completeNow: () => string | null;
 };
 
 const ShippingWindowContext = createContext<Ctx | null>(null);
@@ -110,10 +113,13 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   }, [endTs, minimized, finalized, completed, hydrated]);
 
-  // Mock auto-charge at window close. Settles ONLY the already-purchased SESH/Ticker
-  // (locked) items; any shop wines stay in the cart for explicit checkout.
-  const finalize = useCallback(() => {
-    if (settlingRef.current) return; // settle exactly once per window
+  // SHARED settlement — the single mock auto-charge for the already-purchased SESH/
+  // Ticker (locked) items; any shop wines stay in the cart for explicit checkout. The
+  // `settlingRef` guard makes it run EXACTLY ONCE per window, so the natural timer close
+  // and an explicit "Complete Order" force-close can never double-settle. Returns the
+  // settlement result (or null when there's nothing to settle); callers decide the UI.
+  const settle = useCallback((): Finalized | null => {
+    if (settlingRef.current) return null; // settle exactly once per window
     settlingRef.current = true;
     setCompleted(true); // window reached 0:00 — widget stays "done" at 0:00
     const c = cartRef.current;
@@ -127,7 +133,7 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     if (lockedItems.length === 0 || !isShippableState(addr?.state)) {
       setEndTs(null);
       setMinimized(true);
-      return;
+      return null;
     }
     // Charge from the locked lines' own snapshots — every line is priced, none dropped.
     const lines = lockedItems.map((i) => ({
@@ -156,8 +162,23 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
     lockedItems.forEach((i) => c.removeItem(i.lineId));
     setEndTs(null);
     setMinimized(true);
-    setFinalized({ orderId, total, shipping, freeShip, remainingShop: shopItems.length });
+    return { orderId, total, shipping, freeShip, remainingShop: shopItems.length };
   }, []);
+
+  // Natural window close (timer hit 0:00): settle + show the in-app confirmation overlay.
+  const finalize = useCallback(() => {
+    const result = settle();
+    if (result) setFinalized(result);
+  }, [settle]);
+
+  // Explicit "Complete Order" force-close (all-dynamic cart): settle NOW, cancel the
+  // pending countdown (settle() clears endTs + holds the settlingRef), and return the
+  // orderId so the caller can route to the standard order confirmation page. No overlay
+  // — exactly one settlement, same as a natural close.
+  const completeNow = useCallback((): string | null => {
+    const result = settle();
+    return result ? result.orderId : null;
+  }, [settle]);
 
   // Authoritative (mock) timer: drives the countdown and fires the charge at 0:00.
   useEffect(() => {
@@ -203,8 +224,8 @@ export function ShippingWindowProvider({ children }: { children: ReactNode }) {
   const phase: Ctx['phase'] = active ? 'running' : completed ? 'done' : 'idle';
 
   const value = useMemo<Ctx>(
-    () => ({ active, minimized, finalized, secondsLeft, bottles: cart.count, phase, windowSeconds: WINDOW_SECONDS, open, minimize, expand, dismiss, endWindow }),
-    [active, minimized, finalized, secondsLeft, cart.count, phase, open, minimize, expand, dismiss, endWindow],
+    () => ({ active, minimized, finalized, secondsLeft, bottles: cart.count, phase, windowSeconds: WINDOW_SECONDS, open, minimize, expand, dismiss, endWindow, completeNow }),
+    [active, minimized, finalized, secondsLeft, cart.count, phase, open, minimize, expand, dismiss, endWindow, completeNow],
   );
 
   return <ShippingWindowContext.Provider value={value}>{children}</ShippingWindowContext.Provider>;

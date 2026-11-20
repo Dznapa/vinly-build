@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { PageChrome } from '@/components/PageChrome';
 import { useCart, FREE_SHIP_THRESHOLD, SHIPPING_RATE, type CartItem } from '@/context/CartContext';
 import { useUserState } from '@/context/UserStateContext';
+import { useShippingWindow } from '@/context/ShippingWindowContext';
 import { useCartShipping } from '@/context/CartShippingContext';
 import { splitOrderTotals, taxAmount } from '@/lib/cartTotals';
 import { taxRateForState } from '@/lib/tax';
@@ -40,6 +41,10 @@ const sourceLabel = (source?: string) => SOURCE_LABEL[source ?? 'shop'] ?? 'Shop
 // CTA for "Keep Shopping".
 const CTA_PROCEED = 'PROCEED TO BILLING & SHIPPING';
 const CTA_KEEP_SHOPPING = 'KEEP SHOPPING';
+const CTA_CONTINUE_SHOPPING = 'CONTINUE SHOPPING';
+// All-dynamic cart (only already-purchased SESH/Ticker, nothing "due now"): an explicit
+// close-out that force-closes the 15-min window and settles now.
+const CTA_COMPLETE_ORDER = 'COMPLETE ORDER';
 // Guest cart CTAs (no account yet).
 const CTA_LOG_IN = 'LOG IN';
 const CTA_CREATE_ACCOUNT = 'CREATE AN ACCOUNT';
@@ -230,11 +235,21 @@ export default function CustomerCartPage() {
   const { items, setQty, removeItem, count } = useCart();
   const { address: shipAddr, locked: shipLocked } = useCartShipping();
   const { userState } = useUserState();
+  const { completeNow } = useShippingWindow();
   const { push: toast } = useToast();
 
   // Guests (no account) check out via the guest flow — Log In / Create an account /
   // Guest Checkout. Qualified users keep the existing billing & shipping checkout.
   const isGuest = userState === 'guest';
+
+  // All-dynamic cart close-out: force-close the 15-min window (settle the already-
+  // purchased SESH/Ticker wines NOW, exactly once — completeNow() cancels the pending
+  // timer), then route to the standard order confirmation page for the placed order.
+  const handleCompleteOrder = () => {
+    const orderId = completeNow();
+    if (orderId) router.push(`/checkout/summary?orderId=${orderId}`);
+    else router.push('/shop'); // nothing to settle (shouldn't happen for an all-dynamic cart)
+  };
 
   // The Order Summary shows only what's DUE NOW. SESH/Ticker quick-buys are already
   // purchased (locked), excluded from subtotal / tax / total — same split (and now the
@@ -381,10 +396,16 @@ export default function CustomerCartPage() {
                   </button>
                 )
               ) : (
-                // Only committed SESH/Ticker wines → already purchased, no checkout step.
-                <Link href="/shop" className={`btn-billing ${styles.checkoutBtn}`}>
-                  {CTA_KEEP_SHOPPING}
-                </Link>
+                // ALL-DYNAMIC cart: only already-purchased SESH/Ticker wines, nothing
+                // "due now". Give an explicit close-out instead of making users wait out
+                // the timer — force-closes the window, settles now, → order confirmation.
+                <button
+                  type="button"
+                  className={`btn-billing ${styles.checkoutBtn}`}
+                  onClick={handleCompleteOrder}
+                >
+                  {CTA_COMPLETE_ORDER}
+                </button>
               )}
               {hasAdjustable && (
                 <div className={styles.freeShipNote}>
@@ -393,6 +414,10 @@ export default function CustomerCartPage() {
                     : `Just ${FREE_SHIP_THRESHOLD - count} more bottle${FREE_SHIP_THRESHOLD - count === 1 ? '' : 's'} unlocks FREE shipping — otherwise it's a $${SHIPPING_RATE.toFixed(2)} flat rate.`}
                 </div>
               )}
+              {/* Always-present keep-shopping / leave-cart action, in every cart state. */}
+              <Link href="/shop" className={`btn-skip ${styles.continueBtn}`}>
+                {hasAdjustable ? CTA_CONTINUE_SHOPPING : CTA_KEEP_SHOPPING}
+              </Link>
             </aside>
           )}
         </div>

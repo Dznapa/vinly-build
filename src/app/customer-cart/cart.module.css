@@ -360,6 +360,14 @@
   margin-top: 14px;
 }
 
+/* Secondary keep-shopping / leave-cart link under the primary cart action. */
+.continueBtn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  text-align: center;
+}
+
 /* Guest cart: three CTAs in a row — Log In · Create an account · Guest Checkout
    (primary, rightmost). Wraps to a stack on narrow screens. */
 .guestCheckoutRow {
