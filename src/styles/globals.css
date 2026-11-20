@@ -5218,10 +5218,81 @@ body.prices-locked .chart-legend-item {
 .welcome-cta:hover { filter: brightness(1.06); }
 .welcome-cta:active { transform: translateY(1px); }
 
+/* ===== Stage 2: glanceable 3-step "How it works" — a ~3-second read that fits one
+   mobile screen. Reuses .welcome-overlay / .welcome-modal / .welcome-cta chrome. ===== */
+.welcome-hiw-eyebrow {
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 2.4px;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.welcome-hiw-hook { margin-bottom: 6px; }
+.welcome-hiw-accent { color: var(--orange); }
+.welcome-hiw-green { color: var(--green); }
+.welcome-hiw-sub { margin-bottom: 18px; }
+
+.welcome-hiw-steps {
+  text-align: left;
+  margin: 0 0 20px;
+  border-top: 1px solid rgba(99, 162, 222, 0.16);
+}
+.welcome-hiw-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 2px;
+  border-bottom: 1px solid rgba(99, 162, 222, 0.16); /* thin hairline dividers */
+}
+.welcome-hiw-ic {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--navy-deep);
+  border: 1.5px solid rgba(242, 106, 53, 0.65); /* orange outline */
+  color: var(--orange);
+  font-size: 20px;
+}
+.welcome-hiw-body { min-width: 0; }
+.welcome-hiw-head {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  font-size: 15px;
+  color: #fff;
+  margin-bottom: 3px;
+}
+.welcome-hiw-line {
+  margin: 0;
+  color: #b7c6d8;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.welcome-hiw-cta { margin-top: 2px; }
+.welcome-hiw-foot {
+  margin-top: 12px;
+  color: #8aa2bb;
+  font-size: 12.5px;
+  text-align: center;
+}
+
 @media (max-width: 600px) {
   .welcome-modal { padding: 22px 16px 20px; }
   .welcome-logo { width: 132px; }
   .welcome-lede { font-size: 22px; }
+  /* Keep the 3-step read on one phone screen: tighter rows + icon tiles. */
+  .welcome-hiw-sub { margin-bottom: 14px; }
+  .welcome-hiw-steps { margin-bottom: 16px; }
+  .welcome-hiw-step { gap: 12px; padding: 11px 2px; }
+  .welcome-hiw-ic { width: 46px; height: 46px; font-size: 18px; }
+  .welcome-hiw-head { font-size: 14px; }
+  .welcome-hiw-line { font-size: 12.5px; }
 }
 
 /* Welcome-back line for known/qualified users — a light, non-blocking pill that

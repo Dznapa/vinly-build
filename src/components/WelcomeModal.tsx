@@ -80,67 +80,51 @@ export function WelcomeModal() {
             </div>
           </>
         ) : (
-          /* ===== STAGE 2 — the existing explainer, reused as-is ===== */
+          /* ===== STAGE 2 — glanceable 3-step "How it works" (a ~3-second read that
+                 fits one mobile screen). Reuses the welcome modal/CTA chrome. ===== */
           <>
-            <div className="welcome-eyebrow">WELCOME TO</div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="welcome-logo" src="/vinly-logo.png" alt="Vinly" />
-
-            <p className="welcome-lede">Wine has a price.<br />We made it interesting.</p>
-            <p className="welcome-sub">
-              Three ways onto the floor. One of them is closed until you prove you&apos;re serious.
+            <div className="welcome-hiw-eyebrow">Here&apos;s how it works</div>
+            <p className="welcome-lede welcome-hiw-hook">
+              It&apos;s a <span className="welcome-hiw-accent">live wine market</span>.
             </p>
+            <p className="welcome-sub welcome-hiw-sub">Three things, then you&apos;re in.</p>
 
-            <div className="welcome-manifesto">
-              <h3>THIS ISN&apos;T A STORE.</h3>
-              <p>
-                Stores have shelves and patience. We have a market. Three ways to buy, all of them
-                moving faster than you&apos;d like.
-              </p>
+            <div className="welcome-hiw-steps">
+              <div className="welcome-hiw-step">
+                <span className="welcome-hiw-ic"><i className="fa-solid fa-arrow-trend-up" aria-hidden /></span>
+                <div className="welcome-hiw-body">
+                  <div className="welcome-hiw-head">PRICES MOVE</div>
+                  <p className="welcome-hiw-line">
+                    Live, up and down with demand. The number you see is <span className="welcome-hiw-accent">real-time</span>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="welcome-hiw-step">
+                <span className="welcome-hiw-ic"><i className="fa-solid fa-stopwatch" aria-hidden /></span>
+                <div className="welcome-hiw-body">
+                  <div className="welcome-hiw-head">15-MIN WINDOW</div>
+                  <p className="welcome-hiw-line">
+                    Buy one bottle and a <span className="welcome-hiw-accent">15-minute clock</span> opens — keep stacking into the same order.
+                  </p>
+                </div>
+              </div>
+
+              <div className="welcome-hiw-step">
+                <span className="welcome-hiw-ic"><i className="fa-solid fa-truck-fast" aria-hidden /></span>
+                <div className="welcome-hiw-body">
+                  <div className="welcome-hiw-head">6 BOTTLES = FREE SHIPPING</div>
+                  <p className="welcome-hiw-line">
+                    Beat the clock to six and <span className="welcome-hiw-green">shipping&apos;s free</span>. SESH, Ticker &amp; Shop all count.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <ul className="welcome-feats">
-              <li>
-                <span className="welcome-feat-ic"><i className="fa-solid fa-arrow-trend-up" aria-hidden /></span>
-                <p>
-                  <b>THE SESH. THE MAIN EVENT.</b> One bottle. One day. Live pricing that moves in real
-                  time. Watch the number, read the room, decide if you&apos;re a buyer. The whole floor
-                  is watching the same number you are. Most of them blink.
-                </p>
-              </li>
-              <li>
-                <span className="welcome-feat-ic"><i className="fa-solid fa-gem" aria-hidden /></span>
-                <p>
-                  <b>THE TICKER. THE RARE STUFF.</b> Limited, hard-to-find, the bottles that don&apos;t
-                  come back. Live pricing, scrolling all day. If you see something you recognize,
-                  you&apos;re already late.
-                </p>
-              </li>
-              <li>
-                <span className="welcome-feat-ic"><i className="fa-solid fa-store" aria-hidden /></span>
-                <p>
-                  <b>THE MARKET. NO DRAMA.</b> Fixed prices. Your favorites. Superb numbers, no clock,
-                  no countdown. The bottles you reach for when you&apos;ve stopped trying to impress
-                  anyone.
-                </p>
-              </li>
-              <li>
-                <span className="welcome-feat-ic welcome-feat-ic--lock"><i className="fa-solid fa-lock" aria-hidden /></span>
-                <p>
-                  <b>THE FLOOR OPENS WHEN YOU DO.</b> Live pricing is behind the glass. Get
-                  SESH-qualified — account, billing method, done — and the number goes live. No card, no
-                  price. That&apos;s the deal.
-                </p>
-              </li>
-            </ul>
-
-            <button type="button" className="welcome-cta" onClick={dismiss}>
-              SHOW ME THE FLOOR
+            <button type="button" className="welcome-cta welcome-hiw-cta" onClick={dismiss}>
+              ENTER THE FLOOR&nbsp;&nbsp;→
             </button>
-            <button type="button" className="welcome-back" onClick={() => setStage('welcome')}>
-              ← Back
-            </button>
-            <div className="welcome-foot-tagline">Instinct wins. Hesitation loses.</div>
+            <div className="welcome-hiw-foot">You&apos;ll see it all again as you go.</div>
           </>
         )}
       </div>
