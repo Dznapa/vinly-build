@@ -5560,6 +5560,24 @@ body.prices-locked .chart-legend-item {
   gap: 10px;
 }
 
+/* "How it works" replay link for the first-run floor tour — subtle, centered under
+   the board; re-dispatches the tour-start event. */
+.floor-tour-replay {
+  display: block;
+  margin: 8px auto 28px;
+  background: transparent;
+  border: 0;
+  color: #8aa2bb;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+.floor-tour-replay:hover { color: var(--orange); }
+.floor-tour-replay i { margin-right: 6px; }
+
 /* Minimized floating timer chip — keeps running while they shop. */
 .ship-badge {
   display: inline-flex;

@@ -57,6 +57,7 @@ export function Ticker({ sticky = true }: { sticky?: boolean }) {
   return (
     <div
       className={`slider${sticky ? ' ticker-sticky' : ''}${paused ? ' is-paused' : ''}`}
+      data-tour="ticker"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

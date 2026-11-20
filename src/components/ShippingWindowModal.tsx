@@ -239,6 +239,7 @@ export function ShippingWindowModal() {
         )}
         <div
           className="ship-chipwrap"
+          data-tour="timer"
           onMouseEnter={() => { if (canHover) setExplain(true); }}
           onMouseLeave={() => { if (canHover) setExplain(false); }}
           onFocus={() => setExplain(true)}

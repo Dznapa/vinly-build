@@ -17,6 +17,7 @@ import { useQuickBuy } from '@/components/useQuickBuy';
 import { SESH_LOCKED_COPY } from '@/components/QuickBuyPopover';
 import { useQuickBuyRegistry } from '@/context/QuickBuyContext';
 import { useBillingGate } from '@/context/BillingGateContext';
+import { FloorTour, FLOOR_TOUR_START_EVENT } from '@/components/FloorTour';
 import { useCancellations } from '@/context/CancellationContext';
 import { getSeshOffer, getSeshRecap, type SeshOffer } from '@/data/mock';
 import { SeshClosedRecap } from '@/components/SeshClosedRecap';
@@ -180,6 +181,16 @@ function CurrentOfferInner({ id }: { id: string }) {
         {floorClosed && !recapDismissed && (
           <SeshClosedRecap recap={getSeshRecap(offer)} onClose={() => setRecapDismissed(true)} />
         )}
+
+        {/* First-run guided tour (runs once post-onboarding; replay via the link below). */}
+        <FloorTour />
+        <button
+          type="button"
+          className="floor-tour-replay"
+          onClick={() => window.dispatchEvent(new Event(FLOOR_TOUR_START_EVENT))}
+        >
+          <i className="fa-solid fa-circle-question" aria-hidden /> How it works
+        </button>
       </main>
     </PageChrome>
   );

@@ -99,6 +99,7 @@ export function Header() {
               className={`header-cta header-cta--orange header-cta--stack${seshSoloMobile ? ' header-cta--sesh-solo' : ''}`}
               onClick={openGate}
               aria-label={`${CTA_GET_QUALIFIED} — create your account`}
+              data-tour="qualify"
             >
               <span className="header-cta-l1">{CTA_GET_QUALIFIED}</span>
               <span className="header-cta-l2">{CTA_CREATE_ACCOUNT}</span>
@@ -106,7 +107,7 @@ export function Header() {
           )}
         </div>
 
-        <nav className="header-icons" aria-label="Primary">
+        <nav className="header-icons" aria-label="Primary" data-tour="nav">
           <Link className="icon" href="/current-offer/justin-isosceles" title="The SESH — live market" aria-label="The SESH — live market">
             <span className="nav-ic"><i className="fa-solid fa-arrow-trend-up" aria-hidden /></span>
             <span className="nav-label">SESH</span>
