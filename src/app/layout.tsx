@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { AgeGateProvider } from '@/context/AgeGateContext';
 import { UserStateProvider } from '@/context/UserStateContext';
+import { OnboardingProvider } from '@/context/OnboardingContext';
 import { BillingGateProvider } from '@/context/BillingGateContext';
 import { CartProvider } from '@/context/CartContext';
 import { CartShippingProvider } from '@/context/CartShippingContext';
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <UserStateProvider>
+        <OnboardingProvider>
         <AgeGateProvider>
           <ProfileProvider>
             <GuestCheckoutProvider>
@@ -74,6 +76,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </GuestCheckoutProvider>
           </ProfileProvider>
         </AgeGateProvider>
+        </OnboardingProvider>
         </UserStateProvider>
       </body>
     </html>

@@ -10,6 +10,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShippingWindow } from '@/context/ShippingWindowContext';
+import { useOnboarding } from '@/context/OnboardingContext';
+import { useUserState } from '@/context/UserStateContext';
+import { useAgeGate } from '@/context/AgeGateContext';
 import { FREE_SHIP_THRESHOLD } from '@/context/CartContext';
 
 // Single source for the free-shipping threshold (display side).
@@ -40,8 +43,17 @@ function mmss(total: number): string {
 
 export function ShippingWindowModal() {
   const w = useShippingWindow();
+  const { welcomeOpen } = useOnboarding();
+  const { userState, hydrated: userHydrated } = useUserState();
+  const { passed: agePassed } = useAgeGate();
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Onboarding is on screen when: we haven't hydrated yet (suppress to avoid a
+  // first-paint flash), the age gate is up (guest who hasn't affirmed — derived
+  // render-side so there's no lag), or the welcome/explainer is open. The timer only
+  // populates once the visitor is past all of it and actually on the floor.
+  const onboarding = !userHydrated || (userState === 'guest' && !agePassed) || welcomeOpen;
 
   const modalOpen = (w.active && !w.minimized) || w.finalized !== null;
 
@@ -101,7 +113,8 @@ export function ShippingWindowModal() {
   // when the always-on chip first appears, then collapse after a few seconds. Returning
   // users just get the compact chip.
   useEffect(() => {
-    const chipVisible = !w.finalized && !(w.active && !w.minimized);
+    // Only once the chip is actually on the floor — never during onboarding.
+    const chipVisible = !onboarding && !w.finalized && !(w.active && !w.minimized);
     if (!chipVisible || autoShown.current) return;
     autoShown.current = true;
     let seen = false;
@@ -111,7 +124,12 @@ export function ShippingWindowModal() {
     setExplain(true);
     const t = window.setTimeout(() => setExplain(false), 6000);
     return () => window.clearTimeout(t);
-  }, [w.finalized, w.active, w.minimized]);
+  }, [onboarding, w.finalized, w.active, w.minimized]);
+
+  // Suppress the entire widget (chip + auto-expanded popup) while onboarding is on
+  // screen — the age gate or the "Here's how it works" explainer. The timer only
+  // populates once the visitor is actually on the floor.
+  if (onboarding) return null;
 
   // FINALIZED — SESH/Ticker settled. If shop wines are still in the cart, prompt to
   // complete them; otherwise just confirm the charge.

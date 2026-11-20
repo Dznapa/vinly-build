@@ -13,6 +13,7 @@
 import { useEffect, useState } from 'react';
 import { useUserState } from '@/context/UserStateContext';
 import { useAgeGate } from '@/context/AgeGateContext';
+import { useOnboarding } from '@/context/OnboardingContext';
 
 const STORAGE_KEY = 'vinly:welcomeSeen';
 
@@ -20,7 +21,11 @@ export function WelcomeModal() {
   const { userState, hydrated } = useUserState();
   // The age gate comes FIRST — the welcome only opens once the visitor has affirmed.
   const { passed: agePassed } = useAgeGate();
+  const { setWelcomeOpen } = useOnboarding();
   const [open, setOpen] = useState(false);
+
+  // Publish open-state so the always-on timer stays suppressed while the explainer is up.
+  useEffect(() => { setWelcomeOpen(open); }, [open, setWelcomeOpen]);
 
   // Auto-open only for anonymous users who haven't dismissed it before, once state
   // has hydrated AND the age gate has been passed (so the order is age gate → welcome,
