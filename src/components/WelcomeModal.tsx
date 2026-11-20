@@ -1,10 +1,10 @@
 'use client';
 
-/* Welcome-to-Vinly — a TWO-STAGE onboarding for anonymous (not-known) users only.
-   Stage 1: a short warm welcome with a fork ("See how it works" vs "Take me to the
-   floor"). Stage 2: the EXISTING dense explainer (THE SESH / THE TICKER / THE MARKET),
-   reused as-is, shown only if the user opts in. Either exit just closes the overlay
-   onto the blurred SESH floor + the existing sign-up gate (unchanged).
+/* Welcome-to-Vinly — a single-screen onboarding for anonymous (not-known) users only.
+   Shown automatically right after the age gate: a glanceable 3-step "How it works"
+   screen. Its "Enter the floor" button (or the X / Esc) closes the overlay onto the
+   blurred SESH floor + the existing sign-up gate (unchanged) — anyone who doesn't want
+   to read just taps straight through, so there's no forced reading.
 
    Signed-in / SESH-qualified users never see it (they get WelcomeBackLine instead).
    Dismissal is REMEMBERED in localStorage so returning anonymous visitors aren't
@@ -16,14 +16,11 @@ import { useAgeGate } from '@/context/AgeGateContext';
 
 const STORAGE_KEY = 'vinly:welcomeSeen';
 
-type Stage = 'welcome' | 'explainer';
-
 export function WelcomeModal() {
   const { userState, hydrated } = useUserState();
   // The age gate comes FIRST — the welcome only opens once the visitor has affirmed.
   const { passed: agePassed } = useAgeGate();
   const [open, setOpen] = useState(false);
-  const [stage, setStage] = useState<Stage>('welcome');
 
   // Auto-open only for anonymous users who haven't dismissed it before, once state
   // has hydrated AND the age gate has been passed (so the order is age gate → welcome,
@@ -32,7 +29,7 @@ export function WelcomeModal() {
     if (!hydrated || userState !== 'anonymous' || !agePassed) return;
     let dismissed = false;
     try { dismissed = window.localStorage.getItem(STORAGE_KEY) === '1'; } catch { /* ignore */ }
-    if (!dismissed) { setStage('welcome'); setOpen(true); }
+    if (!dismissed) setOpen(true);
   }, [hydrated, userState, agePassed]);
 
   // Close + remember the dismissal so it doesn't re-prompt next visit.
@@ -57,32 +54,10 @@ export function WelcomeModal() {
           <i className="fa-solid fa-xmark" aria-hidden />
         </button>
 
-        {stage === 'welcome' ? (
-          /* ===== STAGE 1 — short warm welcome + fork (fits one mobile screen) ===== */
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="welcome-logo" src="/vinly-logo.png" alt="Vinly" />
-            <p className="welcome-lede">Welcome to Vinly.</p>
-            <p className="welcome-sub welcome-sub--lead">
-              Forget everything you know about buying wine. This is a live market. Prices move
-              with demand. Inventory is limited. The SESH is open.
-            </p>
-            <p className="welcome-sub welcome-sub--hint">
-              First time? Take the 20-second tour. Been around the block? Head straight in.
-            </p>
-            <div className="welcome-actions">
-              <button type="button" className="welcome-cta" onClick={() => setStage('explainer')}>
-                See how it works&nbsp;&nbsp;→
-              </button>
-              <button type="button" className="welcome-cta welcome-cta--ghost" onClick={dismiss}>
-                Take me to the floor&nbsp;&nbsp;→
-              </button>
-            </div>
-          </>
-        ) : (
-          /* ===== STAGE 2 — glanceable 3-step "How it works" (a ~3-second read that
-                 fits one mobile screen). Reuses the welcome modal/CTA chrome. ===== */
-          <>
+        {/* Glanceable 3-step "How it works" — auto-shown after the age gate as the
+            single welcome screen. A ~3-second read that fits one mobile screen; reuses
+            the welcome modal/CTA chrome. "Enter the floor" / X / Esc all exit. */}
+        <>
             <div className="welcome-hiw-eyebrow">Here&apos;s how it works</div>
             <p className="welcome-lede welcome-hiw-hook">
               It&apos;s a <span className="welcome-hiw-accent">live wine market</span>.
@@ -125,8 +100,7 @@ export function WelcomeModal() {
               ENTER THE FLOOR&nbsp;&nbsp;→
             </button>
             <div className="welcome-hiw-foot">You&apos;ll see it all again as you go.</div>
-          </>
-        )}
+        </>
       </div>
     </div>
   );
