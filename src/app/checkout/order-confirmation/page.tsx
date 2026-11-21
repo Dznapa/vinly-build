@@ -25,9 +25,13 @@ export default function OrderConfirmationPage() {
 
   const [createAccount, setCreateAccount] = useState(true); // default CHECKED
   const [password, setPassword] = useState('');
-  const [created, setCreated] = useState(false);
+  // While routing to /profile after account creation, hold render so the just-cleared
+  // order can't flash the empty "no recent order" fallback below.
+  const [navigating, setNavigating] = useState(false);
 
   const money = (n: number) => `$${n.toFixed(2)}`;
+
+  if (navigating) return null; // leaving for the full Profile page
 
   // Direct hit with nothing placed (or already cleared) → gentle fallback.
   if (hydrated && !order) {
@@ -85,8 +89,11 @@ export default function OrderConfirmationPage() {
     });
     // Account == SESH qualified. Seeding effect no-ops (slots now filled).
     setUserState('sesh_qualified');
-    setCreated(true);
     clear(); // discard the transient guest draft now that it's persisted
+    // Land on the standard, fully-rendered Profile/Account page as a qualified holder
+    // (the recorded order appears under order history).
+    setNavigating(true);
+    router.push('/profile');
   };
 
   const onSkip = () => {
@@ -131,53 +138,38 @@ export default function OrderConfirmationPage() {
 
           {/* ---- Account-creation upsell ---- */}
           <aside className={`signup-card ${styles.card} ${styles.upsell}`}>
-            {created ? (
-              <div className={styles.success}>
-                <div className={styles.successIc} aria-hidden><i className="fa-solid fa-star" /></div>
-                <h2 className={styles.cardTitle}>You&apos;re SESH qualified!</h2>
-                <p className={styles.successSub}>
-                  Your account is set up with the shipping and payment you just used. Live SESH &amp;
-                  Ticker pricing is now unlocked.
-                </p>
-                <Link href="/current-offer/juis" className={`btn-billing ${styles.cta}`}>ENTER THE SESH FLOOR →</Link>
-                <Link href="/shop" className={`btn-skip ${styles.cta}`}>KEEP SHOPPING</Link>
-              </div>
-            ) : (
-              <>
-                <h2 className={styles.cardTitle}>Save your details</h2>
-                <p className={styles.upsellSub}>
-                  Create an account from this order — we&apos;ll reuse the shipping and payment you
-                  just entered, and you&apos;ll be <b>SESH qualified</b> instantly.
-                </p>
-                <label className="check-row">
-                  <input type="checkbox" checked={createAccount} onChange={(e) => setCreateAccount(e.target.checked)} />
-                  Create an Account
-                </label>
-                <input
-                  className="field"
-                  type="password"
-                  placeholder="Choose your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={!createAccount}
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  className={`btn-billing ${styles.cta}`}
-                  onClick={onCreateAccount}
-                  disabled={!canCreate}
-                >
-                  CREATE ACCOUNT
-                </button>
-                {createAccount && password.trim().length > 0 && password.trim().length < 4 && (
-                  <p className={styles.hint}>Password must be at least 4 characters.</p>
-                )}
-                <button type="button" className={`btn-skip ${styles.cta}`} onClick={onSkip}>
-                  NO THANKS — KEEP SHOPPING
-                </button>
-              </>
+            <h2 className={styles.cardTitle}>Save your details</h2>
+            <p className={styles.upsellSub}>
+              Create an account from this order — we&apos;ll reuse the shipping and payment you
+              just entered, and you&apos;ll be <b>SESH qualified</b> instantly.
+            </p>
+            <label className="check-row">
+              <input type="checkbox" checked={createAccount} onChange={(e) => setCreateAccount(e.target.checked)} />
+              Create an Account
+            </label>
+            <input
+              className="field"
+              type="password"
+              placeholder="Choose your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={!createAccount}
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              className={`btn-billing ${styles.cta}`}
+              onClick={onCreateAccount}
+              disabled={!canCreate}
+            >
+              CREATE ACCOUNT
+            </button>
+            {createAccount && password.trim().length > 0 && password.trim().length < 4 && (
+              <p className={styles.hint}>Password must be at least 4 characters.</p>
             )}
+            <button type="button" className={`btn-skip ${styles.cta}`} onClick={onSkip}>
+              NO THANKS — KEEP SHOPPING
+            </button>
           </aside>
         </section>
       </main>
