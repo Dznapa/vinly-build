@@ -44,7 +44,7 @@ type StepDef = { target: string; title: string; body: string; center?: boolean }
 function stepDefs(qualified: boolean): StepDef[] {
   return [
     {
-      target: '[data-tour="nav"]',
+      target: '[data-tour="shop-nav"]',
       title: 'Three places to shop.',
       body: 'SESH is the live market. Shop and Spotlight are fixed-price picks. Grab from any of them — it all lands in one cart.',
     },

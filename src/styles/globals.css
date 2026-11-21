@@ -324,6 +324,14 @@ button {
   gap: 18px;
   color: var(--orange);
 }
+/* Shop-destinations group (SESH/Shop/Spotlight) — a flex item in the nav that keeps the
+   same inter-icon gap, so wrapping them changes nothing visually. The tour's step 1
+   anchors here to highlight exactly these three (Cart/Account stay outside it). */
+.nav-shop-group {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
 .header-icons .icon {
   display: inline-flex;
   flex-direction: column;
@@ -4803,6 +4811,7 @@ button {
 
   /* Header: tighten the labelled icon row so it fits narrow phones. */
   .header-icons { gap: 9px; }
+  .nav-shop-group { gap: 9px; }
   .header-icons i { font-size: 19px; }
   .header-icons .nav-ic { width: 22px; height: 22px; }
   .header-icons .nav-label { font-size: 8.5px; letter-spacing: 0.2px; }

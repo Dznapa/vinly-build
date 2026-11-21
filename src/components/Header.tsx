@@ -107,19 +107,24 @@ export function Header() {
           )}
         </div>
 
-        <nav className="header-icons" aria-label="Primary" data-tour="nav">
-          <Link className="icon" href="/current-offer/justin-isosceles" title="The SESH — live market" aria-label="The SESH — live market">
-            <span className="nav-ic"><i className="fa-solid fa-arrow-trend-up" aria-hidden /></span>
-            <span className="nav-label">SESH</span>
-          </Link>
-          <Link className="icon" href="/shop" title="Shop — the Market" aria-label="Shop — the Market">
-            <span className="nav-ic"><i className="fa-solid fa-store" aria-hidden /></span>
-            <span className="nav-label">Shop</span>
-          </Link>
-          <Link className="icon" href="/winemaker-spotlight" title="Winemaker Spotlight" aria-label="Winemaker Spotlight">
-            <span className="nav-ic"><i className="fa-solid fa-award" aria-hidden /></span>
-            <span className="nav-label">Spotlight</span>
-          </Link>
+        <nav className="header-icons" aria-label="Primary">
+          {/* Shop-destinations group — the tour's step 1 highlights EXACTLY these three
+              (SESH / Shop / Spotlight), not Cart or Account. Flex with the nav's gap so
+              layout is unchanged. */}
+          <span className="nav-shop-group" data-tour="shop-nav">
+            <Link className="icon" href="/current-offer/justin-isosceles" title="The SESH — live market" aria-label="The SESH — live market">
+              <span className="nav-ic"><i className="fa-solid fa-arrow-trend-up" aria-hidden /></span>
+              <span className="nav-label">SESH</span>
+            </Link>
+            <Link className="icon" href="/shop" title="Shop — the Market" aria-label="Shop — the Market">
+              <span className="nav-ic"><i className="fa-solid fa-store" aria-hidden /></span>
+              <span className="nav-label">Shop</span>
+            </Link>
+            <Link className="icon" href="/winemaker-spotlight" title="Winemaker Spotlight" aria-label="Winemaker Spotlight">
+              <span className="nav-ic"><i className="fa-solid fa-award" aria-hidden /></span>
+              <span className="nav-label">Spotlight</span>
+            </Link>
+          </span>
           <Link className="icon" href="/customer-cart" title="Cart" aria-label="Cart">
             <span className="nav-ic">
               <i className="fa-solid fa-cart-shopping" aria-hidden />
