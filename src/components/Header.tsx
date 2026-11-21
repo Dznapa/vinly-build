@@ -13,11 +13,11 @@ import { useUserState } from '@/context/UserStateContext';
 import { useCart } from '@/context/CartContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useBillingGate } from '@/context/BillingGateContext';
+import { GetQualifiedButton } from '@/components/GetQualifiedButton';
 
 // Top-of-page CTA labels (editable). Which ones render is gated on user state below.
+// (The "Get SESH Qualified / Create Account" stacked CTA lives in GetQualifiedButton.)
 const CTA_LEARN_MORE = 'Learn More About Vinly';
-const CTA_CREATE_ACCOUNT = 'Create Account';
-const CTA_GET_QUALIFIED = 'Get SESH Qualified';
 
 export function Header() {
   const { userState } = useUserState();
@@ -94,16 +94,11 @@ export function Header() {
             {CTA_LEARN_MORE}
           </a>
           {showGetQualified && (
-            <button
-              type="button"
-              className={`header-cta header-cta--orange header-cta--stack${seshSoloMobile ? ' header-cta--sesh-solo' : ''}`}
+            <GetQualifiedButton
               onClick={openGate}
-              aria-label={`${CTA_GET_QUALIFIED} — create your account`}
-              data-tour="qualify"
-            >
-              <span className="header-cta-l1">{CTA_GET_QUALIFIED}</span>
-              <span className="header-cta-l2">{CTA_CREATE_ACCOUNT}</span>
-            </button>
+              dataTour="qualify"
+              className={seshSoloMobile ? 'header-cta--sesh-solo' : undefined}
+            />
           )}
         </div>
 

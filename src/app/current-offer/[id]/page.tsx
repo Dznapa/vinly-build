@@ -18,6 +18,7 @@ import { SESH_LOCKED_COPY } from '@/components/QuickBuyPopover';
 import { useQuickBuyRegistry } from '@/context/QuickBuyContext';
 import { useBillingGate } from '@/context/BillingGateContext';
 import { FloorTour, FLOOR_TOUR_START_EVENT } from '@/components/FloorTour';
+import { GetQualifiedButton } from '@/components/GetQualifiedButton';
 import { useCancellations } from '@/context/CancellationContext';
 import { getSeshOffer, getSeshRecap, type SeshOffer } from '@/data/mock';
 import { SeshClosedRecap } from '@/components/SeshClosedRecap';
@@ -779,14 +780,12 @@ function LayoutTerminal(p: SharedProps) {
                 <div className="sesh-unlock-card">
                   <div className="sesh-unlock-title"><i className="fa-solid fa-lock" aria-hidden /> {ANON_UNLOCK_TITLE}</div>
                   <div className="sesh-unlock-sub">{ANON_UNLOCK_SUB}</div>
-                  <button
-                    type="button"
-                    className="sesh-unlock-btn"
+                  {/* Same two-line "Get SESH Qualified / Create Account" CTA as the header
+                      (shared component), so the locked-pricing CTA stays in sync. */}
+                  <GetQualifiedButton
                     onClick={openBillingGate}
-                    aria-label="Get SESH-qualified — create your account and unlock live pricing"
-                  >
-                    {ANON_UNLOCK_CTA}
-                  </button>
+                    ariaLabel="Get SESH-qualified — create your account and unlock live pricing"
+                  />
                 </div>
               </div>
             )}

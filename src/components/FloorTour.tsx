@@ -38,7 +38,7 @@ const TOUR_STYLES: Partial<Styles> = {
   spotlight: { borderRadius: 10 },
 };
 
-type StepDef = { target: string; title: string; body: string; center?: boolean };
+type StepDef = { target: string; title: string; body: string; center?: boolean; spotlightPadding?: number };
 
 // Step 4 (qualify) is injected only for non-qualified users; the final step is centered.
 function stepDefs(qualified: boolean): StepDef[] {
@@ -64,6 +64,8 @@ function stepDefs(qualified: boolean): StepDef[] {
           target: '[data-tour="qualify"]',
           title: 'Unlock the floor.',
           body: 'Add billing and shipping once to get SESH qualified. Then live prices and one-tap buys are yours. Costs nothing to unlock.',
+          // Tight frame around the small two-line header button (default padding is loose).
+          spotlightPadding: 4,
         }]),
     {
       target: 'body',
@@ -113,6 +115,7 @@ export function FloorTour() {
         content: d.body,
         placement: d.center ? 'center' : 'auto',
         disableBeacon: true,
+        ...(d.spotlightPadding !== undefined ? { spotlightPadding: d.spotlightPadding } : {}),
       }));
   }, [userState]);
 
