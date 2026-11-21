@@ -24,12 +24,14 @@ const EXPLAINER_SEEN_KEY = 'vinly:shipWindowExplainerSeen';
 // Editable headlines for the under-6 progress states. The >= 6 (free) headline is
 // left inline below and untouched. Plural/singular handled here; driven by the same
 // cart bottle total the meter and counter use.
+const SHIP_HL_ZERO = 'Nothing here yet. Load up.';
 const SHIP_HL_ONE = 'One bottle’s in. Get to six.';
 const shipHlLastOne = (bottles: number) => `${bottles} in. One bottle to go.`;
 const shipHlMany = (bottles: number, remaining: number) => `${bottles} bottles in. ${remaining} to go.`;
 
 function progressHeadline(bottles: number): string {
   const remaining = FREE_AT - bottles;
+  if (bottles <= 0) return SHIP_HL_ZERO; // empty cart — no bottles in yet
   if (bottles <= 1) return SHIP_HL_ONE;
   if (remaining === 1) return shipHlLastOne(bottles);
   return shipHlMany(bottles, remaining);
