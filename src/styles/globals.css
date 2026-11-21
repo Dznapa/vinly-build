@@ -4677,6 +4677,8 @@ button {
 .sqf-elig i { flex: 0 0 auto; }
 .sqf-elig.is-ok { color: var(--green); }
 .sqf-elig.is-no { color: #e23b3b; }
+/* Inline field error (e.g. password mismatch / too short) in the SESH-qualify form. */
+.sqf-err { color: #e23b3b; font-size: 12.5px; line-height: 1.4; margin: -4px 0 12px; }
 
 .sqf-toggle {
   display: flex; align-items: center; gap: 10px;

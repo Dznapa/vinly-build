@@ -66,7 +66,7 @@ type View = 'shipping' | 'payment';
 
 export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { userState, setUserState } = useUserState();
-  const { basics } = useProfile();
+  const { basics, updateBasics } = useProfile();
   const cardRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<View>('shipping');
   const [stateIdx, setStateIdx] = useState('');
@@ -81,6 +81,10 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dob, setDob] = useState('');
+  // Account credentials — getting SESH qualified creates an account, so it needs a
+  // password (mock capture, no real auth). Required, 8+ chars, and must match.
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Start fresh at step 1 (shipping) each time the gate opens; seed known identity
   // fields. Reads userState/basics from the current render's closure (the effect only
@@ -91,6 +95,8 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
     setView('shipping');
     setStateIdx('');
     setSameAddr(true);
+    setPassword('');
+    setConfirmPassword('');
     // Prefill from profile basics only when they look real (not the demo default) —
     // a fresh guest starts with empty fields.
     const known = !!basics.email && basics.email !== 'demo@vinly.local';
@@ -124,12 +130,19 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
   if (!open) return null;
 
   // Mock "billing added → SESH-qualified": instant, in-place reveal (see header).
+  // Capture the chosen password into the mock profile (no real auth) as part of
+  // account creation.
   const unlock = () => {
+    if (password) updateBasics({ password });
     setUserState('sesh_qualified');
     onClose();
   };
 
   const sel = stateIdx === '' ? null : STATES[Number(stateIdx)];
+  // Step-1 password validity — both filled, 8+ chars, and matching.
+  const pwTooShort = password.length > 0 && password.length < 8;
+  const pwMismatch = confirmPassword.length > 0 && confirmPassword !== password;
+  const pwOk = password.length >= 8 && confirmPassword === password;
 
   return (
     <div
@@ -170,10 +183,20 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
                   <h3 className="sqf-title">{SHIP_COPY.title}</h3>
                   <p className="sqf-sub">{SHIP_COPY.sub}</p>
                 </div>
-                <form className="sqf-form" onSubmit={(e) => { e.preventDefault(); setView('payment'); }}>
+                <form className="sqf-form" onSubmit={(e) => { e.preventDefault(); if (pwOk) setView('payment'); }}>
                   <label className="sqf-fld"><span className="sqf-lbl">Email</span>
                     <input className="sqf-input" type="email" placeholder="you@email.com" autoComplete="email"
                       value={email} onChange={(e) => setEmail(e.target.value)} /></label>
+                  <div className="sqf-row">
+                    <label className="sqf-fld"><span className="sqf-lbl">Create password</span>
+                      <input className="sqf-input" type="password" placeholder="At least 8 characters" autoComplete="new-password"
+                        value={password} onChange={(e) => setPassword(e.target.value)} /></label>
+                    <label className="sqf-fld"><span className="sqf-lbl">Confirm password</span>
+                      <input className="sqf-input" type="password" placeholder="Re-enter password" autoComplete="new-password"
+                        value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /></label>
+                  </div>
+                  {pwTooShort && <div className="sqf-err" role="alert">Password must be at least 8 characters.</div>}
+                  {pwMismatch && <div className="sqf-err" role="alert">Passwords don&apos;t match.</div>}
                   <div className="sqf-row">
                     <label className="sqf-fld"><span className="sqf-lbl">First name</span><input className="sqf-input" placeholder="First" autoComplete="given-name"
                       value={firstName} onChange={(e) => setFirstName(e.target.value)} /></label>
@@ -205,7 +228,7 @@ export function BillingGatePopover({ open, onClose }: { open: boolean; onClose: 
 
                   <p className="qbp-gate-trust">{SHIP_COPY.trust}</p>
                   <div className="qbp-modal-actions sqf-actions">
-                    <button type="submit" className="qbp-modal-primary">{SHIP_COPY.cta}&nbsp;&nbsp;→</button>
+                    <button type="submit" className="qbp-modal-primary" disabled={!pwOk}>{SHIP_COPY.cta}&nbsp;&nbsp;→</button>
                   </div>
                 </form>
               </>

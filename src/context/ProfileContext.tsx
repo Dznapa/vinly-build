@@ -25,6 +25,7 @@ export type ProfileBasics = {
   phone: string;
   birthDate?: string; // ISO yyyy-mm-dd or empty
   memberSince: string; // ISO date when first signed in
+  password?: string; // MOCK only — captured at account creation; no real auth/hashing
 };
 
 export type Address = {
