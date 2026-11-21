@@ -362,25 +362,28 @@ export default function CustomerCartPage() {
               )}
               {hasAdjustable ? (
                 isGuest ? (
-                  // Guest cart: Log In · Create an account · Guest Checkout (primary).
-                  <div className={styles.guestCheckoutRow}>
+                  // Guest cart: row 1 = Log In (orange) + Create an Account (blue), equal
+                  // halves; row 2 = Guest Checkout (gray, full width). Routing unchanged.
+                  <div className={styles.guestActions}>
+                    <div className={styles.guestPairRow}>
+                      <button
+                        type="button"
+                        className={`btn-billing ${styles.guestPairBtn}`}
+                        onClick={() => router.push('/login')}
+                      >
+                        {CTA_LOG_IN}
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn-create ${styles.guestPairBtn}`}
+                        onClick={() => router.push('/register_details')}
+                      >
+                        {CTA_CREATE_ACCOUNT}
+                      </button>
+                    </div>
                     <button
                       type="button"
-                      className={`btn-skip ${styles.guestCheckoutBtn}`}
-                      onClick={() => router.push('/login')}
-                    >
-                      {CTA_LOG_IN}
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn-create ${styles.guestCheckoutBtn}`}
-                      onClick={() => router.push('/register_details')}
-                    >
-                      {CTA_CREATE_ACCOUNT}
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn-billing ${styles.guestCheckoutBtn}`}
+                      className={`btn-skip ${styles.guestFullBtn}`}
                       onClick={() => router.push('/checkout/guest')}
                     >
                       {CTA_GUEST_CHECKOUT}

@@ -370,17 +370,26 @@
 
 /* Guest cart: three CTAs in a row — Log In · Create an account · Guest Checkout
    (primary, rightmost). Wraps to a stack on narrow screens. */
-.guestCheckoutRow {
-  display: flex;
-  gap: 10px;
+/* Guest cart actions: [Log In | Create an Account] equal pair, then full-width
+   Guest Checkout. Buttons shrink to fit the card (no nowrap → no overflow). */
+.guestActions {
   margin-top: 14px;
 }
-.guestCheckoutBtn {
-  flex: 1;
-  white-space: nowrap;
+.guestPairRow {
+  display: flex;
+  gap: 10px;
 }
+.guestPairBtn {
+  flex: 1 1 0;
+  min-width: 0; /* allow shrink within the card; text wraps rather than overflowing */
+}
+.guestFullBtn {
+  width: 100%;
+  margin-top: 10px;
+}
+/* Narrow phones: stack the pair so labels never cramp/overflow. */
 @media (max-width: 520px) {
-  .guestCheckoutRow { flex-direction: column; }
+  .guestPairRow { flex-direction: column; }
 }
 
 .freeShipNote {
