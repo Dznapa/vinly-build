@@ -10,7 +10,7 @@
    Purely additive onboarding overlay — no purchase/pricing/qualification logic here. */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Joyride, { STATUS, type CallBackProps, type Step, type Styles } from 'react-joyride';
+import Joyride, { ACTIONS, EVENTS, STATUS, type CallBackProps, type Step, type Styles } from 'react-joyride';
 import { useUserState } from '@/context/UserStateContext';
 import { useAgeGate } from '@/context/AgeGateContext';
 import { useOnboarding } from '@/context/OnboardingContext';
@@ -18,6 +18,15 @@ import { useOnboarding } from '@/context/OnboardingContext';
 const DONE_KEY = 'vinly:floorTourDone';
 /** Fire `window.dispatchEvent(new Event(FLOOR_TOUR_START_EVENT))` to replay the tour. */
 export const FLOOR_TOUR_START_EVENT = 'vinly:floorTour:start';
+// The timer-step showcases the chip's explainer popover by toggling it via this event
+// (ShippingWindowModal listens). The tour opens it on the timer step and MUST close it on
+// advance/exit so nothing is left open. (Plain string, not imported into the global
+// ShippingWindowModal, to keep react-joyride out of that bundle.)
+const TIMER_EXPLAINER_EVENT = 'vinly:floorTour:timerExplainer';
+const TIMER_TARGET = '[data-tour="timer"]';
+function emitTimerExplainer(open: boolean) {
+  try { window.dispatchEvent(new CustomEvent(TIMER_EXPLAINER_EVENT, { detail: open })); } catch { /* ignore */ }
+}
 
 // Brand theme — dark navy tooltip, orange accent, white/muted text (not Joyride default).
 const TOUR_STYLES: Partial<Styles> = {
@@ -176,12 +185,27 @@ export function FloorTour() {
   }, [beginTour]);
 
   const handleCallback = useCallback((data: CallBackProps) => {
-    const finished = data.status === STATUS.FINISHED || data.status === STATUS.SKIPPED;
-    if (finished) {
+    const { status, type, index, action } = data;
+    // Tour ended by ANY means (Done / Skip / X-close / Esc) → stop and ALWAYS collapse
+    // the timer popover the tour may have opened.
+    const ended =
+      status === STATUS.FINISHED
+      || status === STATUS.SKIPPED
+      || action === ACTIONS.CLOSE
+      || type === EVENTS.TOUR_END;
+    if (ended) {
       setRun(false);
+      emitTimerExplainer(false);
       try { window.localStorage.setItem(DONE_KEY, '1'); } catch { /* ignore */ }
+      return;
     }
-  }, []);
+    // On each step entry, showcase the timer's explainer ONLY while the timer step is
+    // active; any other step collapses it (clean up on advance/back).
+    if (type === EVENTS.STEP_BEFORE) {
+      const timerIdx = steps.findIndex((s) => s.target === TIMER_TARGET);
+      emitTimerExplainer(timerIdx >= 0 && index === timerIdx);
+    }
+  }, [steps]);
 
   // Client-only (avoid SSR execution of Joyride internals).
   if (!mounted) return null;

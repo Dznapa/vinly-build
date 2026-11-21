@@ -109,6 +109,14 @@ export function ShippingWindowModal() {
   useEffect(() => {
     setCanHover(window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ?? false);
   }, []);
+  // The coach-mark tour showcases this explainer on its timer step, then MUST collapse it
+  // when it advances past or exits. It toggles us via this event (detail = open?). Manual
+  // hover/tap behavior is unchanged — this is an additional, external control.
+  useEffect(() => {
+    const onToggle = (e: Event) => { setExplain((e as CustomEvent<boolean>).detail === true); };
+    window.addEventListener('vinly:floorTour:timerExplainer', onToggle);
+    return () => window.removeEventListener('vinly:floorTour:timerExplainer', onToggle);
+  }, []);
   // FIRST-TIME EDUCATION: auto-expand the explainer exactly once (ever, per browser)
   // when the always-on chip first appears, then collapse after a few seconds. Returning
   // users just get the compact chip.
