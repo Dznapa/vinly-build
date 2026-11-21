@@ -94,7 +94,7 @@ export function WelcomeModal() {
                 <div className="welcome-hiw-body">
                   <div className="welcome-hiw-head">15-MIN WINDOW</div>
                   <p className="welcome-hiw-line">
-                    Buy one bottle and a <span className="welcome-hiw-accent">15-minute clock</span> opens — keep stacking into the same order.
+                    Buy a dynamically priced wine and a <span className="welcome-hiw-accent">15-minute clock</span> opens — keep stacking into the same order.
                   </p>
                 </div>
               </div>
